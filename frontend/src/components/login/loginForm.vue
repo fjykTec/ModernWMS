@@ -25,7 +25,6 @@
         ></v-text-field>
         <v-checkbox v-model="data.remember" :label="$t('login.rememberTips')"></v-checkbox>
         <v-btn color="purple" @click="method.login()">{{ $t('login.mainButtonLabel') }}</v-btn>
-        <!-- <v-btn color="purple" @click="method.testApi()">{{ '测试接口' }}</v-btn> -->
       </v-form>
     </div>
   </div>
@@ -38,6 +37,7 @@ import i18n from '@/languages/i18n'
 import { login } from '@/api/sys/login'
 // import { getNotify } from '@/api/sys/test'
 import { store } from '@/store'
+// import { funComponentList } from '@/components/common/function/index'
 
 // Get v-form ref
 const VFormRef = ref()
@@ -77,16 +77,6 @@ const method = reactive({
       store.commit('user/setEffectiveMinutes', loginRes.data.expire)
     }
   }
-  // testApi: async () => {
-  //   const { data: res } = await getNotify({
-  //     ifall: true,
-  //     iftodo: true
-  //   })
-
-  //   if (res.isSuccess) {
-  //     console.log('成功！', res)
-  //   }
-  // }
 })
 </script>
 

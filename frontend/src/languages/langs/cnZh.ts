@@ -1,4 +1,13 @@
 export default {
+  system: {
+    hookComponent: {
+      dialog: {
+        defaultClose: '关闭',
+        defaultConfirm: '确认',
+        defaultTitle: '提示'
+      }
+    }
+  },
   login: {
     welcomeTitle: '欢迎来到ModernWMS!👋🏻',
     userNameMustInput: '请填写用户名!',
