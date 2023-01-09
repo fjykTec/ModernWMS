@@ -379,13 +379,13 @@ const data = reactive({
       }
     ],
     volume: [
-      {
-        validator: isDecimal,
-        validNumerical: 'nonNegative',
-        length: 8,
-        decimalLength: 3,
-        trigger: 'change'
-      }
+      // {
+      //   validator: isDecimal,
+      //   validNumerical: 'nonNegative',
+      //   length: 8,
+      //   decimalLength: 3,
+      //   trigger: 'change'
+      // }
     ],
     cost: [
       {
