@@ -2,18 +2,16 @@
   "root": true,
   "globals": {
     "defineEmits": "readonly",
-    "defineProps": "readonly"
+    "defineProps": "readonly",
+    "defineExpose": "readonly"
   },
-  "extends": [
-    "plugin:@typescript-eslint/recommended",
-    "plugin:vue/vue3-recommended",
-    "airbnb-base"
-  ],
+  "extends": ["plugin:@typescript-eslint/recommended", "plugin:vue/vue3-recommended", "airbnb-base"],
   "parserOptions": {
     "parser": "@typescript-eslint/parser",
     "ecmaVersion": 2020
   },
   "rules": {
+    "camelcase": "off",
     "no-bitwise": "off", // 禁用按位运算符
     "no-tabs": "off", // 禁用 tab
     "array-element-newline": ["error", "consistent"], // 强制数组元素间出现换行
@@ -21,7 +19,7 @@
     "quotes": ["error", "single"], // 强制使用一致的反勾号、双引号或单引号
     "comma-dangle": "off", // 要求或禁止末尾逗号
     "object-curly-spacing": ["error", "always"], // 强制在大括号中使用一致的空格
-    "max-len": ["error", 120], // 强制一行的最大长度
+    "max-len": ["error", 200], // 强制一行的最大长度; 注意： 这里特意调整的比prettierrc多50, 因为某些情况下两个插件格式化出来的结果不同导致界面上有波浪线
     "no-new": "off", // 禁止使用 new 以避免产生副作用
     "linebreak-style": "off", // 强制使用一致的换行风格
     "import/extensions": "off", // 确保在导入路径中统一使用文件扩展名

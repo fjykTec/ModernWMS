@@ -1,8 +1,8 @@
 <template>
-  <div class="container">
-    <img class="SysTitleLogo" src="@/assets/img/WMSTitle.png" />
+  <div class="loginContainer">
+    <Logo />
     <div class="loginLeft">
-      <img src="../../assets/img/loginLeft3.png" />
+      <img src="../../assets/img/loginLeft.png" style="width: 80%" />
     </div>
     <div class="loginRight">
       <div class="LanguagesSwitchContainer">
@@ -14,23 +14,20 @@
 </template>
 
 <script lang="ts" setup>
-import LoginForm from '@/components/login/loginForm.vue'
-import LanguagesSwitch from '@/components/common/languages.vue'
+import LoginForm from '@/components/login/login-form.vue'
+import LanguagesSwitch from '@/components/system/languages.vue'
+import Logo from '@/components/system/logo.vue'
 </script>
 
 <style scoped lang="less">
-.SysTitleLogo {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  height: 80px;
-}
 .LanguagesSwitchContainer {
   position: absolute;
   right: 10px;
   top: 10px;
 }
-.container {
+.loginContainer {
+  width: 100%;
+  height: 100%;
   display: flex;
   background-color: #fff;
   .loginLeft {
@@ -41,7 +38,7 @@ import LanguagesSwitch from '@/components/common/languages.vue'
   }
   .loginRight {
     width: 30%;
-    background-color: #f4f5fa;
+    background-color: #fafafa;
     display: flex;
     align-items: center;
   }

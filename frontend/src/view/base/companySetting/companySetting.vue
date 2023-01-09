@@ -1,0 +1,239 @@
+<template>
+  <div class="container">
+    <div>
+      <!-- Main Content -->
+      <v-card class="mt-5">
+        <v-card-text>
+          <div class="operateArea">
+            <v-row no-gutters>
+              <!-- Operate Btn -->
+              <v-col cols="12" sm="3" class="col">
+                <tooltip-btn icon="mdi-plus" :tooltip-text="$t('system.page.add')" @click="method.add()"></tooltip-btn>
+                <tooltip-btn icon="mdi-refresh" :tooltip-text="$t('system.page.refresh')" @click="method.refresh()"></tooltip-btn>
+                <tooltip-btn icon="mdi-export-variant" :tooltip-text="$t('system.page.export')" @click="method.exportTable"></tooltip-btn>
+              </v-col>
+
+              <!-- Search Input -->
+              <v-col cols="12" sm="9">
+                <!-- <v-row no-gutters @keyup.enter="method.sureSearch">
+                  <v-col cols="12" sm="4">
+                    <v-text-field
+                      v-model="data.searchForm.userName"
+                      clearable
+                      hide-details
+                      density="comfortable"
+                      class="searchInput ml-5 mt-1"
+                      :label="$t('login.userName')"
+                      variant="solo"
+                    >
+                    </v-text-field>
+                  </v-col>
+                  <v-col cols="12" sm="4">
+                    <v-text-field
+                      v-model="data.searchForm.userName1"
+                      clearable
+                      hide-details
+                      density="comfortable"
+                      class="searchInput ml-5 mt-1"
+                      :label="$t('login.userName')"
+                      variant="solo"
+                    >
+                    </v-text-field>
+                  </v-col>
+                  <v-col cols="12" sm="4">
+                    <v-text-field
+                      v-model="data.searchForm.userName2"
+                      clearable
+                      hide-details
+                      density="comfortable"
+                      class="searchInput ml-5 mt-1"
+                      :label="$t('login.userName')"
+                      variant="solo"
+                    >
+                    </v-text-field>
+                  </v-col>
+                </v-row> -->
+              </v-col>
+            </v-row>
+          </div>
+
+          <!-- Table -->
+          <div
+            class="mt-5"
+            :style="{
+              height: cardHeight
+            }"
+          >
+            <vxe-table ref="xTable" :data="data.tableData" :height="tableHeight" align="center">
+              <template #empty>
+                {{ i18n.global.t('system.page.noData') }}
+              </template>
+              <vxe-column type="seq" width="60"></vxe-column>
+              <vxe-column field="company_name" :title="$t('base.companySetting.company_name')"></vxe-column>
+              <vxe-column field="city" :title="$t('base.companySetting.city')"></vxe-column>
+              <vxe-column field="address" :title="$t('base.companySetting.address')"></vxe-column>
+              <vxe-column field="manager" :title="$t('base.companySetting.manager')"></vxe-column>
+              <vxe-column field="contact_tel" :title="$t('base.companySetting.contact_tel')"></vxe-column>
+              <vxe-column field="operate" :title="$t('system.page.operate')" width="160" :resizable="false" show-overflow>
+                <template #default="{ row }">
+                  <tooltip-btn
+                    :flat="true"
+                    icon="mdi-pencil-outline"
+                    :tooltip-text="$t('system.page.edit')"
+                    @click="method.editRow(row)"
+                  ></tooltip-btn>
+                  <tooltip-btn
+                    :flat="true"
+                    icon="mdi-delete-outline"
+                    :tooltip-text="$t('system.page.delete')"
+                    :icon-color="errorColor"
+                    @click="method.deleteRow(row)"
+                  ></tooltip-btn>
+                </template>
+              </vxe-column>
+            </vxe-table>
+          </div>
+        </v-card-text>
+      </v-card>
+    </div>
+    <!-- Add or modify data mode window -->
+    <addOrUpdateDialog :show-dialog="data.showDialog" :form="data.dialogForm" @close="method.closeDialog" @saveSuccess="method.saveSuccess" />
+  </div>
+</template>
+
+<script lang="ts" setup>
+import { computed, reactive, onMounted, ref } from 'vue'
+import { computedCardHeight, computedTableHeight, errorColor } from '@/constant/style'
+import tooltipBtn from '@/components/tooltip-btn.vue'
+import { CompanyVO, DataProps } from '@/types/Base/CompanySetting'
+import { getCompanyAll, deleteCompany } from '@/api/base/companySetting'
+import { hookComponent } from '@/components/system'
+import addOrUpdateDialog from './add-or-update-company.vue'
+import i18n from '@/languages/i18n'
+import { exportData } from '@/utils/exportTable'
+
+const xTable = ref()
+
+const data: DataProps = reactive({
+  // searchForm: {
+  //   userName: '',
+  //   userName1: '',
+  //   userName2: ''
+  // },
+  tableData: [],
+  // Dialog info
+  showDialog: false,
+  dialogForm: {
+    id: 0,
+    company_name: '',
+    city: '',
+    address: '',
+    manager: '',
+    contact_tel: ''
+  }
+})
+
+const method = reactive({
+  sureSearch: () => {
+    // console.log(data.searchForm)
+  },
+  // Find Data by Pagination
+  getCompanyList: async () => {
+    const { data: res } = await getCompanyAll()
+    if (!res.isSuccess) {
+      hookComponent.$message({
+        type: 'error',
+        content: res.errorMessage
+      })
+      return
+    }
+    data.tableData = res.data
+  },
+  // Add user
+  add: () => {
+    data.dialogForm = {
+      id: 0,
+      company_name: '',
+      city: '',
+      address: '',
+      manager: '',
+      contact_tel: ''
+    }
+    data.showDialog = true
+  },
+  // Shut add or update dialog
+  closeDialog: () => {
+    data.showDialog = false
+  },
+  // after Add or update success.
+  saveSuccess: () => {
+    method.refresh()
+    method.closeDialog()
+  },
+  // Refresh data
+  refresh: () => {
+    method.getCompanyList()
+  },
+  editRow(row: CompanyVO) {
+    data.dialogForm = JSON.parse(JSON.stringify(row))
+    data.showDialog = true
+  },
+  deleteRow(row: CompanyVO) {
+    hookComponent.$dialog({
+      content: i18n.global.t('system.tips.beforeDeleteMessage'),
+      handleConfirm: async () => {
+        if (row.id) {
+          const { data: res } = await deleteCompany(row.id)
+          if (!res.isSuccess) {
+            hookComponent.$message({
+              type: 'error',
+              content: res.errorMessage
+            })
+            return
+          }
+          hookComponent.$message({
+            type: 'success',
+            content: `${ i18n.global.t('system.page.delete') }${ i18n.global.t('system.tips.success') }`
+          })
+          method.refresh()
+        }
+      }
+    })
+  },
+  // Export table
+  exportTable: () => {
+    const $table = xTable.value
+      exportData({
+        table: $table,
+        filename: i18n.global.t('router.sideBar.companySetting'),
+        columnFilterMethod({ column }: any) {
+          return !['checkbox'].includes(column?.type) && !['operate'].includes(column?.field)
+        }
+      })
+  }
+})
+
+onMounted(async () => {
+  await method.getCompanyList()
+})
+
+const cardHeight = computed(() => computedCardHeight({ hasTab: false }))
+
+const tableHeight = computed(() => computedTableHeight({ hasTab: false, hasPager: false }))
+</script>
+
+<style scoped lang="less">
+.operateArea {
+  width: 100%;
+  min-width: 760px;
+  display: flex;
+  align-items: center;
+  border-radius: 10px;
+  padding: 0 10px;
+}
+
+.col {
+  display: flex;
+  align-items: center;
+}
+</style>

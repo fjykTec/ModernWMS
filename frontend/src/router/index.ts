@@ -1,7 +1,8 @@
 // index.ts
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
 import { store } from '@/store'
-import { CustomerRouterProps } from '@/types/system/router'
+import { CustomerRouterProps } from '@/types/System/Router'
+import { menusToRouter } from '@/utils/router'
 
 // array => dynamic router
 let dynamicRouter: CustomerRouterProps[] = []
@@ -16,12 +17,13 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/login',
     name: 'login',
-    component: () => import('@/view/Login/login.vue')
+    component: () => import('@/view/login/login.vue')
   },
   {
     name: 'home',
     path: '/home',
-    component: () => import('@/view/Home/home.vue'),
+    redirect: 'homepage',
+    component: () => import('@/view/home/home.vue'),
     children: []
   }
 ]
@@ -30,7 +32,7 @@ const routes: RouteRecordRaw[] = [
 const router = createRouter({
   // mode is hash
   history: createWebHashHistory(),
-  routes,
+  routes
   // Return to top after route jump
   // scrollBehavior() {
   //   return { top: 0 }
@@ -41,8 +43,15 @@ const router = createRouter({
 const modules = import.meta.glob('../view/*/*/*.vue')
 
 // load router function
-export function loadRouter() {
-  dynamicRouter = store.getters['user/menulist']
+function loadRouter() {
+  dynamicRouter = menusToRouter(store.getters['user/menulist'])
+  dynamicRouter.push({
+    name: 'homepage',
+    path: '/homepage',
+    directory: 'home/homepage',
+    redirect: '',
+    component: null
+  })
   // Clear the loaded routes before creating them, mainly for logged out users
   for (const item of loadedRouter) {
     router.removeRoute(item)
@@ -51,6 +60,10 @@ export function loadRouter() {
   // This works normally, but it doesn't seem right when getting router
   for (const item of dynamicRouter) {
     item.component = modules[`../view/${ item.directory }${ item.path }.vue`]
+    item.meta = {
+      menuModule: item.module,
+      menuPath: item.name
+    }
     router.addRoute('home', item)
     loadedRouter.push(item.name) // cache dynamic router
   }
@@ -65,9 +78,9 @@ router.beforeEach((to, from, next) => {
   }
 
   // dont have token, back login
-  // if (!store.getters['user/token']) {
-  //   return next('/login')
-  // }
+  if (!store.getters['user/token']) {
+    return next('/login')
+  }
 
   if (dynamicRouter.length === 0) {
     loadRouter()
@@ -77,9 +90,10 @@ router.beforeEach((to, from, next) => {
   next()
 })
 
-// disable back or forward
-// router.afterEach(() => {
-//   window.history.pushState(null, '', window.location.href)
-// })
+// Route interceptor, after jump
+router.afterEach(() => {
+  // disable back or forward
+  window.history.pushState(null, '', window.location.href)
+})
 
 export { router }

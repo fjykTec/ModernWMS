@@ -18,3 +18,11 @@ export interface MessageOptions {
   color?: string
   messageWidth?: string | number // message width pixel or percentage
 }
+
+// Component list
+export interface Components {
+  // eslint-disable-next-line no-unused-vars
+  $message(prop: MessageOptions): void
+  // eslint-disable-next-line no-unused-vars
+  $dialog(prop: DialogOptions): void
+}

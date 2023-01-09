@@ -1,6 +1,6 @@
 {
   "eslintIntegration": false,
-  "printWidth": 120,
+  "printWidth": 150,
   "tabWidth": 2,
   "useTabs": false,
   "semi": false,
