@@ -1,0 +1,636 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="carrier" xml:space="preserve">
+    <value>carrier</value>
+  </data>
+  <data name="departure_city" xml:space="preserve">
+    <value>Departure City</value>
+  </data>
+  <data name="arrival_city" xml:space="preserve">
+    <value>Arrival City</value>
+  </data>
+  <data name="price_per_weight" xml:space="preserve">
+    <value>Weight Fee</value>
+  </data>
+  <data name="price_per_volume" xml:space="preserve">
+    <value>Volume Fee</value>
+  </data>
+  <data name="min_payment" xml:space="preserve">
+    <value>Min Payment</value>
+  </data>
+  <data name="creator" xml:space="preserve">
+    <value>Creator</value>
+  </data>
+  <data name="create_time" xml:space="preserve">
+    <value>Create Time</value>
+  </data>
+  <data name="last_update_time" xml:space="preserve">
+    <value>Last Update Time</value>
+  </data>
+  <data name="is_valid" xml:space="preserve">
+    <value>Valid</value>
+  </data>
+  <data name="user_num" xml:space="preserve">
+    <value>User Num</value>
+  </data>
+  <data name="user_name" xml:space="preserve">
+    <value>User Name</value>
+  </data>
+  <data name="user_role" xml:space="preserve">
+    <value>Role</value>
+  </data>
+  <data name="contact_tel" xml:space="preserve">
+    <value>Contact Information</value>
+  </data>
+  <data name="sex" xml:space="preserve">
+    <value>Sex</value>
+  </data>
+  <data name="warehouseSetting" xml:space="preserve">
+    <value>Warehouse Setting</value>
+  </data>
+  <data name="reservoirSetting" xml:space="preserve">
+    <value>Reservoir Setting</value>
+  </data>
+  <data name="locationSetting" xml:space="preserve">
+    <value>Location Setting</value>
+  </data>
+  <data name="locationSelectModal" xml:space="preserve">
+    <value>Location Select Modal</value>
+  </data>
+  <data name="email" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="warehouse_name" xml:space="preserve">
+    <value>Warehouse Name</value>
+  </data>
+  <data name="city" xml:space="preserve">
+    <value>City</value>
+  </data>
+  <data name="address" xml:space="preserve">
+    <value>Address</value>
+  </data>
+  <data name="manager" xml:space="preserve">
+    <value>Manager</value>
+  </data>
+  <data name="area_name" xml:space="preserve">
+    <value>Reservoir Name</value>
+  </data>
+  <data name="area_property" xml:space="preserve">
+    <value>Reservoir Category</value>
+  </data>
+  <data name="location_name" xml:space="preserve">
+    <value>Location Code</value>
+  </data>
+  <data name="location_length" xml:space="preserve">
+    <value>Location Length</value>
+  </data>
+  <data name="location_width" xml:space="preserve">
+    <value>Location Width</value>
+  </data>
+  <data name="location_heigth" xml:space="preserve">
+    <value>Location Height</value>
+  </data>
+  <data name="location_volume" xml:space="preserve">
+    <value>Location Volume</value>
+  </data>
+  <data name="location_load" xml:space="preserve">
+    <value>Location Load</value>
+  </data>
+  <data name="roadway_number" xml:space="preserve">
+    <value>Roadway Number</value>
+  </data>
+  <data name="shelf_number" xml:space="preserve">
+    <value>Shelf Number</value>
+  </data>
+  <data name="layer_number" xml:space="preserve">
+    <value>Layer Number</value>
+  </data>
+  <data name="tag_number" xml:space="preserve">
+    <value>Tag Number</value>
+  </data>
+  <data name="picking_area" xml:space="preserve">
+    <value>Picking Area</value>
+  </data>
+  <data name="stocking_area" xml:space="preserve">
+    <value>Stocking Area</value>
+  </data>
+  <data name="receiving_area" xml:space="preserve">
+    <value>Receiving Area</value>
+  </data>
+  <data name="return_area" xml:space="preserve">
+    <value>Return Area</value>
+  </data>
+  <data name="defective_area" xml:space="preserve">
+    <value>Defective Area</value>
+  </data>
+  <data name="inventory_area" xml:space="preserve">
+    <value>Inventory Area</value>
+  </data>
+  <data name="customer_name" xml:space="preserve">
+    <value>Customer Name</value>
+  </data>
+  <data name="supplier_name" xml:space="preserve">
+    <value>Supplier Name</value>
+  </data>
+  <data name="role_name" xml:space="preserve">
+    <value>User Role</value>
+  </data>
+  <data name="company_name" xml:space="preserve">
+    <value>Corporate Name</value>
+  </data>
+  <data name="goods_owner_name" xml:space="preserve">
+    <value>Owner Of Cargo</value>
+  </data>
+  <data name="category_name" xml:space="preserve">
+    <value>Commodity category</value>
+  </data>
+  <data name="parent_name" xml:space="preserve">
+    <value>Parent Category</value>
+  </data>
+  <data name="menu_name" xml:space="preserve">
+    <value>Menu Name</value>
+  </data>
+  <data name="spu_code" xml:space="preserve">
+    <value>Commodity Code</value>
+  </data>
+  <data name="spu_name" xml:space="preserve">
+    <value>Commodity Name</value>
+  </data>
+  <data name="sku_code" xml:space="preserve">
+    <value>Specification Code</value>
+  </data>
+  <data name="sku_name" xml:space="preserve">
+    <value>Specification Name</value>
+  </data>
+  <data name="spu_description" xml:space="preserve">
+    <value>Commodity Description</value>
+  </data>
+  <data name="bar_code" xml:space="preserve">
+    <value>Specification Code</value>
+  </data>
+  <data name="brand" xml:space="preserve">
+    <value>Brand</value>
+  </data>
+  <data name="unit" xml:space="preserve">
+    <value>Commodity Unit</value>
+  </data>
+  <data name="cost" xml:space="preserve">
+    <value>Commodity Cost</value>
+  </data>
+  <data name="price" xml:space="preserve">
+    <value>Commodity Price</value>
+  </data>
+  <data name="origin" xml:space="preserve">
+    <value>origin</value>
+  </data>
+  <data name="length_unit" xml:space="preserve">
+    <value>Length Unit</value>
+  </data>
+  <data name="volume_unit" xml:space="preserve">
+    <value>Volume Unit</value>
+  </data>
+  <data name="weight_unit" xml:space="preserve">
+    <value>Weight Unit</value>
+  </data>
+  <data name="weight" xml:space="preserve">
+    <value>Commodity Weight</value>
+  </data>
+  <data name="lenght" xml:space="preserve">
+    <value>Commodity Length</value>
+  </data>
+  <data name="width" xml:space="preserve">
+    <value>Commodity Width</value>
+  </data>
+  <data name="height" xml:space="preserve">
+    <value>Commodity Height</value>
+  </data>
+  <data name="volume" xml:space="preserve">
+    <value>Commodity Volume</value>
+  </data>
+  <data name="warehouse" xml:space="preserve">
+    <value>Warehouse Name</value>
+  </data>
+  <data name="qty_available" xml:space="preserve">
+    <value>Available Qty</value>
+  </data>
+  <data name="job_code" xml:space="preserve">
+    <value>Job Code</value>
+  </data>
+  <data name="job_type" xml:space="preserve">
+    <value>Job Type</value>
+  </data>
+  <data name="process_status" xml:space="preserve">
+    <value>Process Status</value>
+  </data>
+  <data name="processor" xml:space="preserve">
+    <value>Processor</value>
+  </data>
+  <data name="process_time" xml:space="preserve">
+    <value>Process Time</value>
+  </data>
+  <data name="qty" xml:space="preserve">
+    <value>Quantity</value>
+  </data>
+  <data name="is_source" xml:space="preserve">
+    <value>Is Source</value>
+  </data>
+  <data name="target_warehouse" xml:space="preserve">
+    <value>Target Warehouse</value>
+  </data>
+  <data name="target_location" xml:space="preserve">
+    <value>Target Location</value>
+  </data>
+  <data name="is_update_stock" xml:space="preserve">
+    <value>Is Updated Stock</value>
+  </data>
+  <data name="adjust_status" xml:space="preserve">
+    <value>Is Updated Stock</value>
+  </data>
+  <data name="source" xml:space="preserve">
+    <value>Source</value>
+  </data>
+  <data name="target" xml:space="preserve">
+    <value>Target</value>
+  </data>
+  <data name="move_status" xml:space="preserve">
+    <value>Move Status</value>
+  </data>
+  <data name="handler" xml:space="preserve">
+    <value>Handler</value>
+  </data>
+  <data name="handle_time" xml:space="preserve">
+    <value>Handle Time</value>
+  </data>
+  <data name="orig_goods_warehouse" xml:space="preserve">
+    <value>Origin Warehouse</value>
+  </data>
+  <data name="orig_goods_location_name" xml:space="preserve">
+    <value>Origin Location</value>
+  </data>
+  <data name="dest_googs_warehouse" xml:space="preserve">
+    <value>Target Warehouse</value>
+  </data>
+  <data name="dest_googs_location_name" xml:space="preserve">
+    <value>Target Location</value>
+  </data>
+  <data name="freeze" xml:space="preserve">
+    <value>Freeze</value>
+  </data>
+  <data name="unfreeze" xml:space="preserve">
+    <value>Unfreeze</value>
+  </data>
+  <data name="job_status" xml:space="preserve">
+    <value>Job Status</value>
+  </data>
+  <data name="book_qty" xml:space="preserve">
+    <value>Book Qty</value>
+  </data>
+  <data name="counted_qty" xml:space="preserve">
+    <value>Actual Qty</value>
+  </data>
+  <data name="difference_qty" xml:space="preserve">
+    <value>Difference Qty</value>
+  </data>
+  <data name="confirmTaking" xml:space="preserve">
+    <value>Confirm Taking</value>
+  </data>
+  <data name="stockLocation" xml:space="preserve">
+    <value>Stock Location</value>
+  </data>
+  <data name="stock" xml:space="preserve">
+    <value>Stock</value>
+  </data>
+  <data name="sku_id" xml:space="preserve">
+    <value>Sku Id</value>
+  </data>
+  <data name="qty_locked" xml:space="preserve">
+    <value>Locked Quantity</value>
+  </data>
+  <data name="qty_frozen" xml:space="preserve">
+    <value>Frozen Quantity</value>
+  </data>
+  <data name="qty_asn" xml:space="preserve">
+    <value>Asn Quantity</value>
+  </data>
+  <data name="qty_to_unload" xml:space="preserve">
+    <value>Unload Quantity</value>
+  </data>
+  <data name="qty_to_sort" xml:space="preserve">
+    <value>Sort Quantity</value>
+  </data>
+  <data name="qty_sorted" xml:space="preserve">
+    <value>Sorted Quantity</value>
+  </data>
+  <data name="shortage_qty" xml:space="preserve">
+    <value>Shortage Quantity</value>
+  </data>
+  <data name="id" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="asn_no" xml:space="preserve">
+    <value>Asn No</value>
+  </data>
+  <data name="asn_status" xml:space="preserve">
+    <value>Asn Status</value>
+  </data>
+  <data name="spu_id" xml:space="preserve">
+    <value>Spu Id</value>
+  </data>
+  <data name="asn_qty" xml:space="preserve">
+    <value>Asn Quantity</value>
+  </data>
+  <data name="actual_qty" xml:space="preserve">
+    <value>Actual Quantity</value>
+  </data>
+  <data name="sorted_qty" xml:space="preserve">
+    <value>Sorted Quantity</value>
+  </data>
+  <data name="more_qty" xml:space="preserve">
+    <value>More Quantity</value>
+  </data>
+  <data name="damage_qty" xml:space="preserve">
+    <value>Damage Quantity</value>
+  </data>
+  <data name="supplier_id" xml:space="preserve">
+    <value>Supplier Id</value>
+  </data>
+  <data name="goods_owner_id" xml:space="preserve">
+    <value>Goods Owner Id</value>
+  </data>
+  <data name="shipment" xml:space="preserve">
+    <value>Invoice</value>
+  </data>
+  <data name="preShipment" xml:space="preserve">
+    <value>Pre Shipment</value>
+  </data>
+  <data name="newShipment" xml:space="preserve">
+    <value>New Shipment</value>
+  </data>
+  <data name="goodsToBePicked" xml:space="preserve">
+    <value>Goods To Be Picked</value>
+  </data>
+  <data name="picked" xml:space="preserve">
+    <value>Picked</value>
+  </data>
+  <data name="toBePackaged" xml:space="preserve">
+    <value>To Be Packaged</value>
+  </data>
+  <data name="package" xml:space="preserve">
+    <value>Pack</value>
+  </data>
+  <data name="packaged" xml:space="preserve">
+    <value>Packaged</value>
+  </data>
+  <data name="toBeWeighed" xml:space="preserve">
+    <value>To Be Weighed</value>
+  </data>
+  <data name="weigh" xml:space="preserve">
+    <value>Weigh</value>
+  </data>
+  <data name="weighed" xml:space="preserve">
+    <value>Weighed</value>
+  </data>
+  <data name="delivery" xml:space="preserve">
+    <value>Delivery</value>
+  </data>
+  <data name="toBeDelivered" xml:space="preserve">
+    <value>To Be Delivered</value>
+  </data>
+  <data name="outOfWarehouse" xml:space="preserve">
+    <value>Out Of Warehouse</value>
+  </data>
+  <data name="signIn" xml:space="preserve">
+    <value>Sign In</value>
+  </data>
+  <data name="signedIn" xml:space="preserve">
+    <value>Signed In</value>
+  </data>
+  <data name="dispatch_no" xml:space="preserve">
+    <value>Shipment No</value>
+  </data>
+  <data name="dispatch_status" xml:space="preserve">
+    <value>Shipment Doc Status</value>
+  </data>
+  <data name="detailQty" xml:space="preserve">
+    <value>Quantity</value>
+  </data>
+  <data name="data_changed" xml:space="preserve">
+    <value>The data has changed.Please refresh and retry the operation</value>
+  </data>
+  <data name="delete_failed" xml:space="preserve">
+    <value>Delete failed</value>
+  </data>
+  <data name="delete_referenced" xml:space="preserve">
+    <value>The data has been referenced and cannot be deleted</value>
+  </data>
+  <data name="delete_success" xml:space="preserve">
+    <value>Delete success</value>
+  </data>
+  <data name="exists_entity" xml:space="preserve">
+    <value>The {0}:{1} is exists</value>
+  </data>
+  <data name="not_exists_entity" xml:space="preserve">
+    <value>The data does not exist or has been deleted</value>
+  </data>
+  <data name="MaxLength" xml:space="preserve">
+    <value>{0} input length must less than or equal {1}</value>
+  </data>
+  <data name="operation_failed" xml:space="preserve">
+    <value>Operation failed</value>
+  </data>
+  <data name="operation_success" xml:space="preserve">
+    <value>Operation succeeded</value>
+  </data>
+  <data name="Required" xml:space="preserve">
+    <value>{0} is Required</value>
+  </data>
+  <data name="save_failed" xml:space="preserve">
+    <value>Failure</value>
+  </data>
+  <data name="save_success" xml:space="preserve">
+    <value>Success</value>
+  </data>
+  <data name="status_changed" xml:space="preserve">
+    <value>The status of this data has changed.Please refresh and retry the operation</value>
+  </data>
+  <data name="status_not_delete" xml:space="preserve">
+    <value>Current status cannot be deleted</value>
+  </data>
+  <data name="ASN_Status_Is_Not_Pre_Delivery" xml:space="preserve">
+    <value>The ASN status is not PreDelivery</value>
+  </data>
+  <data name="ASN_Status_Is_Not_Pre_Load" xml:space="preserve">
+    <value>The ASN status is not PreLoad</value>
+  </data>
+  <data name="ASN_Status_Is_Not_Pre_Sort" xml:space="preserve">
+    <value>The ASN status is not PreSort</value>
+  </data>
+  <data name="ASN_Status_Is_Not_Sorted" xml:space="preserve">
+    <value>The ASN status is not Sorted</value>
+  </data>
+  <data name="ASN_Status_Is_Not_Sorting" xml:space="preserve">
+    <value>The ASN status is not Sorting</value>
+  </data>
+  <data name="ASN_Status_Is_Putaway" xml:space="preserve">
+    <value>The ASN status is putaway</value>
+  </data>
+  <data name="ASN_Total_PutAway_Qty_Greater_Than_Sorted_Qty" xml:space="preserve">
+    <value>The ASN putaway's quantity greater than sorted quantity</value>
+  </data>
+  <data name="putaway_success" xml:space="preserve">
+    <value>Putaway success</value>
+  </data>
+  <data name="putaway_failed" xml:space="preserve">
+    <value>Putaway failed</value>
+  </data>
+  <data name="sorted_success" xml:space="preserve">
+    <value>Sorted success</value>
+  </data>
+  <data name="sorted_failed" xml:space="preserve">
+    <value>Sorted failed</value>
+  </data>
+  <data name="try_agin" xml:space="preserve">
+    <value>The current operation cannot be performed. Please refresh and try again</value>
+  </data>
+  <data name="unpackgeqty_lessthen" xml:space="preserve">
+    <value>Unpacked quantity is less than the quantity to be packed.Please refresh and try again</value>
+  </data>
+  <data name="unweightqty_lessthen" xml:space="preserve">
+    <value>Unweighed quantity is less than the quantity to be weighed.Please refresh and try again</value>
+  </data>
+  <data name="login_failed" xml:space="preserve">
+    <value>Login failed</value>
+  </data>
+  <data name="exist_location_not_delete" xml:space="preserve">
+    <value>The warehouse location has been set under this warehouse area and cannot be deleted</value>
+  </data>
+  <data name="exist_warehousearea_not_delete" xml:space="preserve">
+    <value>The warehouse area has been set under this warehouse and cannot be deleted</value>
+  </data>
+  <data name="dispatch_not_comfirm" xml:space="preserve">
+    <value>There are un issued shipment documents</value>
+  </data>
+  <data name="move_not_comfirm" xml:space="preserve">
+    <value>There are unconfirmed inventory movements in this location</value>
+  </data>
+  <data name="process_not_comfirm" xml:space="preserve">
+    <value>There are unconfirmed warehouse processings</value>
+  </data>
+</root>
