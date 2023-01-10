@@ -1,0 +1,636 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="carrier" xml:space="preserve">
+    <value>承运商</value>
+  </data>
+  <data name="departure_city" xml:space="preserve">
+    <value>始发城市</value>
+  </data>
+  <data name="arrival_city" xml:space="preserve">
+    <value>到货城市</value>
+  </data>
+  <data name="price_per_weight" xml:space="preserve">
+    <value>单公斤运费</value>
+  </data>
+  <data name="price_per_volume" xml:space="preserve">
+    <value>单立方米运费</value>
+  </data>
+  <data name="min_payment" xml:space="preserve">
+    <value>最小运费</value>
+  </data>
+  <data name="creator" xml:space="preserve">
+    <value>创建人</value>
+  </data>
+  <data name="create_time" xml:space="preserve">
+    <value>创建时间</value>
+  </data>
+  <data name="last_update_time" xml:space="preserve">
+    <value>最后更新时间</value>
+  </data>
+  <data name="is_valid" xml:space="preserve">
+    <value>是否有效</value>
+  </data>
+  <data name="user_num" xml:space="preserve">
+    <value>员工编号</value>
+  </data>
+  <data name="user_name" xml:space="preserve">
+    <value>员工名称</value>
+  </data>
+  <data name="user_role" xml:space="preserve">
+    <value>角色</value>
+  </data>
+  <data name="contact_tel" xml:space="preserve">
+    <value>联系方式</value>
+  </data>
+  <data name="sex" xml:space="preserve">
+    <value>性别</value>
+  </data>
+  <data name="warehouseSetting" xml:space="preserve">
+    <value>仓库设置</value>
+  </data>
+  <data name="reservoirSetting" xml:space="preserve">
+    <value>库区设置</value>
+  </data>
+  <data name="locationSetting" xml:space="preserve">
+    <value>库位设置</value>
+  </data>
+  <data name="locationSelectModal" xml:space="preserve">
+    <value>库位选择框</value>
+  </data>
+  <data name="email" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="warehouse_name" xml:space="preserve">
+    <value>仓库名称</value>
+  </data>
+  <data name="city" xml:space="preserve">
+    <value>所在城市</value>
+  </data>
+  <data name="address" xml:space="preserve">
+    <value>详细地址</value>
+  </data>
+  <data name="manager" xml:space="preserve">
+    <value>负责人</value>
+  </data>
+  <data name="area_name" xml:space="preserve">
+    <value>库区名称</value>
+  </data>
+  <data name="area_property" xml:space="preserve">
+    <value>库区类型</value>
+  </data>
+  <data name="location_name" xml:space="preserve">
+    <value>库位编码</value>
+  </data>
+  <data name="location_length" xml:space="preserve">
+    <value>库位长</value>
+  </data>
+  <data name="location_width" xml:space="preserve">
+    <value>库位宽</value>
+  </data>
+  <data name="location_heigth" xml:space="preserve">
+    <value>库位高</value>
+  </data>
+  <data name="location_volume" xml:space="preserve">
+    <value>库位容积</value>
+  </data>
+  <data name="location_load" xml:space="preserve">
+    <value>库位承重</value>
+  </data>
+  <data name="roadway_number" xml:space="preserve">
+    <value>巷道号</value>
+  </data>
+  <data name="shelf_number" xml:space="preserve">
+    <value>货架号</value>
+  </data>
+  <data name="layer_number" xml:space="preserve">
+    <value>层号</value>
+  </data>
+  <data name="tag_number" xml:space="preserve">
+    <value>位号</value>
+  </data>
+  <data name="picking_area" xml:space="preserve">
+    <value>拣货区</value>
+  </data>
+  <data name="stocking_area" xml:space="preserve">
+    <value>备货区</value>
+  </data>
+  <data name="receiving_area" xml:space="preserve">
+    <value>收货区</value>
+  </data>
+  <data name="return_area" xml:space="preserve">
+    <value>退货区</value>
+  </data>
+  <data name="defective_area" xml:space="preserve">
+    <value>次品区</value>
+  </data>
+  <data name="inventory_area" xml:space="preserve">
+    <value>存货区</value>
+  </data>
+  <data name="customer_name" xml:space="preserve">
+    <value>客户名称</value>
+  </data>
+  <data name="supplier_name" xml:space="preserve">
+    <value>供应商名称</value>
+  </data>
+  <data name="role_name" xml:space="preserve">
+    <value>用户角色</value>
+  </data>
+  <data name="company_name" xml:space="preserve">
+    <value>公司名称</value>
+  </data>
+  <data name="goods_owner_name" xml:space="preserve">
+    <value>货主名称</value>
+  </data>
+  <data name="category_name" xml:space="preserve">
+    <value>商品类别</value>
+  </data>
+  <data name="parent_name" xml:space="preserve">
+    <value>所属类别</value>
+  </data>
+  <data name="menu_name" xml:space="preserve">
+    <value>菜单名称</value>
+  </data>
+  <data name="spu_code" xml:space="preserve">
+    <value>商品编码</value>
+  </data>
+  <data name="spu_name" xml:space="preserve">
+    <value>商品名称</value>
+  </data>
+  <data name="sku_code" xml:space="preserve">
+    <value>规格编码</value>
+  </data>
+  <data name="sku_name" xml:space="preserve">
+    <value>规格名称</value>
+  </data>
+  <data name="spu_description" xml:space="preserve">
+    <value>商品描述</value>
+  </data>
+  <data name="bar_code" xml:space="preserve">
+    <value>商品条码</value>
+  </data>
+  <data name="brand" xml:space="preserve">
+    <value>品牌</value>
+  </data>
+  <data name="unit" xml:space="preserve">
+    <value>商品单位</value>
+  </data>
+  <data name="cost" xml:space="preserve">
+    <value>商品成本</value>
+  </data>
+  <data name="price" xml:space="preserve">
+    <value>商品价格</value>
+  </data>
+  <data name="origin" xml:space="preserve">
+    <value>产地</value>
+  </data>
+  <data name="length_unit" xml:space="preserve">
+    <value>长度单位</value>
+  </data>
+  <data name="volume_unit" xml:space="preserve">
+    <value>体积单位</value>
+  </data>
+  <data name="weight_unit" xml:space="preserve">
+    <value>重量单位</value>
+  </data>
+  <data name="weight" xml:space="preserve">
+    <value>商品重量</value>
+  </data>
+  <data name="lenght" xml:space="preserve">
+    <value>商品长度</value>
+  </data>
+  <data name="width" xml:space="preserve">
+    <value>商品宽度</value>
+  </data>
+  <data name="height" xml:space="preserve">
+    <value>商品高度</value>
+  </data>
+  <data name="volume" xml:space="preserve">
+    <value>商品体积</value>
+  </data>
+  <data name="warehouse" xml:space="preserve">
+    <value>仓库名称</value>
+  </data>
+  <data name="qty_available" xml:space="preserve">
+    <value>可用数量</value>
+  </data>
+  <data name="job_code" xml:space="preserve">
+    <value>作业单号</value>
+  </data>
+  <data name="job_type" xml:space="preserve">
+    <value>作业类型</value>
+  </data>
+  <data name="process_status" xml:space="preserve">
+    <value>加工状态</value>
+  </data>
+  <data name="processor" xml:space="preserve">
+    <value>操作人</value>
+  </data>
+  <data name="process_time" xml:space="preserve">
+    <value>操作时间</value>
+  </data>
+  <data name="qty" xml:space="preserve">
+    <value>数量</value>
+  </data>
+  <data name="is_source" xml:space="preserve">
+    <value>是否来源商品</value>
+  </data>
+  <data name="target_warehouse" xml:space="preserve">
+    <value>目标仓库</value>
+  </data>
+  <data name="target_location" xml:space="preserve">
+    <value>目标库位</value>
+  </data>
+  <data name="is_update_stock" xml:space="preserve">
+    <value>是否已更新库存</value>
+  </data>
+  <data name="adjust_status" xml:space="preserve">
+    <value>是否已调整</value>
+  </data>
+  <data name="source" xml:space="preserve">
+    <value>来源</value>
+  </data>
+  <data name="target" xml:space="preserve">
+    <value>目标</value>
+  </data>
+  <data name="move_status" xml:space="preserve">
+    <value>作业状态</value>
+  </data>
+  <data name="handler" xml:space="preserve">
+    <value>操作人</value>
+  </data>
+  <data name="handle_time" xml:space="preserve">
+    <value>操作时间</value>
+  </data>
+  <data name="orig_goods_warehouse" xml:space="preserve">
+    <value>来源仓库</value>
+  </data>
+  <data name="orig_goods_location_name" xml:space="preserve">
+    <value>来源库位</value>
+  </data>
+  <data name="dest_googs_warehouse" xml:space="preserve">
+    <value>目标仓库</value>
+  </data>
+  <data name="dest_googs_location_name" xml:space="preserve">
+    <value>目标库位</value>
+  </data>
+  <data name="freeze" xml:space="preserve">
+    <value>冻结</value>
+  </data>
+  <data name="unfreeze" xml:space="preserve">
+    <value>解冻</value>
+  </data>
+  <data name="job_status" xml:space="preserve">
+    <value>作业状态</value>
+  </data>
+  <data name="book_qty" xml:space="preserve">
+    <value>账面数量</value>
+  </data>
+  <data name="counted_qty" xml:space="preserve">
+    <value>盘点数量</value>
+  </data>
+  <data name="difference_qty" xml:space="preserve">
+    <value>差异数量</value>
+  </data>
+  <data name="confirmTaking" xml:space="preserve">
+    <value>确认盘点</value>
+  </data>
+  <data name="stockLocation" xml:space="preserve">
+    <value>库位列表</value>
+  </data>
+  <data name="stock" xml:space="preserve">
+    <value>库存列表</value>
+  </data>
+  <data name="sku_id" xml:space="preserve">
+    <value>规格标识</value>
+  </data>
+  <data name="qty_locked" xml:space="preserve">
+    <value>锁定数量</value>
+  </data>
+  <data name="qty_frozen" xml:space="preserve">
+    <value>冻结数量</value>
+  </data>
+  <data name="qty_asn" xml:space="preserve">
+    <value>到货通知书数量</value>
+  </data>
+  <data name="qty_to_unload" xml:space="preserve">
+    <value>待卸货数量</value>
+  </data>
+  <data name="qty_to_sort" xml:space="preserve">
+    <value>待分拣数量</value>
+  </data>
+  <data name="qty_sorted" xml:space="preserve">
+    <value>已分拣数量</value>
+  </data>
+  <data name="shortage_qty" xml:space="preserve">
+    <value>欠货数量</value>
+  </data>
+  <data name="id" xml:space="preserve">
+    <value>标识</value>
+  </data>
+  <data name="asn_no" xml:space="preserve">
+    <value>到货通知书编号</value>
+  </data>
+  <data name="asn_status" xml:space="preserve">
+    <value>到货通知书状态</value>
+  </data>
+  <data name="spu_id" xml:space="preserve">
+    <value>商品spu标识</value>
+  </data>
+  <data name="asn_qty" xml:space="preserve">
+    <value>到货通知书数据</value>
+  </data>
+  <data name="actual_qty" xml:space="preserve">
+    <value>上架数量</value>
+  </data>
+  <data name="sorted_qty" xml:space="preserve">
+    <value>分拣数量</value>
+  </data>
+  <data name="more_qty" xml:space="preserve">
+    <value>超量数量</value>
+  </data>
+  <data name="damage_qty" xml:space="preserve">
+    <value>破损数量</value>
+  </data>
+  <data name="supplier_id" xml:space="preserve">
+    <value>供应商标识</value>
+  </data>
+  <data name="goods_owner_id" xml:space="preserve">
+    <value>货主标识</value>
+  </data>
+  <data name="shipment" xml:space="preserve">
+    <value>发货单</value>
+  </data>
+  <data name="preShipment" xml:space="preserve">
+    <value>预发货</value>
+  </data>
+  <data name="newShipment" xml:space="preserve">
+    <value>新发货</value>
+  </data>
+  <data name="goodsToBePicked" xml:space="preserve">
+    <value>待拣货</value>
+  </data>
+  <data name="picked" xml:space="preserve">
+    <value>已拣货</value>
+  </data>
+  <data name="toBePackaged" xml:space="preserve">
+    <value>待打包</value>
+  </data>
+  <data name="package" xml:space="preserve">
+    <value>打包</value>
+  </data>
+  <data name="packaged" xml:space="preserve">
+    <value>已打包</value>
+  </data>
+  <data name="toBeWeighed" xml:space="preserve">
+    <value>待称重</value>
+  </data>
+  <data name="weigh" xml:space="preserve">
+    <value>称重</value>
+  </data>
+  <data name="weighed" xml:space="preserve">
+    <value>已称重</value>
+  </data>
+  <data name="delivery" xml:space="preserve">
+    <value>出库</value>
+  </data>
+  <data name="toBeDelivered" xml:space="preserve">
+    <value>待出库</value>
+  </data>
+  <data name="outOfWarehouse" xml:space="preserve">
+    <value>已出库</value>
+  </data>
+  <data name="signIn" xml:space="preserve">
+    <value>签收</value>
+  </data>
+  <data name="signedIn" xml:space="preserve">
+    <value>已签收</value>
+  </data>
+  <data name="dispatch_no" xml:space="preserve">
+    <value>发货单号</value>
+  </data>
+  <data name="dispatch_status" xml:space="preserve">
+    <value>发货单状态</value>
+  </data>
+  <data name="detailQty" xml:space="preserve">
+    <value>数量</value>
+  </data>
+  <data name="data_changed" xml:space="preserve">
+    <value>数据发生改变，请刷新后重试操作</value>
+  </data>
+  <data name="delete_failed" xml:space="preserve">
+    <value>删除失败</value>
+  </data>
+  <data name="delete_referenced" xml:space="preserve">
+    <value>数据已被引用，不能删除</value>
+  </data>
+  <data name="delete_success" xml:space="preserve">
+    <value>删除成功</value>
+  </data>
+  <data name="exists_entity" xml:space="preserve">
+    <value>{0}:{1} 已经存在</value>
+  </data>
+  <data name="not_exists_entity" xml:space="preserve">
+    <value>数据不存在或已被删除</value>
+  </data>
+  <data name="MaxLength" xml:space="preserve">
+    <value>{0}输入字符长度不能大于{1}个字符</value>
+  </data>
+  <data name="operation_failed" xml:space="preserve">
+    <value>操作失败</value>
+  </data>
+  <data name="operation_success" xml:space="preserve">
+    <value>操作成功</value>
+  </data>
+  <data name="Required" xml:space="preserve">
+    <value>{0}必填</value>
+  </data>
+  <data name="save_failed" xml:space="preserve">
+    <value>保存失败</value>
+  </data>
+  <data name="save_success" xml:space="preserve">
+    <value>保存成功</value>
+  </data>
+  <data name="status_changed" xml:space="preserve">
+    <value>当前状态已改变,请刷新后重试</value>
+  </data>
+  <data name="status_not_delete" xml:space="preserve">
+    <value>当前状态不可删除</value>
+  </data>
+  <data name="ASN_Status_Is_Not_Pre_Delivery" xml:space="preserve">
+    <value>ASN 状态不是待到货</value>
+  </data>
+  <data name="ASN_Status_Is_Not_Pre_Load" xml:space="preserve">
+    <value>ASN 状态不是待卸货</value>
+  </data>
+  <data name="ASN_Status_Is_Not_Pre_Sort" xml:space="preserve">
+    <value>ASN 状态不是待分拣</value>
+  </data>
+  <data name="ASN_Status_Is_Not_Sorted" xml:space="preserve">
+    <value>ASN 状态不是已分拣</value>
+  </data>
+  <data name="ASN_Status_Is_Not_Sorting" xml:space="preserve">
+    <value>ASN 尚未分拣</value>
+  </data>
+  <data name="ASN_Status_Is_Putaway" xml:space="preserve">
+    <value>ASN 已经上架</value>
+  </data>
+  <data name="ASN_Total_PutAway_Qty_Greater_Than_Sorted_Qty" xml:space="preserve">
+    <value>ASN 上架数量超过了分拣数量</value>
+  </data>
+  <data name="putaway_success" xml:space="preserve">
+    <value>上架成功</value>
+  </data>
+  <data name="putaway_failed" xml:space="preserve">
+    <value>上架失败</value>
+  </data>
+  <data name="sorted_success" xml:space="preserve">
+    <value>确认分拣完成成功</value>
+  </data>
+  <data name="sorted_failed" xml:space="preserve">
+    <value>确认分拣完成失败</value>
+  </data>
+  <data name="try_agin" xml:space="preserve">
+    <value>不能进行当前操作，请刷新后重试</value>
+  </data>
+  <data name="unpackgeqty_lessthen" xml:space="preserve">
+    <value>未打包数量小于当前操作打包数量，请刷新后重试</value>
+  </data>
+  <data name="unweightqty_lessthen" xml:space="preserve">
+    <value>未称重数量小于当前操作称重数量，请刷新后重试</value>
+  </data>
+  <data name="login_failed" xml:space="preserve">
+    <value>登录失败</value>
+  </data>
+  <data name="dispatch_not_comfirm" xml:space="preserve">
+    <value>该库位存在未出库的发货单</value>
+  </data>
+  <data name="exist_location_not_delete" xml:space="preserve">
+    <value>该库区下已设置库位,不能删除</value>
+  </data>
+  <data name="exist_warehousearea_not_delete" xml:space="preserve">
+    <value>该仓库下已设置库区，不能删除</value>
+  </data>
+  <data name="move_not_comfirm" xml:space="preserve">
+    <value>该库位存在未确认的库存移动</value>
+  </data>
+  <data name="process_not_comfirm" xml:space="preserve">
+    <value>该库位存在未确认的仓内加工</value>
+  </data>
+</root>
