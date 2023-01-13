@@ -1,4 +1,3 @@
-<!-- Warehouse Setting -->
 <template>
   <div class="container">
     <div>

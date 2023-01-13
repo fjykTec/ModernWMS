@@ -259,6 +259,7 @@ const method = reactive({
     }
 
     data.dialogForm = res.data
+    data.processType = res.data.job_type
   },
 
   deleteRow(row: WarehouseProcessingVO) {
