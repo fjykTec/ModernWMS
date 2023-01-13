@@ -18,6 +18,7 @@
             <v-select
               v-model="data.menusSelectedList"
               :items="data.combobox.menu_name"
+              :menu-props="{ maxHeight: 400 }"
               item-title="label"
               item-value="value"
               :label="$t('base.roleMenu.menu_name')"

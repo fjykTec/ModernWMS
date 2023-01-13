@@ -201,6 +201,10 @@ onMounted(() => {
       height: 60px;
     }
   }
+  // There is style pollution Or vuetify itself has problems, replace the required verification color manually
+  :deep(.v-messages) {
+    color: #b00020 !important;
+  }
 }
 
 .loginBtn {
