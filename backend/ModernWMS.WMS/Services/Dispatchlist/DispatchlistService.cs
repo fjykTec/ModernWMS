@@ -715,6 +715,7 @@ namespace ModernWMS.WMS.Services
                     }
                     if (d.lock_qty < d.qty)
                     {
+                        d.qty = d.qty - d.lock_qty;
                         new_dispatchlists.Add(new DispatchlistEntity
                         {
                             sku_id = vm.sku_id,
