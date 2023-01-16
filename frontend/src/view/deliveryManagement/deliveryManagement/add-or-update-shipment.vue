@@ -93,7 +93,7 @@ import i18n from '@/languages/i18n'
 import { errorColor } from '@/constant/style'
 import { hookComponent } from '@/components/system/index'
 import { addShipment } from '@/api/wms/deliveryManagement'
-import { getSupplierAll } from '@/api/base/supplier'
+import { getCustomerAll } from '@/api/base/customer'
 import tooltipBtn from '@/components/tooltip-btn.vue'
 import { checkDetailRepeatGetBool } from '@/utils/dataVerification/page'
 import skuSelect from '@/components/select/sku-select.vue'
@@ -210,14 +210,14 @@ const method = reactive({
   // Get the options required by the drop-down box
   getCombobox: async () => {
     data.combobox.customer_name = []
-    const { data: supplierRes } = await getSupplierAll()
+    const { data: supplierRes } = await getCustomerAll()
     if (!supplierRes.isSuccess) {
       return
     }
     for (const item of supplierRes.data) {
       if (item.is_valid) {
         data.combobox.customer_name.push({
-          label: item.supplier_name,
+          label: item.customer_name,
           value: item.id
         })
       }
