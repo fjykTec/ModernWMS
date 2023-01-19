@@ -82,7 +82,7 @@ const data = reactive({
       (val: string) => !!val || `${ i18n.global.t('system.checkText.mustInput') }${ i18n.global.t('base.userManagement.user_register_name') }!`
     ],
     auth_string: [(val: string) => !!val || `${ i18n.global.t('system.checkText.mustInput') }${ i18n.global.t('base.userManagement.auth_string') }!`],
-    email: [],
+    email: [(val: string) => method.verifyMailbox(val)],
     sex: [(val: string) => !!val || `${ i18n.global.t('system.checkText.mustInput') }${ i18n.global.t('base.userManagement.sex') }!`],
     contact_tel: [],
     is_valid: []
@@ -98,6 +98,19 @@ const data = reactive({
 })
 
 const method = reactive({
+  // Verify mailbox
+  verifyMailbox: (val: string) => {
+    if (!val) {
+      return true
+    }
+    const RE = new RegExp(
+      /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
+    )
+    if (RE.test(val)) {
+      return true
+    }
+    return i18n.global.t('system.tips.vaildEmail')
+  },
   // Get the options required by the drop-down box
   getCombobox: () => {
     // Static drop-down box
@@ -118,15 +131,15 @@ const method = reactive({
 
     if (valid) {
       const form = {
-      id: 0,
-      user_num: '',
-      user_name: data.form.user_name,
-      auth_string: Md5.hashStr(data.form.auth_string as string),
-      email: data.form.email,
-      sex: data.form.sex,
-      is_valid: true
-    }
-    
+        id: 0,
+        user_num: '',
+        user_name: data.form.user_name,
+        auth_string: Md5.hashStr(data.form.auth_string as string),
+        email: data.form.email,
+        sex: data.form.sex,
+        is_valid: true
+      }
+
       const { data: res } = await registerUser(form)
       if (!res.isSuccess) {
         hookComponent.$message({

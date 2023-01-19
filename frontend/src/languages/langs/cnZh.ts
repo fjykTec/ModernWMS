@@ -38,7 +38,8 @@ export default {
       beforeAsnUnload: '确认卸货？',
       beforeAsnSorted: '确认分拣完成？',
       requestTimeout: '请求超时！',
-      requestFail: '接口请求失败，请重试'
+      requestFail: '接口请求失败，请重试',
+      vaildEmail: '请输入正确的邮箱格式!'
     },
     checkText: {
       checkFormFail: '操作失败, 请检查数据后重试!',
