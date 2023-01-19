@@ -38,7 +38,8 @@ export default {
       beforeAsnUnload: 'Confirm Unload?',
       beforeAsnSorted: 'Confirm Sorted?',
       requestTimeout: 'Request Timeout!',
-      requestFail: 'Request fail.Please try it again'
+      requestFail: 'Request fail.Please try it again',
+      vaildEmail: 'Please enter the correct email format!'
     },
     checkText: {
       checkFormFail: 'Operation failed. Please check the data and try again!',
