@@ -52,23 +52,35 @@ namespace ModernWMS.Core.Extentions
             });
             var Mysql_connection = configuration.GetConnectionString("MySqlConn");
             var SqlLite_connection = configuration.GetConnectionString("SqlLiteConn");
+            var SqlServer_connection = configuration.GetConnectionString("SqlServerConn");
+            var Postgre_connection = configuration.GetConnectionString("PostGresConn");
             var database_config = configuration.GetSection("Database")["db"];
             services.AddDbContextPool<SqlDBContext>(t =>
             {
-                if(database_config == "SqlLite")
+                if (database_config == "SqlLite")
                 {
                     t.UseSqlite(SqlLite_connection, b => b.MigrationsAssembly("ModernWMS"));
                 }
-                 else
-                 {
-                     t.UseMySql(Mysql_connection, new MySqlServerVersion(new Version(8, 0, 26)));
-                 }
-                
+                else if (database_config == "MySql")
+                {
+                    t.UseMySql(Mysql_connection, new MySqlServerVersion(new Version(8, 0, 26)));
+                }
+                else if(database_config == "SqlServer")
+                {
+                    t.UseSqlServer(SqlServer_connection);
+                }
+
+                else if(database_config == "PostGres")
+                {
+                    t.UseNpgsql(Postgre_connection);
+                    AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+                    AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
+                }
                 t.EnableSensitiveDataLogging();
                 t.UseLoggerFactory(new LoggerFactory(new[] { new DebugLoggerProvider() }));
             }, 100); ;
-            services.AddMemoryCache( );
-            services.AddScoped<MultiTenancy.ITenantProvider, MultiTenancy.TenantProvider>();            
+            services.AddMemoryCache();
+            services.AddScoped<MultiTenancy.ITenantProvider, MultiTenancy.TenantProvider>();
             services.AddSwaggerService(configuration, AppContext.BaseDirectory);
             services.AddTokenGeneratorService(configuration);
             services.RegisterAssembly();
@@ -87,7 +99,8 @@ namespace ModernWMS.Core.Extentions
                   options.SerializerSettings.Converters.Add(new JsonStringTrimConverter());
                   options.SerializerSettings.Formatting = Formatting.Indented;
                   options.SerializerSettings.ContractResolver = new Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver();
-              }).AddDataAnnotationsLocalization(options => {
+              }).AddDataAnnotationsLocalization(options =>
+              {
                   options.DataAnnotationLocalizerProvider = (type, factory) =>
                       factory.Create(typeof(ModernWMS.Core.MultiLanguage));
               }); ;
@@ -106,7 +119,7 @@ namespace ModernWMS.Core.Extentions
             app.UseTokenGeneratorConfigure(configuration);
             app.UseAuthorization();
             app.UseMiddleware<GlobalExceptionMiddleware>();
-            var support_languages = new[] {  "zh-cn", "en-us" };
+            var support_languages = new[] { "zh-cn", "en-us" };
             var localization_options = new RequestLocalizationOptions()
                 .SetDefaultCulture(support_languages[0])
                 .AddSupportedCultures(support_languages)
@@ -229,7 +242,7 @@ namespace ModernWMS.Core.Extentions
             {
                 options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = nameof(ApiResponseHandler); 
+                options.DefaultChallengeScheme = nameof(ApiResponseHandler);
                 options.DefaultForbidScheme = nameof(ApiResponseHandler);
             }
             )
