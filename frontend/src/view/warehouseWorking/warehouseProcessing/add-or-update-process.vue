@@ -2,7 +2,9 @@
   <v-dialog v-model="isShow" width="80%" transition="dialog-top-transition" :persistent="true">
     <template #default>
       <v-card>
-        <v-toolbar color="white" :title="jobTypeComp"></v-toolbar>
+        <v-toolbar color="white" :title="jobTypeComp">
+          <custom-qrcode :value="qrCodeValue" />
+        </v-toolbar>
         <v-card-text>
           <v-row>
             <!-- Source Table -->
@@ -150,6 +152,7 @@ import commoditySelect from '@/components/select/commodity-select.vue'
 import locationSelect from '@/components/select/location-select.vue'
 import skuSelect from '@/components/select/sku-select.vue'
 import tooltipBtn from '@/components/tooltip-btn.vue'
+import customQrcode from '@/components/custom-qrcode.vue'
 import { exportData } from '@/utils/exportTable'
 import { isInteger } from '@/utils/dataVerification/tableRule'
 
@@ -169,6 +172,7 @@ const jobTypeComp = computed(() => (data.form.job_type === PROCESS_JOB_COMBINE
     ? i18n.global.t('wms.warehouseWorking.warehouseProcessing.process_combine')
     : i18n.global.t('wms.warehouseWorking.warehouseProcessing.process_split')))
 const operateDisabled = computed(() => !!isUpdate.value)
+const qrCodeValue = computed(() => data.form.id.toString())
 
 const method = reactive({
   initForm: () => {

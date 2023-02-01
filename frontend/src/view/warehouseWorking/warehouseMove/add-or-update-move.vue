@@ -3,7 +3,9 @@
   <v-dialog v-model="isShow" :width="'30%'" transition="dialog-top-transition" :persistent="true">
     <template #default>
       <v-card>
-        <v-toolbar class="" color="white" :title="`${$t('router.sideBar.warehouseMove')}`"></v-toolbar>
+        <v-toolbar class="" color="white" :title="`${$t('router.sideBar.warehouseMove')}`">
+          <custom-qrcode :value="qrCodeValue" />
+        </v-toolbar>
         <v-card-text>
           <v-form ref="formRef">
             <v-text-field
@@ -101,12 +103,14 @@ import { WarehouseMoveVO, MoveStatus } from '@/types/WarehouseWorking/WarehouseM
 import { removeObjectNull } from '@/utils/common'
 import commoditySelect from '@/components/select/commodity-select.vue'
 import locationSelect from '@/components/select/location-select.vue'
+import customQrcode from '@/components/custom-qrcode.vue'
 import { IsInteger } from '@/utils/dataVerification/formRule'
 
 const formRef = ref()
 const emit = defineEmits(['close', 'saveSuccess'])
 const isUpdate = computed(() => props.form.id && props.form.id > 0)
 const operateDisabled = computed(() => !!isUpdate.value)
+const qrCodeValue = computed(() => data.form.id.toString())
 
 const props = defineProps<{
   showDialog: boolean
