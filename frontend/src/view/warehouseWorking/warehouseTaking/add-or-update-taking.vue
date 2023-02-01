@@ -3,7 +3,9 @@
   <v-dialog v-model="isShow" :width="'30%'" transition="dialog-top-transition" :persistent="true">
     <template #default>
       <v-card>
-        <v-toolbar color="white" :title="`${$t('router.sideBar.warehouseTaking')}`"></v-toolbar>
+        <v-toolbar color="white" :title="`${$t('router.sideBar.warehouseTaking')}`">
+          <custom-qrcode :value="qrCodeValue" />
+        </v-toolbar>
         <v-card-text>
           <div class="header">
             <div class="headerBtn">
@@ -107,12 +109,14 @@ import commoditySelect from '@/components/select/commodity-select.vue'
 import tooltipBtn from '@/components/tooltip-btn.vue'
 import locationSelect from '@/components/select/location-select.vue'
 import skuSelect from '@/components/select/sku-select.vue'
+import customQrcode from '@/components/custom-qrcode.vue'
 
 const formRef = ref()
 const emit = defineEmits(['close', 'saveSuccess'])
 const isUpdate = computed(() => props.form.id && props.form.id > 0)
 const operateDisabled = computed(() => !!isUpdate.value)
 const isFromStock = computed(() => data.curStockID > 0)
+const qrCodeValue = computed(() => data.form.id.toString())
 
 const props = defineProps<{
   showDialog: boolean
