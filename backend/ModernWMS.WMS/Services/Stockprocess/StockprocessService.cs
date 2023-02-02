@@ -127,6 +127,7 @@ namespace ModernWMS.WMS.Services
         /// <returns></returns>
         public async Task<StockprocessWithDetailViewModel> GetAsync(int id)
         {
+
             var DbSet = _dBContext.GetDbSet<StockprocessEntity>();
             var entity = await DbSet.AsNoTracking().FirstOrDefaultAsync(t => t.id.Equals(id));
             var details = await (from spd in _dBContext.GetDbSet<StockprocessdetailEntity>().AsNoTracking().Where(t => t.stock_process_id == id)
@@ -159,10 +160,10 @@ namespace ModernWMS.WMS.Services
             var adjust_DBSet = _dBContext.GetDbSet<StockadjustEntity>().AsNoTracking();
             var adjusted = await (from a in adjust_DBSet
                                   join d in _dBContext.GetDbSet<StockprocessdetailEntity>().AsNoTracking() on a.source_table_id equals d.id
-                                  where a.job_type == 2
+                                  where a.job_type == 2 && d.stock_process_id == id
                                   select a
                            ).AnyAsync();
-            res.adjust_status = adjusted;
+            res.adjust_status =entity.process_status && adjusted;
             res.source_detail_list = details.Where(t => t.is_source == true).ToList();
             res.target_detail_list = details.Where(t => t.is_source == false).ToList();
             return res;
@@ -315,13 +316,22 @@ namespace ModernWMS.WMS.Services
         public async Task<(bool flag, string msg)> ConfirmAdjustment(int id, CurrentUser currentUser)
         {
             var DBSet = _dBContext.GetDbSet<StockprocessEntity>();
+            var detail_DBSet = _dBContext.GetDbSet<StockprocessdetailEntity>();
+            var adjust_DBset = _dBContext.GetDbSet<StockadjustEntity>();
             var entity = await DBSet.FirstOrDefaultAsync(t => t.id == id);
             if (entity == null)
             {
                 return (false, _stringLocalizer["not_exists_entity"]);
             }
-            var detail_DBSet = _dBContext.GetDbSet<StockprocessdetailEntity>();
-            var adjust_DBset = _dBContext.GetDbSet<StockadjustEntity>();
+            var adjusted = await (from a in adjust_DBset
+                                  join d in _dBContext.GetDbSet<StockprocessdetailEntity>().AsNoTracking() on a.source_table_id equals d.id
+                                  where a.job_type == 2 && d.stock_process_id == id
+                                  select a
+              ).AnyAsync();
+            if (entity.process_status && adjusted)
+            {
+                return (false, _stringLocalizer["status_changed"]);
+            }
             var details = await detail_DBSet.Where(t => t.stock_process_id == id).ToListAsync();
             var adjusts = (from d in details
                            select new StockadjustEntity
@@ -402,6 +412,14 @@ namespace ModernWMS.WMS.Services
         {
             var DBSet = _dBContext.GetDbSet<StockprocessEntity>();
             var entity = await DBSet.FirstOrDefaultAsync(t => t.id == id);
+            if(entity == null)
+            {
+                return (false, _stringLocalizer["not_exists_entity"]);
+            }
+            if (entity.process_status == true)
+            {
+                return (false, _stringLocalizer["status_changed"]);
+            }
             entity.process_status = true;
             entity.processor = currentUser.user_name;
             entity.process_time = DateTime.Now;
