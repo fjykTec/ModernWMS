@@ -87,9 +87,10 @@
       <vxe-column field="customer_name" :title="$t('wms.deliveryManagement.customer_name')"></vxe-column>
       <vxe-column field="creator" :title="$t('wms.deliveryManagement.creator')"></vxe-column>
       <!-- <vxe-column field="create_time" width="170px" :title="$t('wms.deliveryManagement.create_time')"></vxe-column> -->
-      <vxe-column field="operate" :title="$t('system.page.operate')" width="240" :resizable="false" show-overflow>
+      <vxe-column field="operate" :title="$t('system.page.operate')" width="290" :resizable="false" show-overflow>
         <template #default="{ row }">
           <div style="width: 100%; display: flex; justify-content: center">
+            <tooltip-btn :flat="true" icon="mdi-eye-outline" :tooltip-text="$t('system.page.view')" @click="method.viewRow(row)"></tooltip-btn>
             <tooltip-btn
               :disabled="row.dispatch_status !== 0 && row.dispatch_status !== 1"
               :flat="true"
@@ -142,6 +143,12 @@
       @close="method.closeConfirmOrder"
       @save-success="method.confirmSuccess"
     />
+    <!-- View order details -->
+    <SearchDeliveredMainDetail
+      :dispatch-no="data.showDeliveredMainDetailNo"
+      :show-dialog="data.showDeliveredMainDetail"
+      @close="method.closeDeliveredDetail"
+    />
   </div>
 </template>
 
@@ -164,10 +171,13 @@ import { setSearchObject } from '@/utils/common'
 import { TablePage } from '@/types/System/Form'
 import { exportData } from '@/utils/exportTable'
 import { DEBOUNCE_TIME } from '@/constant/system'
+import SearchDeliveredMainDetail from './search-delivered-main-detail.vue'
 
 const xTable = ref()
 
 const data = reactive({
+  showDeliveredMainDetailNo: '',
+  showDeliveredMainDetail: false,
   showDialog: false,
   dialogForm: {
     id: 0,
@@ -231,6 +241,15 @@ const data = reactive({
 })
 
 const method = reactive({
+  viewRow: (row: DeliveryManagementVO) => {
+    if (row.dispatch_no) {
+      data.showDeliveredMainDetailNo = row.dispatch_no
+      data.showDeliveredMainDetail = true
+    }
+  },
+  closeDeliveredDetail: () => {
+    data.showDeliveredMainDetail = false
+  },
   // Confirm picking
   confirmPicking: async (row: DeliveryManagementVO) => {
     hookComponent.$dialog({

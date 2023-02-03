@@ -486,6 +486,8 @@ export default {
       spu_code: '商品编码',
       spu_name: '商品名称',
       sku_code: '规格编码',
+      sku_name: '规格名称',
+      unit: '商品单位',
       creator: '创建人',
       create_time: '创建时间',
       confirmOrder: '确认发货单',

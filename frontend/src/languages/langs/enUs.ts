@@ -486,6 +486,8 @@ export default {
       spu_code: 'Commodity Code',
       spu_name: 'Commodity Name',
       sku_code: 'Specification Code',
+      sku_name: 'Specification Name',
+      unit: 'Commodity Unit',
       creator: 'Created By',
       create_time: 'Creation Time',
       confirmOrder: 'Confirm Shipment Doc',
