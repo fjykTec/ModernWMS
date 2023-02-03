@@ -195,7 +195,9 @@ namespace ModernWMS.WMS.Services
                                    spu_description = spu.spu_description,
                                    spu_name = spu.spu_name,
                                    bar_code = spu.bar_code,
-                                   unpicked_qty = d.qty - d.picked_qty
+                                   unpicked_qty = d.qty - d.picked_qty,
+                                   sku_name = sku.sku_name,
+                                   unit = sku.unit
                                }).ToListAsync();
             return datas;
         }
@@ -358,8 +360,8 @@ namespace ModernWMS.WMS.Services
                             customer_id = dg.Key.customer_id,
                             customer_name = dg.Key.customer_name,
                             qty = dg.Sum(t => t.d.qty),
-                            volume = dg.Sum(t =>t.spu.volume_unit==1?  t.d.volume:(t.spu.volume_unit==0?t.d.volume/1000:t.d.volume*1000)),
-                            weight = dg.Sum(t =>t.spu.weight_unit==0?t.d.weight/1000000:(t.spu.weight_unit==1? t.d.weight/1000:t.d.weight)),
+                            volume = dg.Sum(t => t.spu.volume_unit == 1 ? t.d.volume : (t.spu.volume_unit == 0 ? t.d.volume / 1000 : t.d.volume * 1000)),
+                            weight = dg.Sum(t => t.spu.weight_unit == 0 ? t.d.weight / 1000000 : (t.spu.weight_unit == 1 ? t.d.weight / 1000 : t.d.weight)),
                             creator = dg.Key.creator,
                         };
             query = query.Where(queries.AsExpression<PreDispatchlistViewModel>());
@@ -568,7 +570,7 @@ namespace ModernWMS.WMS.Services
                                join spu in spu_DBSet on sku.spu_id equals spu.id
                                join owner in owner_DBSet.AsNoTracking() on sg.goods_owner_id equals owner.id into owner_left
                                from owner in owner_left.DefaultIfEmpty()
-                               join gl in location_DBSet.Where(t=>t.warehouse_area_property != 5).AsNoTracking() on sg.goods_location_id equals gl.id into gl_left
+                               join gl in location_DBSet.Where(t => t.warehouse_area_property != 5).AsNoTracking() on sg.goods_location_id equals gl.id into gl_left
                                from gl in gl_left.DefaultIfEmpty()
                                where dl.dispatch_no == dispatch_no && dl.tenant_id == currentUser.tenant_id && (dl.dispatch_status == 0 || dl.dispatch_status == 1)
                                select new
@@ -655,9 +657,9 @@ namespace ModernWMS.WMS.Services
                     pick.pick_qty = (r.qty <= (pick_qty + pick.qty_available)) ? (r.qty - pick_qty) : pick.qty_available;
                     pick_qty += pick.pick_qty;
                 }
-                r.pick_list = picklist.Where(t=>t.qty_available>0).ToList();
+                r.pick_list = picklist.Where(t => t.qty_available > 0).ToList();
             }
-            
+
             return res;
 
         }

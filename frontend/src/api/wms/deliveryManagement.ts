@@ -219,3 +219,12 @@ export const viewInventoryDetails = (dispatch_id: number) => http({
       dispatch_id
     }
   })
+
+// Set carrier
+export const viewDeliveryMainDetail = (dispatch_no: string) => http({
+    url: '/dispatchlist/by-dispatch_no',
+    method: 'get',
+    params: {
+      dispatch_no
+    }
+  })
