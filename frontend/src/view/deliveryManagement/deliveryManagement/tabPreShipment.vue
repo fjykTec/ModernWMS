@@ -72,8 +72,14 @@
         field="create_time"
         width="170px"
         :title="$t('wms.deliveryManagement.create_time')"
-       
       ></vxe-column> -->
+      <vxe-column field="operate" :title="$t('system.page.operate')" width="70" :resizable="false" show-overflow>
+        <template #default="{ row }">
+          <div style="width: 100%; display: flex; justify-content: center">
+            <tooltip-btn :flat="true" icon="mdi-eye-outline" :tooltip-text="$t('system.page.view')" @click="method.viewRow(row)"></tooltip-btn>
+          </div>
+        </template>
+      </vxe-column>
     </vxe-table>
     <custom-pager
       :current-page="data.tablePage.pageIndex"
@@ -85,6 +91,12 @@
       @page-change="method.handlePageChange"
     >
     </custom-pager>
+    <!-- View order details -->
+    <SearchDeliveredMainDetail
+      :dispatch-no="data.showDeliveredMainDetailNo"
+      :show-dialog="data.showDeliveredMainDetail"
+      @close="method.closeDeliveredDetail"
+    />
   </div>
 </template>
 
@@ -104,10 +116,13 @@ import { setSearchObject } from '@/utils/common'
 import { TablePage } from '@/types/System/Form'
 import { exportData } from '@/utils/exportTable'
 import { DEBOUNCE_TIME } from '@/constant/system'
+import SearchDeliveredMainDetail from './search-delivered-main-detail.vue'
 
 const xTable = ref()
 
 const data = reactive({
+  showDeliveredMainDetailNo: '',
+  showDeliveredMainDetail: false,
   showDialog: false,
   dialogForm: {
     id: 0
@@ -128,6 +143,15 @@ const data = reactive({
 })
 
 const method = reactive({
+  viewRow: (row: DeliveryManagementVO) => {
+    if (row.dispatch_no) {
+      data.showDeliveredMainDetailNo = row.dispatch_no
+      data.showDeliveredMainDetail = true
+    }
+  },
+  closeDeliveredDetail: () => {
+    data.showDeliveredMainDetail = false
+  },
   // Refresh data
   refresh: () => {
     method.getPreShipment()
@@ -152,13 +176,13 @@ const method = reactive({
   }),
   exportTable: () => {
     const $table = xTable.value
-      exportData({
-        table: $table,
-        filename: i18n.global.t('wms.deliveryManagement.preShipment'),
-        columnFilterMethod({ column }: any) {
-          return !['checkbox'].includes(column?.type) && !['operate'].includes(column?.field)
-        }
-      })
+    exportData({
+      table: $table,
+      filename: i18n.global.t('wms.deliveryManagement.preShipment'),
+      columnFilterMethod({ column }: any) {
+        return !['checkbox'].includes(column?.type) && !['operate'].includes(column?.field)
+      }
+    })
   },
   sureSearch: () => {
     data.tablePage.searchObjects = setSearchObject(data.searchForm)
