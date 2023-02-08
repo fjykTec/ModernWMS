@@ -10,6 +10,10 @@
       </div>
       <LoginForm />
     </div>
+    
+    <div class="copyRight">
+      <a href="https://modernwms.ikeyly.com" target="_blank">CopyRight © 2023 ModernWMS All Rights Reserve</a>
+    </div>
   </div>
 </template>
 
@@ -30,6 +34,7 @@ import Logo from '@/components/system/logo.vue'
   height: 100%;
   display: flex;
   background-color: #fff;
+  position: relative;
   .loginLeft {
     width: 70%;
     display: flex;
@@ -42,5 +47,17 @@ import Logo from '@/components/system/logo.vue'
     display: flex;
     align-items: center;
   }
+}
+
+.copyRight {
+  width: 100%;
+  color: #bbb;
+  display: flex;
+  justify-content: center;
+  font-size: 12px;
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 </style>
