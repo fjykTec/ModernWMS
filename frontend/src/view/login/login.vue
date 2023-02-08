@@ -14,13 +14,21 @@
     <div class="copyRight">
       <a href="https://modernwms.ikeyly.com" target="_blank">CopyRight © 2023 ModernWMS All Rights Reserve</a>
     </div>
+    <div class="ICP" @click="method.toICP"> 闽ICP备2021008548号 </div>
   </div>
 </template>
 
 <script lang="ts" setup>
+import { reactive } from 'vue'
 import LoginForm from '@/components/login/login-form.vue'
 import LanguagesSwitch from '@/components/system/languages.vue'
 import Logo from '@/components/system/logo.vue'
+
+const method = reactive({
+  toICP: () => {
+    window.open('https://beian.miit.gov.cn/', '_blank')
+  }
+})
 </script>
 
 <style scoped lang="less">
@@ -56,8 +64,22 @@ import Logo from '@/components/system/logo.vue'
   justify-content: center;
   font-size: 12px;
   position: absolute;
-  bottom: 20px;
+  bottom: 30px;
   left: 50%;
   transform: translate(-50%, -50%);
+}
+
+.ICP {
+  color: #999;
+  font-size: 12px;
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  &:hover{
+    cursor: pointer;
+    color: #aaa;
+  }
 }
 </style>
