@@ -254,19 +254,4 @@ watch(
   justify-content: center;
   align-items: center;
 }
-.checkbox {
-  width: 20px;
-  height: 20px;
-  background-color: #fff;
-  border-radius: 5px;
-  border: 1px solid #f8f8f9;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-.checkboxConfirm {
-  background-color: #409eff;
-  color: #fff;
-  border: 1px solid #409eff;
-}
 </style>
