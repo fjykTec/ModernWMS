@@ -741,7 +741,6 @@ namespace ModernWMS.WMS.Services
                     }
                     if (d.lock_qty < d.qty)
                     {
-                        d.qty = d.qty - d.lock_qty;
                         new_dispatchlists.Add(new DispatchlistEntity
                         {
                             sku_id = vm.sku_id,
@@ -749,6 +748,7 @@ namespace ModernWMS.WMS.Services
                             qty = d.qty - d.lock_qty,
                             tenant_id = currentUser.tenant_id
                         });
+                        d.qty = d.lock_qty;
                     }
                 }
                 else
