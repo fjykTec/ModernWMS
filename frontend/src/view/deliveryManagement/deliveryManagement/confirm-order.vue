@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="isShow" :width="'70%'" transition="dialog-top-transition" :persistent="true">
+  <v-dialog v-model="isShow" :width="'80%'" transition="dialog-top-transition" :persistent="true">
     <template #default>
       <v-card class="formCard">
         <v-toolbar color="white" :title="`${$t('wms.deliveryManagement.confirmOrder')}`"></v-toolbar>
@@ -11,7 +11,7 @@
                 keep-source
                 :column-config="{ minWidth: '100px' }"
                 :data="data.treeData"
-                :height="'500px'"
+                :height="'600px'"
                 align="center"
                 :cell-style="method.cellStyle"
                 @cell-click="method.cellClick"
@@ -23,7 +23,8 @@
                 <vxe-column width="40">
                   <template #default="{ row }">
                     <div style="height: 100%; display: flex; align-items: center; justify-content: center">
-                      <vxe-checkbox v-model="row.confirm"></vxe-checkbox>
+                      <!-- <input v-model="row.confirm" class="checkboxClass" type="checkbox" /> -->
+                      <CustomCheckbox v-model:value="row.confirm" />
                     </div>
                   </template>
                 </vxe-column>
@@ -34,6 +35,7 @@
                     <span :style="data.validList.includes(row.sku_code) ? 'color: red' : ''">{{ row.sku_code }}</span>
                   </template>
                 </vxe-column>
+                <vxe-column field="qty" :title="$t('wms.deliveryManagement.qty')"> </vxe-column>
               </vxe-table>
               <!-- <v-card :height="tableHeight"> -->
               <!-- <NavListVue
@@ -52,7 +54,7 @@
                 keep-source
                 :column-config="{ minWidth: '100px' }"
                 :data="data.tableData"
-                :height="'500px'"
+                :height="'600px'"
                 align="center"
                 :edit-config="{ trigger: 'click', mode: 'cell' }"
                 :edit-rules="data.validRules"
@@ -90,6 +92,7 @@ import i18n from '@/languages/i18n'
 import { getConfirmOrderInfoAndStock, confirmOrder } from '@/api/wms/deliveryManagement'
 import { hookComponent } from '@/components/system/index'
 import { isInteger } from '@/utils/dataVerification/tableRule'
+import CustomCheckbox from '@/components/custom-checkbox.vue'
 
 const xTable = ref()
 const detailXTable = ref()
@@ -250,5 +253,20 @@ watch(
   display: flex;
   justify-content: center;
   align-items: center;
+}
+.checkbox {
+  width: 20px;
+  height: 20px;
+  background-color: #fff;
+  border-radius: 5px;
+  border: 1px solid #f8f8f9;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.checkboxConfirm {
+  background-color: #409eff;
+  color: #fff;
+  border: 1px solid #409eff;
 }
 </style>
