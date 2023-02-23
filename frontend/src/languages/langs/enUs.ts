@@ -39,7 +39,8 @@ export default {
       beforeAsnSorted: 'Confirm Sorted?',
       requestTimeout: 'Request Timeout!',
       requestFail: 'Request fail.Please try it again',
-      vaildEmail: 'Please enter the correct email format!'
+      vaildEmail: 'Please enter the correct email format!',
+      verifyPwd: 'Verification failed. The new password is different from the confirmed one!'
     },
     checkText: {
       checkFormFail: 'Operation failed. Please check the data and try again!',
@@ -53,7 +54,11 @@ export default {
       lengthValid: 'The length should be between '
     },
     homeHeader: {
-      logout: 'Logout'
+      logout: 'Logout',
+      changePwd: 'Change Password',
+      oldPwd: 'Old password',
+      newPwd: 'New password',
+      confrimNewPwd: 'Confirm new password'
     },
     combobox: {
       sex: {

@@ -288,7 +288,7 @@ const method = reactive({
     for (const item of res.data) {
       data.combobox.warehouse_name.push({
         label: item.name,
-        // WarehouseID is a numberic type
+        // WarehouseID is a numeric type
         value: Number(item.value)
       })
     }
