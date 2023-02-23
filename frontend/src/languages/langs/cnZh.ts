@@ -39,7 +39,8 @@ export default {
       beforeAsnSorted: '确认分拣完成？',
       requestTimeout: '请求超时！',
       requestFail: '接口请求失败，请重试',
-      vaildEmail: '请输入正确的邮箱格式!'
+      vaildEmail: '请输入正确的邮箱格式!',
+      verifyPwd: '校验失败, 新密码与确认新密码不同!'
     },
     checkText: {
       checkFormFail: '操作失败, 请检查数据后重试!',
@@ -53,7 +54,11 @@ export default {
       lengthValid: '字段长度应该在'
     },
     homeHeader: {
-      logout: '注销'
+      logout: '注销',
+      changePwd: '修改密码',
+      oldPwd: '旧密码',
+      newPwd: '新密码',
+      confrimNewPwd: '确认新密码'
     },
     combobox: {
       sex: {

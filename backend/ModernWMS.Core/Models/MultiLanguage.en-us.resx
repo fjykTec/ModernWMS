@@ -633,4 +633,10 @@
   <data name="process_not_comfirm" xml:space="preserve">
     <value>There are unconfirmed warehouse processings</value>
   </data>
+  <data name="is_incorrect" xml:space="preserve">
+    <value>is incorrect</value>
+  </data>
+  <data name="old_password" xml:space="preserve">
+    <value>old password</value>
+  </data>
 </root>

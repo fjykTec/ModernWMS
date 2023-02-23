@@ -10,7 +10,7 @@
       </div>
       <LoginForm />
     </div>
-    
+
     <div class="copyRight">
       <a href="https://modernwms.ikeyly.com" target="_blank">CopyRight © 2023 ModernWMS All Rights Reserve</a>
     </div>
