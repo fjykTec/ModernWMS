@@ -633,4 +633,10 @@
   <data name="process_not_comfirm" xml:space="preserve">
     <value>该库位存在未确认的仓内加工</value>
   </data>
+  <data name="is_incorrect" xml:space="preserve">
+    <value>不正确</value>
+  </data>
+  <data name="old_password" xml:space="preserve">
+    <value>旧密码</value>
+  </data>
 </root>

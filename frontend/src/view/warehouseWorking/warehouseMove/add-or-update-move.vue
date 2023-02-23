@@ -3,7 +3,7 @@
   <v-dialog v-model="isShow" :width="'30%'" transition="dialog-top-transition" :persistent="true">
     <template #default>
       <v-card>
-        <v-toolbar class="" color="white" :title="`${$t('router.sideBar.warehouseMove')}`">
+        <v-toolbar color="white" :title="`${$t('router.sideBar.warehouseMove')}`">
           <custom-qrcode :value="qrCodeValue" />
         </v-toolbar>
         <v-card-text>
@@ -91,6 +91,7 @@
     @close="method.closeCommodityDialogSelect"
     @sureSelect="method.sureSelectCommodity"
   />
+
   <location-select :show-dialog="data.showLocationDialogSelect" @close="method.closeLocationDialogSelect" @sureSelect="method.sureSelectLocation" />
 </template>
 

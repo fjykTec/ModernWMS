@@ -9,10 +9,10 @@
     </div>
     <div class="toolsBar">
       <div class="gitSrc mr-4">
-        <img src="@/assets/img/gitee.png" alt="Gitee" @click="method.toGit('gitee')">
+        <img src="@/assets/img/gitee.png" alt="Gitee" @click="method.toGit('gitee')" />
       </div>
       <div class="gitSrc mr-4">
-        <img src="@/assets/img/github.png" alt="Gitee" @click="method.toGit('github')">
+        <img src="@/assets/img/github.png" alt="Gitee" @click="method.toGit('github')" />
       </div>
       <LanguagesSwitch />
       <v-menu>
@@ -29,11 +29,12 @@
         </v-list>
       </v-menu>
     </div>
+    <ChangePwd ref="ChangePwdRef" />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { reactive, watch, computed } from 'vue'
+import { reactive, watch, computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import LanguagesSwitch from '@/components/system/languages.vue'
 import { lightGrey } from '@/constant/style'
@@ -41,13 +42,19 @@ import i18n from '@/languages/i18n'
 import { router } from '@/router'
 import { store } from '@/store'
 import { DataProps } from '@/types/Home/HomeHeader'
+import ChangePwd from '@/components/system/change-pwd.vue'
 
 const routerInfo = useRouter()
+const ChangePwdRef = ref()
 
 const data: DataProps = reactive({
   breadcrumbItems: [],
   // User Action List
   userOperationMenu: [
+    {
+      title: i18n.global.t('system.homeHeader.changePwd'),
+      value: 'changePwd'
+    },
     {
       title: i18n.global.t('system.homeHeader.logout'),
       value: 'logout'
@@ -87,6 +94,8 @@ const method = reactive({
       store.commit('system/setCurrentRouterPath', '')
 
       router.push('/login')
+    } else if (value === 'changePwd') {
+      ChangePwdRef.value.open()
     }
   },
   toGit: (type: string) => {
@@ -217,7 +226,7 @@ const firstName = computed(() => {
   }
 }
 
-.firstName{
+.firstName {
   font-weight: 600;
   color: #9c27b0;
 }
