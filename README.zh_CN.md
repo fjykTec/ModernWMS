@@ -11,7 +11,7 @@
 ![QR Code Support](https://img.shields.io/badge/QR--Code-Support-orange.svg)
 ![Docker Support](https://img.shields.io/badge/Docker-Support-orange.svg)
 ![i18n Support](https://img.shields.io/badge/i18n-Support-orange.svg)
-[![MySQL8](https://img.shields.io/badge/MySQL-8.0%2B-orange)](https://www.mysql.com/downloads/)
+[![MySQL8](https://img.shields.io/badge/MySQL8.0%2B-Support-orange)](https://www.mysql.com/downloads/)
 [![SQL Server](https://img.shields.io/badge/SQL%20Server2017%2B-Support-orange)](https://www.mysql.com/downloads/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL12-Support-orange)](https://www.mysql.com/downloads/)
 
@@ -106,8 +106,9 @@
   ```bash
   cd /tmp/ && unzip master.zip && cd ./ModernWMS-master
   mkdir -p /ModernWMS/frontend/ /ModernWMS/backend/
-  cd ./frontend/ && yarn && yarn build && cp -rf ./frontend/dist/* /ModernWMS/frontend/
-  cd ./backend/ && sudo dotnet publish && cp -rf ./backend/ModernWMS/bin/Debug/net7.0/publish/* /ModernWMS/backend/
+  cd /tmp/ModernWMS-master/frontend/ && yarn && yarn build && cp -rf /tmp/ModernWMS-master/frontend/dist/* /ModernWMS/frontend/
+  cd /tmp/ModernWMS-master/backend/ && sudo dotnet publish && cp -rf /tmp/ModernWMS-master/backend/ModernWMS/bin/Debug/net7.0/publish/* /ModernWMS/backend/
+  cp -rf /tmp/ModernWMS-master/backend/ModernWMS/wms.db /ModernWMS/backend/
   ```  
 
   + 第四步，安装nginx
@@ -125,36 +126,37 @@
 + 下载源码后编译部署
   + 第一步，下载源码
   ```PowerShell
-  cd c:\
+  cd C:\
   wget -Uri https://github.com/fjykTec/ModernWMS/archive/refs/heads/master.zip  -OutFile master.zip
   Expand-Archive -Path C:\master.zip -DestinationPath C:\
   ```
   + 第二步，安装.NET SDK 、运行时 和 NodeJS
   ```CMD
   wget -Uri https://download.visualstudio.microsoft.com/download/pr/35660869-0942-4c5d-8692-6e0d4040137a/4921a36b578d8358dac4c27598519832/dotnet-sdk-7.0.101-win-x64.exe  -OutFile dotnet-sdk-7.0.101-win-x64.exe
-  dotnet-sdk-7.0.100-win-x64.exe /install /quiet /norestart
+  dotnet-sdk-7.0.101-win-x64.exe /install /quiet /norestart
   wget -Uri https://nodejs.org/dist/v16.13.1/node-v16.13.1-x64.msi  -OutFile node-v16.13.1-x64.msi
   msiexec /i .\node-v16.13.1-x64.msi /passive /norestart
+  npm install -g yarn
   ```
   + 第三步，编译前端和后端
   ```
   md C:\ModernWMS\frontend\
   md C:\ModernWMS\backend\
-  cd c:\ModernWMS-master\backend
+  cd C:\ModernWMS-master\backend
   dotnet publish 
-  copy-item -path ".\backend\ModernWMS\bin\Debug\net7.0\publish\" -destination "C:\ModernWMS\backend\" -recurse
-  copy-Item ".\backend\ModernWMS\wms.db" -Destination "C:\ModernWMS\backend\"
-  cd c:\ModernWMS-master\frontend  
+  copy-item -path "C:\ModernWMS-master\backend\ModernWMS\bin\Debug\net7.0\publish\" -destination "C:\ModernWMS\backend\" -recurse
+  copy-Item "C:\ModernWMS-master\backend\ModernWMS\wms.db" -Destination "C:\ModernWMS\backend\"
+  cd C:\ModernWMS-master\frontend  
   yarn && yarn build 
-  copy-item -path ".\frontend\dist\*" -destination "C:\ModernWMS\frontend\" -recurse
+  copy-item -path "C:\ModernWMS-master\frontend\dist\*" -destination "C:\ModernWMS\frontend\" -recurse
   ```
   + 第四步，安装nginx并启动
   ```
   cd C:\
   wget -Uri http://nginx.org/download/nginx-1.16.1.zip -OutFile nginx-1.16.1.zip
   Expand-Archive -Path C:\nginx-1.16.1.zip -DestinationPath C:\
-  copy-item -path "C:\ModernWMS\frontend\*" -destination ".\nginx-1.16.1\html\" -recurse
-  start .\nginx-1.16.1\nginx.exe
+  copy-item -path "C:\ModernWMS\frontend\*" -destination "C:\nginx-1.16.1\html\" -recurse
+  start C:\nginx-1.16.1\nginx.exe
   cd C:\ModernWMS\backend\
   dotnet ModernWMS.dll --urls http://0.0.0.0:20011
   ```
@@ -172,9 +174,9 @@
 
   ```bash
   cd /tmp/ && unzip master.zip && cd ./ModernWMS-master
-  cd ./frontend/ && yarn && yarn build && cp -rf ./frontend/dist/* ./docker/frontend/
-  cd ./backend/ && sudo dotnet publish && cp -rf ./backend/ModernWMS/bin/Debug/net7.0/publish/* ./docker/backend/
-  cp -rf ./backend/ModernWMS/wms.db ./docker/backend/
+  cd /tmp/ModernWMS-master/frontend/ && yarn && yarn build && cp -rf /tmp/ModernWMS-master/frontend/dist/* /tmp/ModernWMS-master/docker/frontend/
+  cd /tmp/ModernWMS-master/backend/ && sudo dotnet publish && cp -rf /tmp/ModernWMS-master/backend/ModernWMS/bin/Debug/net7.0/publish/* /tmp/ModernWMS-master/docker/backend/
+  cp -rf /tmp/ModernWMS-master/backend/ModernWMS/wms.db /tmp/ModernWMS-master/docker/backend/
   ```  
   + 第三步，部署docker
   ```shell
