@@ -639,4 +639,7 @@
   <data name="old_password" xml:space="preserve">
     <value>旧密码</value>
   </data>
+  <data name="location_exist_stock_not_delete" xml:space="preserve">
+    <value>库位存在库存，不能删除</value>
+  </data>
 </root>
