@@ -309,6 +309,11 @@ namespace ModernWMS.WMS.Services
         public async Task<(bool flag, string msg)> Register(RegisterViewModel viewModel)
         {
             var DbSet = _dBContext.GetDbSet<userEntity>();
+            var num_exist = await DbSet.AnyAsync(t => t.user_num == viewModel.user_name);
+            if (num_exist)
+            {
+                return (false, _stringLocalizer["username_existed"]);
+            }
             var entity = viewModel.Adapt<userEntity>();
             var time = DateTime.Now;
             entity.user_num = entity.user_name;
