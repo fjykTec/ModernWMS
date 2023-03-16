@@ -642,4 +642,7 @@
   <data name="location_exist_stock_not_delete" xml:space="preserve">
     <value>Inventory exists in the warehouse location. Cannot delete the warehouse location</value>
   </data>
+  <data name="username_existed" xml:space="preserve">
+    <value>User name already exists</value>
+  </data>
 </root>
