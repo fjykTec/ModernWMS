@@ -133,7 +133,7 @@
   + 第二步，安装.NET SDK 、运行时 和 NodeJS
   ```CMD
   wget -Uri https://download.visualstudio.microsoft.com/download/pr/35660869-0942-4c5d-8692-6e0d4040137a/4921a36b578d8358dac4c27598519832/dotnet-sdk-7.0.101-win-x64.exe  -OutFile dotnet-sdk-7.0.101-win-x64.exe
-  dotnet-sdk-7.0.101-win-x64.exe /install /quiet /norestart
+  .\dotnet-sdk-7.0.101-win-x64.exe /install /quiet /norestart
   wget -Uri https://nodejs.org/dist/v16.13.1/node-v16.13.1-x64.msi  -OutFile node-v16.13.1-x64.msi
   msiexec /i .\node-v16.13.1-x64.msi /passive /norestart
   npm install -g yarn
@@ -144,10 +144,11 @@
   md C:\ModernWMS\backend\
   cd C:\ModernWMS-master\backend
   dotnet publish 
-  copy-item -path "C:\ModernWMS-master\backend\ModernWMS\bin\Debug\net7.0\publish\" -destination "C:\ModernWMS\backend\" -recurse
+  copy-item -path "C:\ModernWMS-master\backend\ModernWMS\bin\Debug\net7.0\publish\*" -destination "C:\ModernWMS\backend\" -recurse
   copy-Item "C:\ModernWMS-master\backend\ModernWMS\wms.db" -Destination "C:\ModernWMS\backend\"
   cd C:\ModernWMS-master\frontend  
-  yarn && yarn build 
+  yarn
+  yarn build 
   copy-item -path "C:\ModernWMS-master\frontend\dist\*" -destination "C:\ModernWMS\frontend\" -recurse
   ```
   + 第四步，安装nginx并启动
@@ -156,7 +157,8 @@
   wget -Uri http://nginx.org/download/nginx-1.16.1.zip -OutFile nginx-1.16.1.zip
   Expand-Archive -Path C:\nginx-1.16.1.zip -DestinationPath C:\
   copy-item -path "C:\ModernWMS\frontend\*" -destination "C:\nginx-1.16.1\html\" -recurse
-  start C:\nginx-1.16.1\nginx.exe
+  cd C:\nginx-1.16.1\
+  start nginx.exe
   cd C:\ModernWMS\backend\
   dotnet ModernWMS.dll --urls http://0.0.0.0:20011
   ```
