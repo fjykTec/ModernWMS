@@ -212,9 +212,6 @@
 <h4>
   <a href="https://github.com/fjykTec/ModernWMS/issues/new?template=feature_request.md&title=[FR]">Submit a suggestion</a>
 </h4>
-<h4>
-  <a href="https://jq.qq.com/?_wv=1027&k=YgVJGWnI">Join QQ Group Chat 757128595</a>
-</h4>
 
 ## License
 
