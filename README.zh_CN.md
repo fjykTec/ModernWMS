@@ -210,9 +210,6 @@
 <h4>
   <a href="https://github.com/fjykTec/ModernWMS/issues/new?template=feature_request.md&title=[FR]">提交一个建议</a>
 </h4>
-<h4>
-  <a href="https://jq.qq.com/?_wv=1027&k=YgVJGWnI">加入QQ群聊 757128595</a>
-</h4>
 
 ## 版权信息
 该项目使用的是 [MIT](https://opensource.org/licenses/MIT/) 协议. 详情查阅[LICENSE.txt](https://github.com/fjykTec/ModernWMS/master/LICENSE).必须遵守此协议。
