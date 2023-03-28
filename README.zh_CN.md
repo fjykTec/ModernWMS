@@ -177,20 +177,37 @@
   ```bash
   cd /tmp/ && wget https://github.com/fjykTec/ModernWMS/archive/refs/heads/master.zip
   ```  
-  
-  + 第二步，编译前端和后端
+
+  + 第二步，安装.NET SDK 和 NodeJS
 
   ```bash
+  wget https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+  sudo dpkg -i packages-microsoft-prod.deb
+  sudo apt-get update && sudo apt-get install -y dotnet-sdk-7.0
+  curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+  sudo apt install -y nodejs
+  sudo apt-get install gcc g++ make
+  sudo npm install -g yarn
+  ```  
+
+  + 第三步，编译前端和后端
+
+  ```bash
+  sudo apt install unzip
   cd /tmp/ && unzip master.zip && cd ./ModernWMS-master
-  cd /tmp/ModernWMS-master/frontend/ && yarn && yarn build && cp -rf /tmp/ModernWMS-master/frontend/dist/* /tmp/ModernWMS-master/docker/frontend/
+  cd /tmp/ModernWMS-master/frontend/ && sed -i 's#http://127.0.0.1#http://前部署服务器的IP地址#g' ./.env.production
+  yarn && yarn build && cp -rf /tmp/ModernWMS-master/frontend/dist/* /tmp/ModernWMS-master/docker/frontend/
   cd /tmp/ModernWMS-master/backend/ && sudo dotnet publish && cp -rf /tmp/ModernWMS-master/backend/ModernWMS/bin/Debug/net7.0/publish/* /tmp/ModernWMS-master/docker/backend/
   cp -rf /tmp/ModernWMS-master/backend/ModernWMS/wms.db /tmp/ModernWMS-master/docker/backend/
   ```  
-  + 第三步，部署docker
-  ```shell
+
+  + 第四步，部署docker
+
+  ```bash
+  sudo apt install docker.io
   cd /tmp/ModernWMS-master/docker/
   docker build -t modernwms:1.0 .
-  docker run -d -p 80:80  modernwms:1.0 /bin/bash ./run.sh
+  docker run -d -p 80:80  modernwms:1.0 ./run.sh
   ```
 
 ## 使用方法
