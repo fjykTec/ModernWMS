@@ -207,7 +207,7 @@
   sudo apt install docker.io
   cd /tmp/ModernWMS-master/docker/
   docker build -t modernwms:1.0 .
-  docker run -d -p 80:80  modernwms:1.0 ./run.sh
+  docker run -d -p 20011:20011 -p 80:80  modernwms:1.0 ./run.sh
   ```
 
 ## 使用方法
