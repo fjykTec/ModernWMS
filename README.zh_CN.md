@@ -90,23 +90,27 @@
   cd /tmp/ && wget https://github.com/fjykTec/ModernWMS/archive/refs/heads/master.zip
   ```  
 
-  + 第二步，安装.NET SDK 、运行时 和 NodeJS
+  + 第二步，安装.NET SDK 和 NodeJS
 
   ```bash
   wget https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
   sudo dpkg -i packages-microsoft-prod.deb
   sudo apt-get update && sudo apt-get install -y dotnet-sdk-7.0
-  sudo apt-get install -y aspnetcore-runtime-7.0
   curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
   sudo apt install -y nodejs
+  sudo apt-get install gcc g++ make
+  sudo npm install -g yarn
   ```  
 
   + 第三步，编译前端和后端
 
   ```bash
+  sudo apt install unzip
   cd /tmp/ && unzip master.zip && cd ./ModernWMS-master
   mkdir -p /ModernWMS/frontend/ /ModernWMS/backend/
-  cd /tmp/ModernWMS-master/frontend/ && yarn && yarn build && cp -rf /tmp/ModernWMS-master/frontend/dist/* /ModernWMS/frontend/
+  cd /tmp/ModernWMS-master/frontend/ 
+  sed -i 's#http://127.0.0.1#http://前部署服务器的IP地址#g' ./.env.production
+  yarn && yarn build && cp -rf /tmp/ModernWMS-master/frontend/dist/* /ModernWMS/frontend/
   cd /tmp/ModernWMS-master/backend/ && sudo dotnet publish && cp -rf /tmp/ModernWMS-master/backend/ModernWMS/bin/Debug/net7.0/publish/* /ModernWMS/backend/
   cp -rf /tmp/ModernWMS-master/backend/ModernWMS/wms.db /ModernWMS/backend/
   ```  
@@ -116,11 +120,13 @@
   ```bash
   cd /tmp/ && wget http://nginx.org/download/nginx-1.18.0.tar.gz 
   tar -zxvf nginx-1.18.0.tar.gz && cd nginx-1.18.0
-  ./configure --prefix=/etc/nginx --with-http_secure_link_module --with-http_stub_status_module --with-http_ssl_module --with-http_realip_module
+  ./configure --prefix=/etc/nginx --with-http_secure_link_module --with-http_stub_status_module --with-http_realip_module --without-http_rewrite_module --without-http_gzip_module
   make && make install
   cp -rf /ModernWMS/frontend/* /etc/nginx/html/
-  dotnet /ModernWMS/backend/ModernWMS.dll --urls http://0.0.0.0:20011
+  nohup /etc/nginx/sbin/nginx -g 'daemon off;' &
+  cd /ModernWMS/backend/ && dotnet ModernWMS.dll --urls http://0.0.0.0:20011
   ```  
+
 ### Windows
 
 + 下载源码后编译部署
@@ -130,7 +136,7 @@
   wget -Uri https://github.com/fjykTec/ModernWMS/archive/refs/heads/master.zip  -OutFile master.zip
   Expand-Archive -Path C:\master.zip -DestinationPath C:\
   ```
-  + 第二步，安装.NET SDK 、运行时 和 NodeJS
+  + 第二步，安装.NET SDK 和 NodeJS
   ```CMD
   wget -Uri https://download.visualstudio.microsoft.com/download/pr/35660869-0942-4c5d-8692-6e0d4040137a/4921a36b578d8358dac4c27598519832/dotnet-sdk-7.0.101-win-x64.exe  -OutFile dotnet-sdk-7.0.101-win-x64.exe
   .\dotnet-sdk-7.0.101-win-x64.exe /install /quiet /norestart
