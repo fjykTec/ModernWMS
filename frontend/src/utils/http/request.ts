@@ -52,6 +52,8 @@ function rediretToLogin() {
   store.commit('system/clearOpenedMenu')
   store.commit('system/setCurrentRouterPath', '')
 
+  clearLoading() // Clear all loads
+
   router.push('/login')
 }
 
@@ -67,6 +69,11 @@ const closeLoading = () => {
   if (acitveAxios <= 0) {
     emitter.emit('closeLoading')
   }
+}
+
+const clearLoading = () => {
+  acitveAxios = 0
+  emitter.emit('closeLoading')
 }
 
 const handleRefreshToken = (token: string) => {
