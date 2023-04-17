@@ -19,21 +19,15 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, onMounted } from 'vue'
+import { reactive } from 'vue'
 import LoginForm from '@/components/login/login-form.vue'
 import LanguagesSwitch from '@/components/system/languages.vue'
 import Logo from '@/components/system/logo.vue'
-import { emitter } from '@/utils/bus.js'
 
 const method = reactive({
   toICP: () => {
     window.open('https://beian.miit.gov.cn/', '_blank')
   }
-})
-
-// 回到登录界面清除状态
-onMounted(() => {
-  emitter.emit('closeLoading')
 })
 </script>
 
