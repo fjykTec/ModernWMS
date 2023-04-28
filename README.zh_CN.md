@@ -59,6 +59,7 @@
   - [联系我们](#联系我们)
   - [版权信息](#版权信息)
   - [特别声明](#特别声明)
+  - [捐赠](#捐赠)
 
 
 ## 介绍
@@ -171,7 +172,37 @@
 
 ### Docker
 
-+ 下载源码后编译
++ 方法 1: 直接从dockerhub中下载镜像
+
+  + Step 1, 安装docker，下载镜像
+
+  ```bash
+  sudo apt install docker.io
+  sudo docker pull modernwms/modernwms:1.0
+  ```  
+
+  + Step 2，部署
+  
+  ```bash  
+  sudo docker run -d -p 20011:20011 -p 80:80  modernwms/modernwms:1.0 ./run.sh
+  sudo docker ps -a | awk 'NR>1 && $2=="modernwms/modernwms:1.0" {print $1}'
+  sudo docker exec -it <CONTAINER ID> /bin/bash
+  ```
+
+  进入docker容器后，在容器中执行以下命令
+
+  ```bash
+  grep -rl "http://127.0.0.1:20011" /frontend | xargs sed -i 's#http://127.0.0.1:20011#http://IP address:20011#g'
+  exit
+  ```
+
+  重启容器
+
+  ```bash
+  sudo docker restart <CONTAINER ID>
+  ```
+
++ 方法 2: 自行构建镜像
   + 第一步，下载源码
 
   ```bash
@@ -244,3 +275,10 @@
 本项目已加入 [dotNET China](https://gitee.com/dotnetchina)  组织。<br/>
 
 ![dotnetchina](https://gitee.com/dotnetchina/home/raw/master/assets/dotnetchina-raw.png "dotNET China LOGO")
+
+## 捐赠
+
+如果您觉得我的开源库可以帮到您，请我们的作者喝杯咖啡吧，您的支持将鼓励我们继续创作。
+
+<img src="alipay.jpg" alt="image3" height="auto" />
+<img src="wechat.jpg" alt="image4" height="auto" />

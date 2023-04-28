@@ -58,6 +58,7 @@
   - [Usage](#usage)
   - [Contact](#contact)
   - [License](#license)
+  - [Donate](#donate)
 
 ## Introduction 
 
@@ -170,7 +171,37 @@
 
 ### Docker(Optional)
 
-+ download the source code and compile
++ Approach 1, download the image from docker hub
+
+  + Step 1, install docker and download the image
+
+  ```bash
+  sudo apt install docker.io
+  sudo docker pull modernwms/modernwms:1.0
+  ```  
+
+  + Step 2，deploy
+  
+  ```bash
+  sudo docker run -d -p 20011:20011 -p 80:80  modernwms/modernwms:1.0 ./run.sh
+  sudo docker ps -a | awk 'NR>1 && $2=="modernwms/modernwms:1.0" {print $1}'
+  sudo docker exec -it <CONTAINER ID> /bin/bash
+  ```
+
+  After entering the Docker container, execute the following command in the container.
+
+  ```bash
+  grep -rl "http://127.0.0.1:20011" /frontend | xargs sed -i 's#http://127.0.0.1:20011#http://IP address:20011#g'
+  exit
+  ```
+
+  restart container
+
+  ```bash
+  sudo docker restart <CONTAINER ID>
+  ```
+
++ Approach 2, Build your own image
   + Step 1, download the source code
 
   ```bash
@@ -240,3 +271,10 @@
 ## License
 
 Distributed under the [MIT](https://opensource.org/licenses/MIT/) License. See [LICENSE.txt](https://github.com/fjykTec/ModernWMS/master/LICENSE) for more information.This must be observed.
+
+## Donate
+
+If it's helpful to you, you can donate us by alipay,by wechat. Your support will encourage us to continue creating
+
+<img src="alipay.jpg" alt="image3" height="auto" />
+<img src="wechat.jpg" alt="image4" height="auto" />
