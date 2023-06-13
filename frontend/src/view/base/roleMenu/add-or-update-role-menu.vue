@@ -13,6 +13,7 @@
               :rules="data.rules.role_name"
               :label="$t('base.roleMenu.role_name')"
               variant="outlined"
+              :disabled="data.dialogTitle === 'update'"
               clearable
             ></v-select>
             <v-select
@@ -205,5 +206,4 @@ watch(
 )
 </script>
 
-<style scoped lang="less">
-</style>
+<style scoped lang="less"></style>
