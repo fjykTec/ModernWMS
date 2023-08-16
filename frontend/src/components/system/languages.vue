@@ -2,8 +2,8 @@
   <div class="languageIcon">
     <v-menu>
       <template #activator="{ props }">
-        <!-- <v-icon icon="mdi-translate" color="#666666" v-bind="props"></v-icon> -->
-        <v-icon icon="mdi-web" color="#666666" v-bind="props"></v-icon>
+        <v-icon icon="mdi-translate" color="#666666" v-bind="props"></v-icon>
+        <!-- <v-icon icon="mdi-web" color="#666666" v-bind="props"></v-icon> -->
       </template>
       <v-list>
         <v-list-item v-for="(item, index) in data.languageList" :key="index" :value="index" @click="method.changeLanguage(item.value)">
