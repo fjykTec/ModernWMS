@@ -50,28 +50,27 @@ namespace ModernWMS.Core.Extentions
                 var cache = new MemoryCache(new MemoryCacheOptions());
                 return cache;
             });
-            var Mysql_connection = configuration.GetConnectionString("MySqlConn");
-            var SqlLite_connection = configuration.GetConnectionString("SqlLiteConn");
-            var SqlServer_connection = configuration.GetConnectionString("SqlServerConn");
-            var Postgre_connection = configuration.GetConnectionString("PostGresConn");
             var database_config = configuration.GetSection("Database")["db"];
             services.AddDbContextPool<SqlDBContext>(t =>
             {
                 if (database_config == "SqlLite")
                 {
+                    var SqlLite_connection = configuration.GetConnectionString("SqlLiteConn");
                     t.UseSqlite(SqlLite_connection, b => b.MigrationsAssembly("ModernWMS"));
                 }
                 else if (database_config == "MySql")
                 {
+                    var Mysql_connection = configuration.GetConnectionString("MySqlConn");
                     t.UseMySql(Mysql_connection, new MySqlServerVersion(new Version(8, 0, 26)));
                 }
-                else if(database_config == "SqlServer")
+                else if (database_config == "SqlServer")
                 {
+                    var SqlServer_connection = configuration.GetConnectionString("SqlServerConn");
                     t.UseSqlServer(SqlServer_connection);
                 }
-
-                else if(database_config == "PostGres")
+                else if (database_config == "PostGres")
                 {
+                    var Postgre_connection = configuration.GetConnectionString("PostGresConn");
                     t.UseNpgsql(Postgre_connection);
                     AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
                     AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
@@ -104,8 +103,8 @@ namespace ModernWMS.Core.Extentions
                   options.DataAnnotationLocalizerProvider = (type, factory) =>
                       factory.Create(typeof(ModernWMS.Core.MultiLanguage));
               }); ;
-
         }
+
         public static void UseExtensionsConfigure(this IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider, IConfiguration configuration)
         {
             if (env.IsDevelopment())
@@ -130,7 +129,9 @@ namespace ModernWMS.Core.Extentions
                 endpoints.MapControllers();
             });
         }
+
         #region Swagger
+
         /// <summary>
         /// Swagger
         /// </summary>
@@ -162,7 +163,6 @@ namespace ModernWMS.Core.Extentions
                         });
                     });
 
-
                     if (settings.XmlFiles != null && settings.XmlFiles.Count > 0)
                     {
                         settings.XmlFiles.ForEach(fileName =>
@@ -178,7 +178,6 @@ namespace ModernWMS.Core.Extentions
                     c.OperationFilter<AppendAuthorizeToSummaryOperationFilter>();
                     c.OperationFilter<SecurityRequirementsOperationFilter>();
 
-
                     c.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
                     {
                         Description = "please input Bearer {token}",
@@ -187,10 +186,10 @@ namespace ModernWMS.Core.Extentions
                         Type = SecuritySchemeType.ApiKey
                     });
                     c.SwaggerGeneratorOptions.DescribeAllParametersInCamelCase = false;
-
                 });
             }
         }
+
         /// <summary>
         /// register Swagger
         /// </summary>
@@ -198,7 +197,6 @@ namespace ModernWMS.Core.Extentions
         /// <param name="configuration">配置文件</param>
         private static void UseSwaggerConfigure(this IApplicationBuilder app, IConfiguration configuration)
         {
-
             var swaggerSettings = configuration.GetSection("SwaggerSettings");
 
             if (swaggerSettings != null && swaggerSettings["Name"].Equals("ModernWMS"))
@@ -214,14 +212,14 @@ namespace ModernWMS.Core.Extentions
 
                     c.IndexStream = () => Assembly.GetExecutingAssembly().GetManifestResourceStream("ModernWMS.Core.Swagger.index.html");
                     c.RoutePrefix = "";
-
                 });
-
             }
         }
-        #endregion
+
+        #endregion Swagger
 
         #region JWT
+
         /// <summary>
         /// register JWT
         /// </summary>
@@ -229,7 +227,6 @@ namespace ModernWMS.Core.Extentions
         /// <param name="configuration">configuration</param>
         private static void AddTokenGeneratorService(this IServiceCollection services, IConfiguration configuration)
         {
-
             if (services == null)
             {
                 throw new ArgumentNullException(nameof(services));
@@ -261,24 +258,23 @@ namespace ModernWMS.Core.Extentions
                 };
             })
             .AddScheme<AuthenticationSchemeOptions, ApiResponseHandler>(nameof(ApiResponseHandler), o => { });
-
         }
 
         private static void UseTokenGeneratorConfigure(this IApplicationBuilder app, IConfiguration configuration)
         {
             app.UseAuthentication();
         }
-        #endregion
 
-        #region  dynamic injection
+        #endregion JWT
+
+        #region dynamic injection
+
         /// <summary>
-        /// judge the dll to be injected by IDependency 
+        /// judge the dll to be injected by IDependency
         /// </summary>
         /// <param name="services">services</param>
         private static IServiceCollection RegisterAssembly(this IServiceCollection services)
         {
-
-
             var path = AppDomain.CurrentDomain.RelativeSearchPath ?? AppDomain.CurrentDomain.BaseDirectory;
             var referencedAssemblies = System.IO.Directory.GetFiles(path, "ModernWMS*.dll").Select(Assembly.LoadFrom).ToArray();
 
@@ -298,8 +294,7 @@ namespace ModernWMS.Core.Extentions
             services.AddScoped<Services.IAccountService, Services.AccountService>();
             return services;
         }
-        #endregion
 
-
+        #endregion dynamic injection
     }
 }
