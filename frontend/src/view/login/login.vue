@@ -19,15 +19,21 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive } from 'vue'
+import { reactive, onMounted } from 'vue'
 import LoginForm from '@/components/login/login-form.vue'
 import LanguagesSwitch from '@/components/system/languages.vue'
 import Logo from '@/components/system/logo.vue'
+import { emitter } from '@/utils/bus.js'
 
 const method = reactive({
   toICP: () => {
     window.open('https://beian.miit.gov.cn/', '_blank')
   }
+})
+
+// 回到登录界面清除状态
+onMounted(() => {
+  emitter.emit('closeLoading')
 })
 </script>
 
@@ -42,7 +48,6 @@ const method = reactive({
   height: 100%;
   display: flex;
   background-color: #fff;
-  position: relative;
   .loginLeft {
     width: 70%;
     display: flex;
