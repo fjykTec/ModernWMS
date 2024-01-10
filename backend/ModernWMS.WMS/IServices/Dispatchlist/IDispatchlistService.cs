@@ -149,7 +149,16 @@ namespace ModernWMS.WMS.IServices
         /// <param name="id">dispatchlist_id</param>
         /// <returns></returns>
         Task<(bool flag, string msg)> CancelDispatchlistDetailOpration(int id);
-         #endregion
-     }
+
+
+        /// <summary>
+        /// Excel Import
+        /// </summary>
+        /// <param name="viewModels">viewModels</param>
+        /// <param name="currentUser">currentUser</param>
+        /// <returns></returns>
+        Task<(bool flag, string msg)> Import(List<DispatchlistImportViewModel> viewModels, CurrentUser currentUser);
+        #endregion
+    }
  }
  

@@ -2,6 +2,7 @@
  * date：2022-12-27
  * developer：NoNo
  */
+
 using Mapster;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -16,6 +17,7 @@ using ModernWMS.WMS.Entities.Models;
 using ModernWMS.WMS.Entities.ViewModels;
 using ModernWMS.WMS.IServices;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ModernWMS.WMS.Services
 {
@@ -25,6 +27,7 @@ namespace ModernWMS.WMS.Services
     public class DispatchlistService : BaseService<DispatchlistEntity>, IDispatchlistService
     {
         #region Args
+
         /// <summary>
         /// The DBContext
         /// </summary>
@@ -34,9 +37,11 @@ namespace ModernWMS.WMS.Services
         /// Localizer Service
         /// </summary>
         private readonly IStringLocalizer<ModernWMS.Core.MultiLanguage> _stringLocalizer;
-        #endregion
+
+        #endregion Args
 
         #region constructor
+
         /// <summary>
         ///Dispatchlist  constructor
         /// </summary>
@@ -50,9 +55,11 @@ namespace ModernWMS.WMS.Services
             this._dBContext = dBContext;
             this._stringLocalizer = stringLocalizer;
         }
-        #endregion
+
+        #endregion constructor
 
         #region Api
+
         /// <summary>
         /// page search
         /// </summary>
@@ -136,6 +143,7 @@ namespace ModernWMS.WMS.Services
             {
                 query = query.Where(t => t.picked_qty == t.qty && (t.dispatch_status.Equals(3) || t.dispatch_status.Equals(4) || t.dispatch_status.Equals(5)));
             }
+        
             int totals = await query.CountAsync();
             var list = await query.OrderByDescending(t => t.create_time)
                        .Skip((pageSearch.pageIndex - 1) * pageSearch.pageSize)
@@ -143,6 +151,7 @@ namespace ModernWMS.WMS.Services
                        .ToListAsync();
             return (list, totals);
         }
+
         /// <summary>
         /// get dispatchlist by dispatch_no
         /// </summary>
@@ -201,6 +210,7 @@ namespace ModernWMS.WMS.Services
                                }).ToListAsync();
             return datas;
         }
+
         /// <summary>
         /// update dispatchlist with same dispatch_no
         /// </summary>
@@ -218,7 +228,7 @@ namespace ModernWMS.WMS.Services
             var skus = await (_dBContext.GetDbSet<SkuEntity>().AsNoTracking().Where(t => sku_id_list.Contains(t.id))).ToListAsync();
             if (entities.Any(t => t.dispatch_status != 1 && t.dispatch_status != 0))
             {
-                return (false, _stringLocalizer["data_changed"]);
+                return (false,"[202]"+ _stringLocalizer["data_changed"]);
             }
             foreach (var vm in viewModels)
             {
@@ -227,7 +237,7 @@ namespace ModernWMS.WMS.Services
                     var entity = entities.FirstOrDefault(t => t.id == -vm.id);
                     if (entity == null)
                     {
-                        return (false, _stringLocalizer["data_changed"]);
+                        return (false, "[202]" + _stringLocalizer["data_changed"]);
                     }
                     DBSet.Remove(entity);
                     delete_id_list.Add(entity.id);
@@ -237,7 +247,7 @@ namespace ModernWMS.WMS.Services
                     var entity = entities.FirstOrDefault(t => t.id == vm.id);
                     if (entity == null)
                     {
-                        return (false, _stringLocalizer["data_changed"]);
+                        return (false, "[202]" + _stringLocalizer["data_changed"]);
                     }
                     entity.sku_id = vm.sku_id;
                     entity.qty = vm.qty;
@@ -261,7 +271,6 @@ namespace ModernWMS.WMS.Services
                         dispatch_status = dispatch_status,
                         sku_id = vm.sku_id,
                         qty = vm.qty
-
                     };
                     var sku = skus.FirstOrDefault(t => t.id == entity.sku_id);
                     if (sku != null)
@@ -291,9 +300,10 @@ namespace ModernWMS.WMS.Services
             }
             else
             {
-                return (false, _stringLocalizer["save_failed"]);
+                return (false, "[202]" + _stringLocalizer["save_failed"]);
             }
         }
+
         /// <summary>
         /// get pick list by dispatch_id
         /// </summary>
@@ -332,7 +342,7 @@ namespace ModernWMS.WMS.Services
         }
 
         /// <summary>
-        /// advanced dispatch order page search 
+        /// advanced dispatch order page search
         /// </summary>
         /// <param name="pageSearch">args</param>
         /// <param name="currentUser">currentUser</param>
@@ -376,12 +386,18 @@ namespace ModernWMS.WMS.Services
                 var dispatch_status = Convert.ToByte(pageSearch.sqlTitle.Trim().ToLower().Replace("dispatch_status", "").Replace("：", "").Replace(":", "").Replace("=", ""));
                 query = query.Where(t => t.dispatch_status.Equals(dispatch_status));
             }
+            else if (pageSearch.sqlTitle.Equals("todo"))
+            {
+                query = query.Where(t => t.dispatch_status >= 2 && t.dispatch_status <= 5);
+            }
             int totals = await query.CountAsync();
             var list = await query.OrderByDescending(t => t.dispatch_no)
                        .Skip((pageSearch.pageIndex - 1) * pageSearch.pageSize)
                        .Take(pageSearch.pageSize)
                        .ToListAsync();
-            #region sqlit cannot sum data of decimal type 
+
+            #region sqlit cannot sum data of decimal type
+
             var dispatch_no_list = list.Select(t => t.dispatch_no).Distinct().ToList();
             var d_datas = await (from d in DbSet.AsNoTracking()
                                  join sku in _dBContext.GetDbSet<SkuEntity>().AsNoTracking() on d.sku_id equals sku.id
@@ -398,9 +414,12 @@ namespace ModernWMS.WMS.Services
                 t.volume = d_datas.Where(d => d.dispatch_no == t.dispatch_no).Sum(t => t.volume);
                 t.weight = d_datas.Where(d => d.dispatch_no == t.dispatch_no).Sum(t => t.weight);
             });
-            #endregion
+
+            #endregion sqlit cannot sum data of decimal type
+
             return (list, totals);
         }
+
         /// <summary>
         /// Get dispatchlist by dispatch_no
         /// </summary>
@@ -455,7 +474,7 @@ namespace ModernWMS.WMS.Services
         }
 
         /// <summary>
-        /// add a new Dispatchlist 
+        /// add a new Dispatchlist
         /// </summary>
         /// <param name="viewModel">viewmodel</param>
         /// <param name="currentUser">current user</param>
@@ -490,7 +509,7 @@ namespace ModernWMS.WMS.Services
             }
             else
             {
-                return (false, _stringLocalizer["save_failed"]);
+                return (false, "[202]" + _stringLocalizer["save_failed"]);
             }
         }
 
@@ -515,7 +534,7 @@ namespace ModernWMS.WMS.Services
             }
             else
             {
-                return (false, _stringLocalizer["delete_failed"]);
+                return (false, "[202]" + _stringLocalizer["delete_failed"]);
             }
         }
 
@@ -685,7 +704,6 @@ namespace ModernWMS.WMS.Services
             }
 
             return res;
-
         }
 
         /// <summary>
@@ -718,7 +736,7 @@ namespace ModernWMS.WMS.Services
                 var d = dispatchlist_datas.Where(t => t.id == vm.dispatchlist_id).FirstOrDefault();
                 if (d == null)
                 {
-                    return (false, _stringLocalizer["data_changed"]);
+                    return (false, "[202]" + _stringLocalizer["data_changed"]);
                 }
                 if (vm.confirm == true)
                 {
@@ -824,7 +842,7 @@ namespace ModernWMS.WMS.Services
                                 select tp).Any();
             if (if_not_stock)
             {
-                return (false, _stringLocalizer["data_changed"]);
+                return (false, "[202]" + _stringLocalizer["data_changed"]);
             }
             await pick_DBSet.AddRangeAsync(pick_datas);
             var dispatch_no = await GetOrderCode(currentUser);
@@ -849,12 +867,12 @@ namespace ModernWMS.WMS.Services
             }
             else
             {
-                return (false, _stringLocalizer["operation_failed"]);
+                return (false, "[202]" + _stringLocalizer["operation_failed"]);
             }
         }
 
         /// <summary>
-        ///  cancel order opration 
+        ///  cancel order opration
         /// </summary>
         /// <param name="viewModel">viewmodel</param>
         /// <param name="currentUser">current user</param>
@@ -866,7 +884,7 @@ namespace ModernWMS.WMS.Services
             var entities = await DBSet.Where(t => t.dispatch_no == viewModel.dispatch_no && t.tenant_id == currentUser.tenant_id && t.dispatch_status == viewModel.dispatch_status).ToListAsync();
             if (entities.Count == 0)
             {
-                return (false, _stringLocalizer["status_changed"]);
+                return (false, "[202]" + _stringLocalizer["status_changed"]);
             }
             var time = DateTime.Now;
             var dispatch_id_list = entities.Select(t => t.id).ToList();
@@ -914,7 +932,7 @@ namespace ModernWMS.WMS.Services
                             var proposedValues = entry.CurrentValues;
                             var databaseValues = entry.GetDatabaseValues();
                             if (UtilConvert.ObjToInt(databaseValues["dispatch_status"]) != viewModel.dispatch_status)
-                                return (false, _stringLocalizer["data_changed"]);
+                                return (false, "[202]" + _stringLocalizer["data_changed"]);
                             // Refresh original values to bypass next concurrency check
                             entry.OriginalValues.SetValues(databaseValues);
                         }
@@ -931,7 +949,7 @@ namespace ModernWMS.WMS.Services
             }
             else
             {
-                return (false, _stringLocalizer["operation_failed"]);
+                return (false, "[202]" + _stringLocalizer["operation_failed"]);
             }
         }
 
@@ -947,7 +965,7 @@ namespace ModernWMS.WMS.Services
             var time = DateTime.Now;
             if (entity == null)
             {
-                return (false, _stringLocalizer["not_exists_entity"]);
+                return (false, "[202]" + _stringLocalizer["not_exists_entity"]);
             }
             if (entity.dispatch_status == 4)
             {
@@ -981,7 +999,7 @@ namespace ModernWMS.WMS.Services
             }
             else
             {
-                return (false, _stringLocalizer["status_changed"]);
+                return (false, "[202]" + _stringLocalizer["status_changed"]);
             }
             entity.last_update_time = time;
             var qty = await _dBContext.SaveChangesAsync();
@@ -991,7 +1009,7 @@ namespace ModernWMS.WMS.Services
             }
             else
             {
-                return (false, _stringLocalizer["operation_failed"]);
+                return (false, "[202]" + _stringLocalizer["operation_failed"]);
             }
         }
 
@@ -1026,7 +1044,7 @@ namespace ModernWMS.WMS.Services
             }
             else
             {
-                return (false, _stringLocalizer["operation_failed"]);
+                return (false, "[202]" + _stringLocalizer["operation_failed"]);
             }
         }
 
@@ -1049,11 +1067,11 @@ namespace ModernWMS.WMS.Services
                 var entity = entities.FirstOrDefault(t => t.id == vm.id && t.dispatch_status == vm.dispatch_status);
                 if (entity == null)
                 {
-                    return (false, _stringLocalizer["data_changed"]);
+                    return (false, "[202]" + _stringLocalizer["data_changed"]);
                 }
                 if ((entity.package_qty + vm.package_qty) > entity.picked_qty)
                 {
-                    return (false, _stringLocalizer["unpackgeqty_lessthen"]);
+                    return (false, "[202]" + _stringLocalizer["unpackgeqty_lessthen"]);
                 }
                 entity.last_update_time = time;
                 entity.package_person = currentUser.user_name;
@@ -1083,11 +1101,11 @@ namespace ModernWMS.WMS.Services
                             var t_vm = viewModels.FirstOrDefault(t => t.id == UtilConvert.ObjToInt(databaseValues["id"]));
                             if (t_vm == null)
                             {
-                                return (false, _stringLocalizer["data_changed"]);
+                                return (false, "[202]" + _stringLocalizer["data_changed"]);
                             }
                             if (UtilConvert.ObjToInt(databaseValues["package_qty"]) + t_vm.package_qty > t_vm.picked_qty)
                             {
-                                return (false, _stringLocalizer["data_changed"]);
+                                return (false, "[202]" + _stringLocalizer["data_changed"]);
                             }
                             else
                             {
@@ -1114,7 +1132,7 @@ namespace ModernWMS.WMS.Services
             }
             else
             {
-                return (false, _stringLocalizer["operation_failed"]);
+                return (false,"[202]"+ _stringLocalizer["operation_failed"]);
             }
         }
 
@@ -1137,11 +1155,11 @@ namespace ModernWMS.WMS.Services
                 var entity = entities.FirstOrDefault(t => t.id == vm.id && t.dispatch_status == vm.dispatch_status);
                 if (entity == null)
                 {
-                    return (false, _stringLocalizer["data_changed"]);
+                    return (false, "[202]" + _stringLocalizer["data_changed"]);
                 }
                 if ((entity.weighing_qty + vm.weighing_qty) > entity.picked_qty)
                 {
-                    return (false, _stringLocalizer["unweightqty_lessthen"]);
+                    return (false, "[202]" + _stringLocalizer["unweightqty_lessthen"]);
                 }
                 entity.last_update_time = time;
                 entity.weighing_person = currentUser.user_name;
@@ -1172,11 +1190,11 @@ namespace ModernWMS.WMS.Services
                             var t_vm = viewModels.FirstOrDefault(t => t.id == UtilConvert.ObjToInt(databaseValues["id"]));
                             if (t_vm == null)
                             {
-                                return (false, _stringLocalizer["data_changed"]);
+                                return (false, "[202]" + _stringLocalizer["data_changed"]);
                             }
                             if (UtilConvert.ObjToInt(databaseValues["weighing_qty"]) + t_vm.weighing_qty > t_vm.picked_qty)
                             {
-                                return (false, _stringLocalizer["data_changed"]);
+                                return (false, "[202]" + _stringLocalizer["data_changed"]);
                             }
                             else
                             {
@@ -1204,7 +1222,7 @@ namespace ModernWMS.WMS.Services
             }
             else
             {
-                return (false, _stringLocalizer["operation_failed"]);
+                return (false, "[202]" + _stringLocalizer["operation_failed"]);
             }
         }
 
@@ -1227,7 +1245,7 @@ namespace ModernWMS.WMS.Services
             {
                 if (entity.dispatch_status != 3 && entity.dispatch_status != 4 && entity.dispatch_status != 5)
                 {
-                    return (false, _stringLocalizer["data_changed"]);
+                    return (false, "[202]" + _stringLocalizer["data_changed"]);
                 }
                 entity.last_update_time = time;
                 entity.dispatch_status = 6;
@@ -1240,14 +1258,14 @@ namespace ModernWMS.WMS.Services
             var picks_g = pick_sql.AsNoTracking().GroupBy(e => new { e.goods_location_id, e.sku_id, e.goods_owner_id }).Select(c => new { c.Key.goods_location_id, c.Key.sku_id, c.Key.goods_owner_id, picked_qty = c.Sum(t => t.picked_qty) });
             var picks = await picks_g.ToListAsync();
             var stocks = await (from stock in stock_DBSet
-                                where picks_g.Any(t => t.goods_location_id == stock.goods_location_id && t.sku_id == stock.sku_id && t.goods_owner_id == stock.goods_owner_id)
+                                where pick_sql.Any(t => t.goods_location_id == stock.goods_location_id && t.sku_id == stock.sku_id && t.goods_owner_id == stock.goods_owner_id)
                                 select stock).ToListAsync();
             foreach (var pick in picks)
             {
                 var s = stocks.FirstOrDefault(t => t.goods_location_id == pick.goods_location_id && t.sku_id == pick.sku_id && t.goods_owner_id == pick.goods_owner_id);
                 if (s == null)
                 {
-                    return (false, _stringLocalizer["data_changed"]);
+                    return (false, "[202]" + _stringLocalizer["data_changed"]);
                 }
                 s.qty -= pick.picked_qty;
                 s.last_update_time = time;
@@ -1258,6 +1276,7 @@ namespace ModernWMS.WMS.Services
                 pick.is_update_stock = true;
                 pick.last_update_time = DateTime.Now;
             }
+            pick_DBSet.UpdateRange(pick_datas);
             var saved = false;
             int res = 0;
             while (!saved)
@@ -1278,7 +1297,7 @@ namespace ModernWMS.WMS.Services
                             var databaseValues = entry.GetDatabaseValues();
                             if (UtilConvert.ObjToInt(databaseValues["dispatch_status"]) != 3 && UtilConvert.ObjToInt(databaseValues["dispatch_status"]) != 4 && UtilConvert.ObjToInt(databaseValues["dispatch_status"]) != 5)
                             {
-                                return (false, _stringLocalizer["data_changed"]);
+                                return (false, "[202]" + _stringLocalizer["data_changed"]);
                             }
                             proposedValues["last_update_time"] = DateTime.Now;
                         }
@@ -1289,7 +1308,7 @@ namespace ModernWMS.WMS.Services
                             var t_p = picks.FirstOrDefault(t => t.goods_location_id == UtilConvert.ObjToInt(databaseValues["goods_location_id"]) && t.sku_id == UtilConvert.ObjToInt(databaseValues["sku_id"]) && t.goods_owner_id == UtilConvert.ObjToInt(databaseValues["goods_owner_id"]));
                             if (t_p == null)
                             {
-                                return (false, _stringLocalizer["data_changed"]);
+                                return (false, "[202]" + _stringLocalizer["data_changed"]);
                             }
                             proposedValues["qty"] = UtilConvert.ObjToInt(databaseValues["qty"]) - t_p.picked_qty;
                             proposedValues["last_update_time"] = DateTime.Now;
@@ -1309,9 +1328,10 @@ namespace ModernWMS.WMS.Services
             }
             else
             {
-                return (false, _stringLocalizer["operation_failed"]);
+                return (false, "[202]" + _stringLocalizer["operation_failed"]);
             }
         }
+
         /// <summary>
         ///  set dispatchlist freightfee
         /// </summary>
@@ -1354,9 +1374,10 @@ namespace ModernWMS.WMS.Services
             }
             else
             {
-                return (false, _stringLocalizer["operation_failed"]);
+                return (false, "[202]" + _stringLocalizer["operation_failed"]);
             }
         }
+
         /// <summary>
         /// sign for arrival
         /// </summary>
@@ -1372,7 +1393,7 @@ namespace ModernWMS.WMS.Services
                 var vm = viewModels.FirstOrDefault(t => t.id == t.id && t.dispatch_status == entity.dispatch_status);
                 if (vm == null)
                 {
-                    return (false, _stringLocalizer["data_changed"]);
+                    return (false, "[202]" + _stringLocalizer["data_changed"]);
                 }
                 entity.sign_qty = entity.actual_qty - vm.damage_qty;
                 entity.damage_qty = vm.damage_qty;
@@ -1386,9 +1407,10 @@ namespace ModernWMS.WMS.Services
             }
             else
             {
-                return (false, _stringLocalizer["operation_failed"]);
+                return (false, "[202]" + _stringLocalizer["operation_failed"]);
             }
         }
+
         /// <summary>
         /// get next order code number
         /// </summary>
@@ -1432,7 +1454,106 @@ namespace ModernWMS.WMS.Services
             long timeStamp = Convert.ToInt32(DateTime.Now.Subtract(_dtStart).TotalSeconds);
             return date + timeStamp.ToString();
         }
-        #endregion
+        /// <summary>
+        /// Excel Import
+        /// </summary>
+        /// <param name="viewModels">viewModels</param>
+        /// <param name="currentUser">currentUser</param>
+        /// <returns></returns>
+        public async Task<(bool flag, string msg)> Import(List<DispatchlistImportViewModel> viewModels, CurrentUser currentUser)
+        {
+            var DbSet = _dBContext.GetDbSet<DispatchlistEntity>();
+            var import_sku_code = viewModels.Select(e => e.sku_code).ToList();
+            var import_customer_name = viewModels.Select(e => e.customer_name).ToList();
+            var sku_list = await (from sku in _dBContext.GetDbSet<SkuEntity>()
+                                  join spu in _dBContext.GetDbSet<SpuEntity>() on sku.spu_id equals spu.id
+                                  where spu.tenant_id == currentUser.tenant_id && import_sku_code.Contains(sku.sku_code)
+                                  select sku).ToListAsync();
+            var customer_list = await _dBContext.GetDbSet<CustomerEntity>().Where(t => t.tenant_id == currentUser.tenant_id && import_customer_name.Contains(t.customer_name)).ToListAsync();
+            var entities = new List<DispatchlistEntity>();
+            var groups = viewModels.Select(t => t.import_group).Distinct().ToList();
+            var groups_code = await GetOrderCodeList(currentUser, groups.Count());
+            var group_code_dic = new Dictionary<int, string>();
+            for (int i = 0; i < groups.Count(); i++)
+            {
+                group_code_dic.Add(groups[i], groups_code[i]);
+            }
+            foreach (var vm in viewModels)
+            {
+                var customer = customer_list.FirstOrDefault(t => t.customer_name == vm.customer_name);
+                if (customer == null)
+                {
+                    return (false, _stringLocalizer["customer_name"] + ":" + vm.customer_name + " " + _stringLocalizer["not_exists_entity"]);
+                }
+                var sku = sku_list.FirstOrDefault(t => t.sku_code == vm.sku_code);
+                if (sku == null)
+                {
+                    return (false, _stringLocalizer["sku_name"] + ":" + vm.sku_name + "-" + _stringLocalizer["sku_code"] + ":" + vm.sku_code + " " + _stringLocalizer["not_exists_entity"]);
+                }
+                entities.Add(new DispatchlistEntity
+                {
+                    customer_id = customer.id,
+                    customer_name = vm.customer_name,
+                    sku_id = sku.id,
+                    qty = vm.qty,
+                    creator = currentUser.user_name,
+                    create_time = DateTime.Now,
+                    last_update_time = DateTime.Now,
+                    tenant_id = currentUser.tenant_id,
+                    dispatch_no = group_code_dic[vm.import_group],
+                });
+            }
+            await DbSet.AddRangeAsync(entities);
+            var qty = await _dBContext.SaveChangesAsync();
+            if (qty > 0)
+            {
+                return (true, _stringLocalizer["save_success"]);
+            }
+            else
+            {
+                return (false, _stringLocalizer["save_failed"]);
+            }
+        }
+
+        /// <summary>
+        /// get next order code number
+        /// </summary>
+        /// <returns></returns>
+        public async Task<List<string>> GetOrderCodeList(CurrentUser currentUser, int cnt)
+        {
+            List<string> code = new List<string>();
+            string date = DateTime.Now.ToString("yyyy" + "MM" + "dd");
+            string maxNo = await _dBContext.GetDbSet<DispatchlistEntity>().Where(t => t.tenant_id == currentUser.tenant_id).MaxAsync(t => t.dispatch_no);
+            if (maxNo == null)
+            {
+                for (int i = 1; i <= cnt; i++)
+                {
+                    code.Add(date + "-" + i.ToString("0000"));
+                }
+            }
+            else
+            {
+                string maxDate = maxNo.Substring(0, 8);
+                string maxDateNo = maxNo.Substring(9, 4);
+                if (date == maxDate)
+                {
+                    int.TryParse(maxDateNo, out int dd);
+                    for (int i = 1; i <= cnt; i++)
+                    {
+                        code.Add(date + "-" + (dd + i).ToString("0000"));
+                    }
+                }
+                else
+                {
+                    for (int i = 1; i <= cnt; i++)
+                    {
+                        code.Add(date + "-" + i.ToString("0000"));
+                    }
+                }
+            }
+
+            return code;
+        }
+        #endregion Api
     }
 }
-

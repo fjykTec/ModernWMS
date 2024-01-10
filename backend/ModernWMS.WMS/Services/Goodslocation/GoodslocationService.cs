@@ -212,12 +212,12 @@
          /// <returns></returns>
          public async Task<(bool flag, string msg)> DeleteAsync(int id)
          {
-            var exist_stock = await _dBContext.GetDbSet<StockEntity>().AsNoTracking().Where(t => t.qty > 0 && t.goods_location_id == id).AnyAsync();
+             var exist_stock =await  _dBContext.GetDbSet<StockEntity>().AsNoTracking().Where(t=>t.qty>0&&t.goods_location_id == id ).AnyAsync();
             if (exist_stock)
             {
                 return (false, _stringLocalizer["location_exist_stock_not_delete"]);
             }
-            var qty = await _dBContext.GetDbSet<GoodslocationEntity>().Where(t => t.id.Equals(id)).ExecuteDeleteAsync();
+             var qty = await _dBContext.GetDbSet<GoodslocationEntity>().Where(t => t.id.Equals(id)).ExecuteDeleteAsync();
              if (qty > 0)
              {
                  return (true, _stringLocalizer["delete_success"]);

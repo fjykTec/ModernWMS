@@ -116,12 +116,29 @@ namespace ModernWMS.WMS.IServices
         Task<(bool flag, string msg)> SortedCancelAsync(int id);
 
         /// <summary>
+        /// get pending putaway data by asn_id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        Task<List<AsnPendingPutawayViewModel>> GetPendingPutawayDataAsync(int id);
+
+        /// <summary>
         /// PutAway
         /// </summary>
         /// <param name="viewModel">args</param>
         /// <param name="currentUser">currentUser</param>
         /// <returns></returns>
         Task<(bool flag, string msg)> PutAwayAsync(AsnPutAwayInputViewModel viewModel, CurrentUser currentUser);
+        #endregion
+
+        #region excel import
+        /// <summary>
+        /// excel import
+        /// </summary>
+        /// <param name="excelData">excel data</param>
+        /// <param name="currentUser">current user</param>
+        /// <returns></returns>
+        Task<(bool flag, string msg, List<AsnExcelImportViewModel> errList)> ImportAsync(List<AsnExcelImportViewModel> excelData, CurrentUser currentUser);
         #endregion
     }
 }

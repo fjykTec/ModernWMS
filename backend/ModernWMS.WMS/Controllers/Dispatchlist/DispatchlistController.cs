@@ -336,6 +336,24 @@ namespace ModernWMS.WMS.Controllers
             }
         }
 
+        /// <summary>
+        /// Excel Import
+        /// </summary>
+        /// <param name="viewModels">viewModels</param>
+        /// <returns></returns>
+        [HttpPost("import")]
+        public async Task<ResultModel<string>> Import(List<DispatchlistImportViewModel> viewModels)
+        {
+            var (flag, msg) = await _dispatchlistService.Import(viewModels, CurrentUser);
+            if (flag)
+            {
+                return ResultModel<string>.Success(msg);
+            }
+            else
+            {
+                return ResultModel<string>.Error(msg);
+            }
+        }
         #endregion
 
     }

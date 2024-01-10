@@ -2,6 +2,7 @@
  * date：2022-12-20
  * developer：NoNo
  */
+
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using ModernWMS.Core.DBContext;
@@ -26,6 +27,7 @@ namespace ModernWMS.WMS.Services
     public class UserService : BaseService<userEntity>, IUserService
     {
         #region Args
+
         /// <summary>
         /// The DBContext
         /// </summary>
@@ -35,9 +37,11 @@ namespace ModernWMS.WMS.Services
         /// Localizer Service
         /// </summary>
         private readonly IStringLocalizer<ModernWMS.Core.MultiLanguage> _stringLocalizer;
-        #endregion
+
+        #endregion Args
 
         #region constructor
+
         /// <summary>
         ///User  constructor
         /// </summary>
@@ -51,9 +55,11 @@ namespace ModernWMS.WMS.Services
             this._dBContext = dBContext;
             this._stringLocalizer = stringLocalizer;
         }
-        #endregion
+
+        #endregion constructor
 
         #region Api
+
         /// <summary>
         /// get select items
         /// </summary>
@@ -106,6 +112,7 @@ namespace ModernWMS.WMS.Services
                        .ToListAsync();
             return (list.Adapt<List<UserViewModel>>(), totals);
         }
+
         /// <summary>
         /// Get all records
         /// </summary>
@@ -113,7 +120,7 @@ namespace ModernWMS.WMS.Services
         public async Task<List<UserViewModel>> GetAllAsync(CurrentUser currentUser)
         {
             var DbSet = _dBContext.GetDbSet<userEntity>();
-            var data = await DbSet.AsNoTracking().Where(t=>t.tenant_id == currentUser.tenant_id).ToListAsync();
+            var data = await DbSet.AsNoTracking().Where(t => t.tenant_id == currentUser.tenant_id).ToListAsync();
             return data.Adapt<List<UserViewModel>>();
         }
 
@@ -131,6 +138,7 @@ namespace ModernWMS.WMS.Services
             }
             return entity.Adapt<UserViewModel>();
         }
+
         /// <summary>
         /// add a new record
         /// </summary>
@@ -146,7 +154,8 @@ namespace ModernWMS.WMS.Services
             }
             var entity = viewModel.Adapt<userEntity>();
             entity.id = 0;
-            entity.auth_string = Md5Helper.Md5Encrypt32("pwd123456");
+            var new_auth = GetRandomPassword();
+            entity.auth_string = Md5Helper.Md5Encrypt32(new_auth);
             entity.create_time = DateTime.Now;
             entity.last_update_time = DateTime.Now;
             entity.tenant_id = currentUser.tenant_id;
@@ -154,13 +163,14 @@ namespace ModernWMS.WMS.Services
             await _dBContext.SaveChangesAsync();
             if (entity.id > 0)
             {
-                return (entity.id, _stringLocalizer["save_success"]);
+                return (entity.id, new_auth);
             }
             else
             {
                 return (0, _stringLocalizer["save_failed"]);
             }
         }
+
         /// <summary>
         /// update a record
         /// </summary>
@@ -197,6 +207,7 @@ namespace ModernWMS.WMS.Services
                 return (false, _stringLocalizer["save_failed"]);
             }
         }
+
         /// <summary>
         /// delete a record
         /// </summary>
@@ -214,27 +225,28 @@ namespace ModernWMS.WMS.Services
                 return (false, _stringLocalizer["delete_failed"]);
             }
         }
+
         /// <summary>
         /// import users by excel
         /// </summary>
         /// <param name="datas">excel datas</param>
         /// <param name="currentUser">current user</param>
         /// <returns></returns>
-        public async Task<(bool flag,string msg)>ExcelAsync(List<UserExcelImportViewModel> datas,CurrentUser currentUser)
+        public async Task<(bool flag, string msg)> ExcelAsync(List<UserExcelImportViewModel> datas, CurrentUser currentUser)
         {
             StringBuilder sb = new StringBuilder();
             var DbSet = _dBContext.GetDbSet<userEntity>();
-            var user_num_repeat_excel =  datas.GroupBy(t => t.user_num).Select(t=>new { user_num= t.Key,cnt = t.Count()}).Where(t=>t.cnt>1).ToList();
-            foreach(var repeat in user_num_repeat_excel)
+            var user_num_repeat_excel = datas.GroupBy(t => t.user_num).Select(t => new { user_num = t.Key, cnt = t.Count() }).Where(t => t.cnt > 1).ToList();
+            foreach (var repeat in user_num_repeat_excel)
             {
                 sb.AppendLine(string.Format(_stringLocalizer["exists_entity"], _stringLocalizer["user_num"], repeat.user_num));
             }
             if (user_num_repeat_excel.Count > 0)
             {
-                return (false,sb.ToString());
+                return (false, sb.ToString());
             }
 
-            var user_num_repeat_exists =await DbSet.Where(t=>t.tenant_id == currentUser.tenant_id).Where(t => datas.Select(t => t.user_num).ToList().Contains(t.user_num)).Select(t=>t.user_num).ToListAsync();
+            var user_num_repeat_exists = await DbSet.Where(t => t.tenant_id == currentUser.tenant_id).Where(t => datas.Select(t => t.user_num).ToList().Contains(t.user_num)).Select(t => t.user_num).ToListAsync();
             foreach (var repeat in user_num_repeat_exists)
             {
                 sb.AppendLine(string.Format(_stringLocalizer["exists_entity"], _stringLocalizer["user_num"], repeat));
@@ -245,14 +257,15 @@ namespace ModernWMS.WMS.Services
             }
 
             var entities = datas.Adapt<List<userEntity>>();
-            entities.ForEach(t => {
+            entities.ForEach(t =>
+            {
                 t.creator = currentUser.user_name;
-                t.tenant_id= currentUser.tenant_id;
+                t.tenant_id = currentUser.tenant_id;
                 t.auth_string = Md5Helper.Md5Encrypt32("pwd123456");
                 t.create_time = DateTime.Now;
-                t.last_update_time= DateTime.Now;
+                t.last_update_time = DateTime.Now;
                 t.is_valid = true;
-                });
+            });
             await DbSet.AddRangeAsync(entities);
             var res = await _dBContext.SaveChangesAsync();
             if (res > 0)
@@ -267,18 +280,18 @@ namespace ModernWMS.WMS.Services
         /// </summary>
         /// <param name="viewModel">viewmodel</param>
         /// <returns></returns>
-        public async Task<(bool,string)> ResetPwd(BatchOperationViewModel viewModel)
+        public async Task<(bool, string)> ResetPwd(BatchOperationViewModel viewModel)
         {
             var DBSet = _dBContext.GetDbSet<userEntity>();
-            var entities =await DBSet.Where(t => viewModel.id_list.Contains(t.id)).ToListAsync();
+            var entities = await DBSet.Where(t => viewModel.id_list.Contains(t.id)).ToListAsync();
             var newpassword = GetRandomPassword();
             entities.ForEach(t => { t.auth_string = Md5Helper.Md5Encrypt32(newpassword); t.last_update_time = DateTime.Now; });
-            var res = await  _dBContext.SaveChangesAsync();
+            var res = await _dBContext.SaveChangesAsync();
             if (res > 0)
             {
                 return (true, newpassword);
             }
-            return (false,_stringLocalizer["operation_failed"]);
+            return (false, _stringLocalizer["operation_failed"]);
         }
 
         /// <summary>
@@ -286,21 +299,23 @@ namespace ModernWMS.WMS.Services
         /// </summary>
         /// <param name="viewModel">viewmodel</param>
         /// <returns></returns>
-        public async Task<(bool flag,string msg)> ChangePwd(UserChangePwdViewModel viewModel)
+        public async Task<(bool flag, string msg)> ChangePwd(UserChangePwdViewModel viewModel)
         {
             var DBSet = _dBContext.GetDbSet<userEntity>();
-            var entity =await DBSet.FirstOrDefaultAsync(t => t.id.Equals(viewModel.id));
-            if(entity == null)
+            var entity = await DBSet.FirstOrDefaultAsync(t => t.id.Equals(viewModel.id));
+            if (entity == null)
             {
                 return (false, _stringLocalizer["not_exists_entity"]);
             }
-            if (!entity.auth_string.Equals(viewModel.old_password)){
-                return(false, _stringLocalizer["old_password"] + _stringLocalizer["is_incorrect"]);
+            if (!entity.auth_string.Equals(viewModel.old_password))
+            {
+                return (false, _stringLocalizer["old_password"] + _stringLocalizer["is_incorrect"]);
             }
             entity.auth_string = viewModel.new_password;
             await _dBContext.SaveChangesAsync();
             return (true, _stringLocalizer["save_success"]);
         }
+
         /// <summary>
         /// register a new tenant
         /// </summary>
@@ -329,7 +344,9 @@ namespace ModernWMS.WMS.Services
             if (entity.id > 0)
             {
                 var tenant_id = entity.id;
+
                 #region menus
+
                 var menus = new List<MenuEntity>
                 {
                     new MenuEntity
@@ -512,15 +529,17 @@ namespace ModernWMS.WMS.Services
                         tenant_id = tenant_id
                     }
                 };
-                #endregion
+
+                #endregion menus
+
                 entity.tenant_id = tenant_id;
                 entity.creator = entity.user_name;
                 entity.user_role = "admin";
-                var adminrole = new UserroleEntity {is_valid = true, last_update_time = time, create_time = time, role_name = "admin", tenant_id = tenant_id };
+                var adminrole = new UserroleEntity { is_valid = true, last_update_time = time, create_time = time, role_name = "admin", tenant_id = tenant_id };
                 await _dBContext.GetDbSet<UserroleEntity>().AddAsync(adminrole);
                 await _dBContext.GetDbSet<MenuEntity>().AddRangeAsync(menus);
                 await _dBContext.SaveChangesAsync();
-                foreach(var menu in menus)
+                foreach (var menu in menus)
                 {
                     await _dBContext.GetDbSet<RolemenuEntity>().AddAsync(new RolemenuEntity
                     {
@@ -528,7 +547,7 @@ namespace ModernWMS.WMS.Services
                         authority = 1,
                         menu_id = menu.id,
                         tenant_id = tenant_id,
-                        last_update_time=time,
+                        last_update_time = time,
                         create_time = time,
                     });
                 }
@@ -559,7 +578,6 @@ namespace ModernWMS.WMS.Services
             return password;
         }
 
-        #endregion
+        #endregion Api
     }
 }
-

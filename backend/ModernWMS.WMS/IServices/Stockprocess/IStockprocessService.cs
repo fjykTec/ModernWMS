@@ -70,6 +70,12 @@
         /// <param name="currentUser">current user</param>
         /// <returns></returns>
         Task<(bool flag, string msg)> ConfirmAdjustment(int id, CurrentUser currentUser);
+
+        /// <summary>
+        /// Excel Import
+        /// </summary>
+        /// <returns></returns>
+        Task<(bool flag, string msg)> Import(List<StockprocessImportViewModel> viewModels, CurrentUser currentUser);
          #endregion
      }
  }

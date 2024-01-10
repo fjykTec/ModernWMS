@@ -2,6 +2,7 @@
  * date：2022-12-20
  * developer：NoNo
  */
+
 using Microsoft.AspNetCore.Mvc;
 using ModernWMS.Core.Controller;
 using ModernWMS.Core.Models;
@@ -31,9 +32,11 @@ namespace ModernWMS.WMS.Controllers
         /// Localizer Service
         /// </summary>
         private readonly IStringLocalizer<ModernWMS.Core.MultiLanguage> _stringLocalizer;
-        #endregion
+
+        #endregion Args
 
         #region constructor
+
         /// <summary>
         /// constructor
         /// </summary>
@@ -47,9 +50,11 @@ namespace ModernWMS.WMS.Controllers
             this._userService = userService;
             this._stringLocalizer = stringLocalizer;
         }
-        #endregion
+
+        #endregion constructor
 
         #region Api
+
         /// <summary>
         /// get select items
         /// </summary>
@@ -60,6 +65,7 @@ namespace ModernWMS.WMS.Controllers
             var datas = await _userService.GetSelectItemsAsnyc(CurrentUser);
             return ResultModel<List<FormSelectItem>>.Success(datas);
         }
+
         /// <summary>
         /// page search
         /// </summary>
@@ -112,6 +118,7 @@ namespace ModernWMS.WMS.Controllers
                 return ResultModel<UserViewModel>.Error(_stringLocalizer["not_exists_entity"]);
             }
         }
+
         /// <summary>
         /// add a new record
         /// </summary>
@@ -124,13 +131,14 @@ namespace ModernWMS.WMS.Controllers
             var (id, msg) = await _userService.AddAsync(viewModel, CurrentUser);
             if (id > 0)
             {
-                return ResultModel<int>.Success(id);
+                return ResultModel<int>.Success(id, msg);
             }
             else
             {
                 return ResultModel<int>.Error(msg);
             }
         }
+
         /// <summary>
         /// register a new tenant
         /// </summary>
@@ -150,6 +158,7 @@ namespace ModernWMS.WMS.Controllers
                 return ResultModel<string>.Error(msg);
             }
         }
+
         /// <summary>
         /// import users by excel
         /// </summary>
@@ -168,6 +177,7 @@ namespace ModernWMS.WMS.Controllers
                 return ResultModel<string>.Error(msg);
             }
         }
+
         /// <summary>
         /// update a record
         /// </summary>
@@ -205,6 +215,7 @@ namespace ModernWMS.WMS.Controllers
                 return ResultModel<string>.Error(msg);
             }
         }
+
         /// <summary>
         /// reset password
         /// </summary>
@@ -223,6 +234,7 @@ namespace ModernWMS.WMS.Controllers
                 return ResultModel<string>.Error(msg);
             }
         }
+
         /// <summary>
         /// change password
         /// </summary>
@@ -241,8 +253,7 @@ namespace ModernWMS.WMS.Controllers
                 return ResultModel<string>.Error(msg);
             }
         }
-        #endregion
 
+        #endregion Api
     }
 }
-

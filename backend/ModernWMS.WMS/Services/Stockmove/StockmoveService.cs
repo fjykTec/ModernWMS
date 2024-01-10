@@ -2,6 +2,7 @@
  * date：2022-12-27
  * developer：NoNo
  */
+
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using ModernWMS.Core.DBContext;
@@ -26,6 +27,7 @@ namespace ModernWMS.WMS.Services
     public class StockmoveService : BaseService<StockmoveEntity>, IStockmoveService
     {
         #region Args
+
         /// <summary>
         /// The DBContext
         /// </summary>
@@ -35,9 +37,11 @@ namespace ModernWMS.WMS.Services
         /// Localizer Service
         /// </summary>
         private readonly IStringLocalizer<ModernWMS.Core.MultiLanguage> _stringLocalizer;
-        #endregion
+
+        #endregion Args
 
         #region constructor
+
         /// <summary>
         ///Stockmove  constructor
         /// </summary>
@@ -51,9 +55,11 @@ namespace ModernWMS.WMS.Services
             this._dBContext = dBContext;
             this._stringLocalizer = stringLocalizer;
         }
-        #endregion
+
+        #endregion constructor
 
         #region Api
+
         /// <summary>
         /// page search
         /// </summary>
@@ -120,36 +126,36 @@ namespace ModernWMS.WMS.Services
         {
             var DbSet = _dBContext.GetDbSet<StockmoveEntity>();
             var location_DBSet = _dBContext.GetDbSet<GoodslocationEntity>().AsNoTracking();
-            var data = await(from m in DbSet.AsNoTracking().Where(t => t.tenant_id.Equals(currentUser.tenant_id))
-                        join sku in _dBContext.GetDbSet<SkuEntity>().AsNoTracking() on m.sku_id equals sku.id
-                        join spu in _dBContext.GetDbSet<SpuEntity>().AsNoTracking() on sku.spu_id equals spu.id
-                        join orig_location in location_DBSet on m.orig_goods_location_id equals orig_location.id
-                        join dest_location in location_DBSet on m.dest_googs_location_id equals dest_location.id
-                        select new StockmoveViewModel
-                        {
-                            id = m.id,
-                            job_code = m.job_code,
-                            move_status = m.move_status,
-                            sku_id = m.sku_id,
-                            orig_goods_location_id = m.orig_goods_location_id,
-                            dest_googs_location_id = m.dest_googs_location_id,
-                            qty = m.qty,
-                            goods_owner_id = m.goods_owner_id,
-                            handler = m.handler,
-                            handle_time = m.handle_time,
-                            creator = m.creator,
-                            create_time = m.create_time,
-                            last_update_time = m.last_update_time,
-                            tenant_id = m.tenant_id,
-                            sku_code = sku.sku_code,
-                            sku_name = sku.sku_name,
-                            spu_code = spu.spu_code,
-                            spu_name = spu.spu_name,
-                            dest_googs_location_name = dest_location.location_name,
-                            dest_googs_warehouse = dest_location.warehouse_name,
-                            orig_goods_location_name = orig_location.location_name,
-                            orig_goods_warehouse = orig_location.warehouse_name,
-                        }
+            var data = await (from m in DbSet.AsNoTracking().Where(t => t.tenant_id.Equals(currentUser.tenant_id))
+                              join sku in _dBContext.GetDbSet<SkuEntity>().AsNoTracking() on m.sku_id equals sku.id
+                              join spu in _dBContext.GetDbSet<SpuEntity>().AsNoTracking() on sku.spu_id equals spu.id
+                              join orig_location in location_DBSet on m.orig_goods_location_id equals orig_location.id
+                              join dest_location in location_DBSet on m.dest_googs_location_id equals dest_location.id
+                              select new StockmoveViewModel
+                              {
+                                  id = m.id,
+                                  job_code = m.job_code,
+                                  move_status = m.move_status,
+                                  sku_id = m.sku_id,
+                                  orig_goods_location_id = m.orig_goods_location_id,
+                                  dest_googs_location_id = m.dest_googs_location_id,
+                                  qty = m.qty,
+                                  goods_owner_id = m.goods_owner_id,
+                                  handler = m.handler,
+                                  handle_time = m.handle_time,
+                                  creator = m.creator,
+                                  create_time = m.create_time,
+                                  last_update_time = m.last_update_time,
+                                  tenant_id = m.tenant_id,
+                                  sku_code = sku.sku_code,
+                                  sku_name = sku.sku_name,
+                                  spu_code = spu.spu_code,
+                                  spu_name = spu.spu_name,
+                                  dest_googs_location_name = dest_location.location_name,
+                                  dest_googs_warehouse = dest_location.warehouse_name,
+                                  orig_goods_location_name = orig_location.location_name,
+                                  orig_goods_warehouse = orig_location.warehouse_name,
+                              }
             ).ToListAsync();
             return data.Adapt<List<StockmoveViewModel>>();
         }
@@ -163,42 +169,43 @@ namespace ModernWMS.WMS.Services
             var DbSet = _dBContext.GetDbSet<StockmoveEntity>();
             var location_DBSet = _dBContext.GetDbSet<GoodslocationEntity>().AsNoTracking();
             var data = await (from m in DbSet.AsNoTracking()
-                                join sku in _dBContext.GetDbSet<SkuEntity>().AsNoTracking() on m.sku_id equals sku.id
-                                join spu in _dBContext.GetDbSet<SpuEntity>().AsNoTracking() on sku.spu_id equals spu.id
-                                join orig_location in location_DBSet on m.orig_goods_location_id equals orig_location.id
-                                join dest_location in location_DBSet on m.dest_googs_location_id equals dest_location.id
-                                where m.id == id
-                                select new StockmoveViewModel
-                                {
-                                    id = m.id,
-                                    job_code = m.job_code,
-                                    move_status = m.move_status,
-                                    sku_id = m.sku_id,
-                                    orig_goods_location_id = m.orig_goods_location_id,
-                                    dest_googs_location_id = m.dest_googs_location_id,
-                                    qty = m.qty,
-                                    goods_owner_id = m.goods_owner_id,
-                                    handler = m.handler,
-                                    handle_time = m.handle_time,
-                                    creator = m.creator,
-                                    create_time = m.create_time,
-                                    last_update_time = m.last_update_time,
-                                    tenant_id = m.tenant_id,
-                                    sku_code = sku.sku_code,
-                                    sku_name = sku.sku_name,
-                                    spu_code = spu.spu_code,
-                                    spu_name = spu.spu_name,
-                                    dest_googs_location_name = dest_location.location_name,
-                                    dest_googs_warehouse = dest_location.warehouse_name,
-                                    orig_goods_location_name = orig_location.location_name,
-                                    orig_goods_warehouse = orig_location.warehouse_name,
-                                }).FirstOrDefaultAsync();
+                              join sku in _dBContext.GetDbSet<SkuEntity>().AsNoTracking() on m.sku_id equals sku.id
+                              join spu in _dBContext.GetDbSet<SpuEntity>().AsNoTracking() on sku.spu_id equals spu.id
+                              join orig_location in location_DBSet on m.orig_goods_location_id equals orig_location.id
+                              join dest_location in location_DBSet on m.dest_googs_location_id equals dest_location.id
+                              where m.id == id
+                              select new StockmoveViewModel
+                              {
+                                  id = m.id,
+                                  job_code = m.job_code,
+                                  move_status = m.move_status,
+                                  sku_id = m.sku_id,
+                                  orig_goods_location_id = m.orig_goods_location_id,
+                                  dest_googs_location_id = m.dest_googs_location_id,
+                                  qty = m.qty,
+                                  goods_owner_id = m.goods_owner_id,
+                                  handler = m.handler,
+                                  handle_time = m.handle_time,
+                                  creator = m.creator,
+                                  create_time = m.create_time,
+                                  last_update_time = m.last_update_time,
+                                  tenant_id = m.tenant_id,
+                                  sku_code = sku.sku_code,
+                                  sku_name = sku.sku_name,
+                                  spu_code = spu.spu_code,
+                                  spu_name = spu.spu_name,
+                                  dest_googs_location_name = dest_location.location_name,
+                                  dest_googs_warehouse = dest_location.warehouse_name,
+                                  orig_goods_location_name = orig_location.location_name,
+                                  orig_goods_warehouse = orig_location.warehouse_name,
+                              }).FirstOrDefaultAsync();
             if (data == null)
             {
                 return null;
             }
             return data;
         }
+
         /// <summary>
         /// add a new record
         /// </summary>
@@ -215,65 +222,72 @@ namespace ModernWMS.WMS.Services
             var dispatch_DBSet = _dBContext.GetDbSet<DispatchlistEntity>().Where(t => t.tenant_id.Equals(currentUser.tenant_id));
             var dispatch_group_datas = from dp in dispatch_DBSet.AsNoTracking()
                                        join dpp in dispatchpick_DBSet.AsNoTracking() on dp.id equals dpp.dispatchlist_id
-                                       where dp.dispatch_status > 1 && dp.dispatch_status < 6 
-                                       && dpp.goods_location_id == entity.orig_goods_location_id && dpp.sku_id == entity.sku_id 
-                                       group dpp by new { dpp.sku_id, dpp.goods_location_id } into dg
+                                       where dp.dispatch_status > 1 && dp.dispatch_status < 6
+                                       && dpp.goods_location_id == entity.orig_goods_location_id && dpp.sku_id == entity.sku_id
+                                       && dpp.goods_owner_id == entity.goods_owner_id
+                                       group dpp by new { dpp.sku_id, dpp.goods_location_id, dpp.goods_owner_id } into dg
                                        select new
                                        {
                                            sku_id = dg.Key.sku_id,
                                            goods_location_id = dg.Key.goods_location_id,
+                                           goods_owner_id = dg.Key.goods_location_id,
                                            qty_locked = dg.Sum(t => t.pick_qty)
                                        };
             var process_locked_group_datas = from pd in processdetail_DBSet
                                              where pd.is_update_stock == false
                                              && pd.sku_id == entity.sku_id && pd.goods_location_id == entity.orig_goods_location_id
-                                             group pd by new { pd.sku_id, pd.goods_location_id } into pdg
+                                             && pd.goods_owner_id == entity.goods_owner_id
+                                             group pd by new { pd.sku_id, pd.goods_location_id, pd.goods_owner_id } into pdg
                                              select new
                                              {
                                                  sku_id = pdg.Key.sku_id,
                                                  goods_location_id = pdg.Key.goods_location_id,
+                                                 pdg.Key.goods_owner_id,
                                                  qty_locked = pdg.Sum(t => t.qty)
                                              };
             var move_locked_group_datas = from sm in DbSet.AsNoTracking()
                                           where sm.move_status == 0 && sm.sku_id == entity.sku_id && sm.orig_goods_location_id == entity.orig_goods_location_id
-                                          group sm by new { sm.sku_id, goods_location_id = sm.orig_goods_location_id } into smg
-                                          select new {
-                                               smg.Key.sku_id,
-                                               smg.Key.goods_location_id,
-                                               qty_locked = smg.Sum(t => t.qty)
+                                          && sm.goods_owner_id == entity.goods_owner_id
+                                          group sm by new { sm.sku_id, goods_location_id = sm.orig_goods_location_id, sm.goods_owner_id } into smg
+                                          select new
+                                          {
+                                              smg.Key.sku_id,
+                                              smg.Key.goods_location_id,
+                                              smg.Key.goods_owner_id,
+                                              qty_locked = smg.Sum(t => t.qty)
                                           };
 
-            var orig_stock =await 
+            var orig_stock = await
                 (from sg in stock_DBSet.AsNoTracking()
-                 join dp in dispatch_group_datas on new { sg.sku_id, sg.goods_location_id } equals new { dp.sku_id, dp.goods_location_id } into dp_left
+                 join dp in dispatch_group_datas on new { sg.sku_id, sg.goods_location_id, sg.goods_owner_id } equals new { dp.sku_id, dp.goods_location_id, dp.goods_owner_id } into dp_left
                  from dp in dp_left.DefaultIfEmpty()
-                 join pl in process_locked_group_datas on new { sg.sku_id, sg.goods_location_id } equals new { pl.sku_id, pl.goods_location_id } into pl_left
+                 join pl in process_locked_group_datas on new { sg.sku_id, sg.goods_location_id, sg.goods_owner_id } equals new { pl.sku_id, pl.goods_location_id, pl.goods_owner_id } into pl_left
                  from pl in pl_left.DefaultIfEmpty()
-                 join sm in move_locked_group_datas on new {sg.sku_id,sg.goods_location_id} equals new {sm.sku_id, goods_location_id = sm.goods_location_id} into sm_left
+                 join sm in move_locked_group_datas on new { sg.sku_id, sg.goods_location_id, sg.goods_owner_id } equals new { sm.sku_id, goods_location_id = sm.goods_location_id, sm.goods_owner_id } into sm_left
                  from sm in sm_left.DefaultIfEmpty()
-                 where sg.sku_id == entity.sku_id && sg.goods_location_id == entity.orig_goods_location_id
+                 where sg.sku_id == entity.sku_id && sg.goods_location_id == entity.orig_goods_location_id && sg.goods_owner_id == entity.goods_owner_id
                  select new
                  {
                      id = sg.id,
-                     qty_available = sg.is_freeze ? 0 : (sg.qty - (dp.qty_locked == null ? 0 : dp.qty_locked) - (pl.qty_locked == null ? 0 : pl.qty_locked) - (sm.qty_locked == null ? 0 : sm.qty_locked)) ,
+                     qty_available = sg.is_freeze ? 0 : (sg.qty - (dp.qty_locked == null ? 0 : dp.qty_locked) - (pl.qty_locked == null ? 0 : pl.qty_locked) - (sm.qty_locked == null ? 0 : sm.qty_locked)),
                  }
                 ).FirstOrDefaultAsync();
-            var dest_stock = await stock_DBSet.FirstOrDefaultAsync(t => t.goods_location_id == entity.dest_googs_location_id && t.sku_id == entity.sku_id);
-            if(orig_stock == null || orig_stock.qty_available<entity.qty)
+            var dest_stock = await stock_DBSet.FirstOrDefaultAsync(t => t.goods_location_id == entity.dest_googs_location_id && t.sku_id == entity.sku_id && t.goods_owner_id == entity.goods_owner_id);
+            if (orig_stock == null || orig_stock.qty_available < entity.qty)
             {
                 return (0, _stringLocalizer["qty_not_available"]);
             }
-            if(dest_stock!=null && dest_stock.is_freeze == true)
+            if (dest_stock != null && dest_stock.is_freeze == true)
             {
                 return (0, _stringLocalizer["dest_stock_freeze"]);
             }
             entity.id = 0;
-            entity.move_status= 0;
+            entity.move_status = 0;
             entity.create_time = DateTime.Now;
             entity.creator = currentUser.user_name;
             entity.last_update_time = DateTime.Now;
             entity.tenant_id = currentUser.tenant_id;
-            entity.job_code =await GetOrderCode(currentUser);
+            entity.job_code = await GetOrderCode(currentUser);
             await DbSet.AddAsync(entity);
             await _dBContext.SaveChangesAsync();
             if (entity.id > 0)
@@ -285,16 +299,17 @@ namespace ModernWMS.WMS.Services
                 return (0, _stringLocalizer["save_failed"]);
             }
         }
+
         /// <summary>
         /// confirm move
         /// </summary>
         /// <param name="id">id</param>
         /// <param name="currentUser">current user</param>
         /// <returns></returns>
-        public async Task<(bool flag, string msg)> Confirm(int id,CurrentUser currentUser)
+        public async Task<(bool flag, string msg)> Confirm(int id, CurrentUser currentUser)
         {
             var DbSet = _dBContext.GetDbSet<StockmoveEntity>();
-            var stock_DBSet  = _dBContext.GetDbSet<StockEntity>();
+            var stock_DBSet = _dBContext.GetDbSet<StockEntity>();
             var entity = await DbSet.FirstOrDefaultAsync(t => t.id.Equals(id));
             if (entity == null)
             {
@@ -304,21 +319,21 @@ namespace ModernWMS.WMS.Services
             entity.handle_time = DateTime.Now;
             entity.move_status = 1;
             entity.last_update_time = DateTime.Now;
-            var orig_stock = await stock_DBSet.FirstOrDefaultAsync(t => t.goods_location_id == entity.orig_goods_location_id && t.sku_id == entity.sku_id) ;
-            var dest_stock = await stock_DBSet.FirstOrDefaultAsync(t=>t.goods_location_id == entity.dest_googs_location_id && t.sku_id!= entity.sku_id);
+            var orig_stock = await stock_DBSet.FirstOrDefaultAsync(t => t.goods_location_id == entity.orig_goods_location_id && t.goods_owner_id == entity.goods_owner_id && t.sku_id == entity.sku_id);
+            var dest_stock = await stock_DBSet.FirstOrDefaultAsync(t => t.goods_location_id == entity.dest_googs_location_id && t.goods_owner_id == entity.goods_owner_id && t.sku_id == entity.sku_id);
             if (orig_stock != null)
             {
-                if(orig_stock.qty == entity.qty)
+                if (orig_stock.qty == entity.qty)
                 {
                     stock_DBSet.Remove(orig_stock);
                 }
                 else
                 {
                     orig_stock.qty -= entity.qty;
-                    orig_stock.last_update_time=DateTime.Now;
+                    orig_stock.last_update_time = DateTime.Now;
                 }
             }
-            if(dest_stock == null)
+            if (dest_stock == null)
             {
                 dest_stock = new StockEntity
                 {
@@ -361,7 +376,7 @@ namespace ModernWMS.WMS.Services
                                 {
                                     throw new NotSupportedException(_stringLocalizer["try_agin"]);
                                 }
-                                else if(UtilConvert.ObjToInt(databaseValues["qty"]) - entity.qty==0)
+                                else if (UtilConvert.ObjToInt(databaseValues["qty"]) - entity.qty == 0)
                                 {
                                     entry.State = EntityState.Deleted;
                                 }
@@ -371,7 +386,7 @@ namespace ModernWMS.WMS.Services
                                     proposedValues["qty"] = UtilConvert.ObjToInt(databaseValues["qty"]) - entity.qty;
                                 }
                             }
-                            else if(UtilConvert.ObjToInt(proposedValues["id"]) == dest_stock.id)
+                            else if (UtilConvert.ObjToInt(proposedValues["id"]) == dest_stock.id)
                             {
                                 proposedValues["qty"] = UtilConvert.ObjToInt(databaseValues["qty"]) + entity.qty;
                             }
@@ -394,6 +409,7 @@ namespace ModernWMS.WMS.Services
                 return (false, _stringLocalizer["operation_failed"]);
             }
         }
+
         /// <summary>
         /// delete a record
         /// </summary>
@@ -401,7 +417,7 @@ namespace ModernWMS.WMS.Services
         /// <returns></returns>
         public async Task<(bool flag, string msg)> DeleteAsync(int id)
         {
-            var qty = await _dBContext.GetDbSet<StockmoveEntity>().Where(t => t.id.Equals(id)&&t.move_status == 0).ExecuteDeleteAsync();
+            var qty = await _dBContext.GetDbSet<StockmoveEntity>().Where(t => t.id.Equals(id) && t.move_status == 0).ExecuteDeleteAsync();
             if (qty > 0)
             {
                 return (true, _stringLocalizer["delete_success"]);
@@ -420,7 +436,7 @@ namespace ModernWMS.WMS.Services
         {
             string code;
             string date = DateTime.Now.ToString("yyyy" + "MM" + "dd");
-            string maxNo = await _dBContext.GetDbSet<StockmoveEntity>().AsNoTracking().Where(t=>t.tenant_id == currentUser.tenant_id).MaxAsync(t => t.job_code);
+            string maxNo = await _dBContext.GetDbSet<StockmoveEntity>().AsNoTracking().Where(t => t.tenant_id == currentUser.tenant_id).MaxAsync(t => t.job_code);
             if (maxNo == null)
             {
                 code = date + "-0001";
@@ -443,7 +459,7 @@ namespace ModernWMS.WMS.Services
 
             return code;
         }
-        #endregion
+
+        #endregion Api
     }
 }
-

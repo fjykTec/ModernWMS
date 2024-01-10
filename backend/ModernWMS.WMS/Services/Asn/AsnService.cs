@@ -13,6 +13,7 @@ using ModernWMS.Core.Services;
 using ModernWMS.WMS.Entities.Models;
 using ModernWMS.WMS.Entities.ViewModels;
 using ModernWMS.WMS.IServices;
+using System.Text;
 
 namespace ModernWMS.WMS.Services
 {
@@ -66,20 +67,29 @@ namespace ModernWMS.WMS.Services
                     queries.Add(s);
                 });
             }
+            var Asns = _dBContext.GetDbSet<AsnEntity>().AsNoTracking();
             Byte asn_status = 255;
-            if (pageSearch.sqlTitle.ToLower().Contains("asn_status"))
+            bool isShowAllData = false;
+            if (pageSearch.sqlTitle.ToLower().Contains("asn_status:-1"))
+            {
+                isShowAllData = true;
+            }
+            else if (pageSearch.sqlTitle.ToLower().Contains("asn_status:alltodo"))
+            {
+                Asns = Asns.Where(t => t.asn_status <= 3);
+            }
+            else if (pageSearch.sqlTitle.ToLower().Contains("asn_status"))
             {
                 asn_status = Convert.ToByte(pageSearch.sqlTitle.Trim().ToLower().Replace("asn_status","").Replace("：", "").Replace(":", "").Replace("=", ""));
-                asn_status = asn_status.Equals(4) ? (Byte)255 : asn_status;
+                //asn_status = asn_status.Equals(4) ? (Byte)255 : asn_status;
+                Asns = Asns.Where(t => t.asn_status == asn_status);
             }
-            var Spus = _dBContext.GetDbSet<SpuEntity>();
-            var Skus = _dBContext.GetDbSet<SkuEntity>();
-            var Asns = _dBContext.GetDbSet<AsnEntity>();
-            var query = from m in Asns.AsNoTracking()
-                        join p in Spus.AsNoTracking() on m.spu_id equals p.id
-                        join k in Skus.AsNoTracking() on m.sku_id equals k.id
+            var Spus = _dBContext.GetDbSet<SpuEntity>().AsNoTracking();
+            var Skus = _dBContext.GetDbSet<SkuEntity>().AsNoTracking();
+            var query = from m in Asns
+                        join p in Spus on m.spu_id equals p.id
+                        join k in Skus on m.sku_id equals k.id
                         where m.tenant_id == currentUser.tenant_id
-                        && (asn_status == 255 || m.asn_status == asn_status)
                         select new AsnViewModel
                         {
                             id = m.id,
@@ -154,8 +164,8 @@ namespace ModernWMS.WMS.Services
                             shortage_qty = m.shortage_qty,
                             more_qty = m.more_qty,
                             damage_qty = m.damage_qty,
-                            weight = m.weight,
-                            volume = m.volume,
+                            weight = k.weight * m.asn_qty,
+                            volume = k.volume * m.asn_qty,
                             supplier_id = m.supplier_id,
                             supplier_name = m.supplier_name,
                             goods_owner_id = m.goods_owner_id,
@@ -350,11 +360,11 @@ namespace ModernWMS.WMS.Services
             var entity = await Asns.FirstOrDefaultAsync(t => t.id == id);
             if (entity == null)
             {
-                return (false, _stringLocalizer["not_exists_entity"]);
+                return (false, "[202]" + _stringLocalizer["not_exists_entity"]);
             }
             else if (entity.asn_status > 0)
             {
-                return (false, $"{entity.asn_no}{_stringLocalizer["ASN_Status_Is_Not_Pre_Delivery"]}");
+                return (false, "[202]" + $"{entity.asn_no}{_stringLocalizer["ASN_Status_Is_Not_Pre_Delivery"]}");
             }
             entity.asn_status = 1;
             var qty = await _dBContext.SaveChangesAsync();
@@ -378,11 +388,11 @@ namespace ModernWMS.WMS.Services
             var entity = await Asns.FirstOrDefaultAsync(t => t.id == id);
             if (entity == null)
             {
-                return (false, _stringLocalizer["not_exists_entity"]);
+                return (false, "[202]" + _stringLocalizer["not_exists_entity"]);
             }
             else if (entity.asn_status != (byte)1)
             {
-                return (false, $"{entity.asn_no}{_stringLocalizer["ASN_Status_Is_Not_Pre_Delivery"]}");
+                return (false, "[202]" + $"{entity.asn_no}{_stringLocalizer["ASN_Status_Is_Not_Pre_Delivery"]}");
             }
             entity.asn_status = 0;
             var qty = await _dBContext.SaveChangesAsync();
@@ -408,11 +418,11 @@ namespace ModernWMS.WMS.Services
             var entity = await Asns.FirstOrDefaultAsync(t => t.id == id);
             if (entity == null)
             {
-                return (false, _stringLocalizer["not_exists_entity"]);
+                return (false, "[202]" + _stringLocalizer["not_exists_entity"]);
             }
             else if (entity.asn_status > 1)
             {
-                return (false, $"{entity.asn_no}{_stringLocalizer["ASN_Status_Is_Not_Pre_Load"]}");
+                return (false, "[202]" + $"{entity.asn_no}{_stringLocalizer["ASN_Status_Is_Not_Pre_Load"]}");
             }
             entity.asn_status = 2; 
             entity.last_update_time = DateTime.Now;
@@ -439,11 +449,11 @@ namespace ModernWMS.WMS.Services
             var entity = await Asns.FirstOrDefaultAsync(t => t.id == id);
             if (entity == null)
             {
-                return (false, _stringLocalizer["not_exists_entity"]);
+                return (false, "[202]" + _stringLocalizer["not_exists_entity"]);
             }
             else if (entity.asn_status != (byte)2)
             {
-                return (false, $"{entity.asn_no}{_stringLocalizer["ASN_Status_Is_Not_Pre_Load"]}");
+                return (false, "[202]" + $"{entity.asn_no}{_stringLocalizer["ASN_Status_Is_Not_Pre_Load"]}");
             }
             entity.asn_status = 1;
             entity.last_update_time = DateTime.Now;
@@ -471,11 +481,11 @@ namespace ModernWMS.WMS.Services
             var entity = await Asns.FirstOrDefaultAsync(t => t.id == viewModel.asn_id);
             if (entity == null)
             {
-                return (false, _stringLocalizer["not_exists_entity"]);
+                return (false, "[202]" + _stringLocalizer["not_exists_entity"]);
             }
             else if (entity.asn_status != 2)
             {
-                return (false, $"{entity.asn_no}{_stringLocalizer["ASN_Status_Is_Not_Pre_Sort"]}");
+                return (false, "[202]" + $"{entity.asn_no}{_stringLocalizer["ASN_Status_Is_Not_Pre_Sort"]}");
             }
             await Asnsorts.AddAsync(new AsnsortEntity
             {
@@ -511,11 +521,11 @@ namespace ModernWMS.WMS.Services
             var entity = await Asns.FirstOrDefaultAsync(t => t.id == id);
             if (entity == null)
             {
-                return (false, _stringLocalizer["not_exists_entity"]);
+                return (false, "[202]" + _stringLocalizer["not_exists_entity"]);
             }
             else if (entity.sorted_qty < 1)
             {
-                return (false, $"{entity.asn_no}{_stringLocalizer["ASN_Status_Is_Not_Sorting"]}");
+                return (false, "[202]" + $"{entity.asn_no}{_stringLocalizer["ASN_Status_Is_Not_Sorting"]}");
             }
             entity.asn_status = 3;
             if (entity.sorted_qty > entity.asn_qty)
@@ -550,15 +560,15 @@ namespace ModernWMS.WMS.Services
             var entity = await Asns.FirstOrDefaultAsync(t => t.id == id);
             if (entity == null)
             {
-                return (false, _stringLocalizer["not_exists_entity"]);
+                return (false, "[202]" + _stringLocalizer["not_exists_entity"]);
             }
             else if (entity.actual_qty > 0)
             {
-                return (false, $"{entity.asn_no}{_stringLocalizer["ASN_Status_Is_Putaway"]}");
+                return (false, "[202]" + $"{entity.asn_no}{_stringLocalizer["ASN_Status_Is_Putaway"]}");
             }
             else if (entity.sorted_qty < 1)
             {
-                return (false, $"{entity.asn_no}{_stringLocalizer["ASN_Status_Is_Not_Sorting"]}");
+                return (false, "[202]" + $"{entity.asn_no}{_stringLocalizer["ASN_Status_Is_Not_Sorting"]}");
             }
             entity.asn_status = 2;
             entity.sorted_qty = 0;
@@ -577,6 +587,32 @@ namespace ModernWMS.WMS.Services
                 return (false, _stringLocalizer["save_failed"]);
             }
         }
+
+        /// <summary>
+        /// get pending putaway data by asn_id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<List<AsnPendingPutawayViewModel>> GetPendingPutawayDataAsync(int id)
+        {
+            var Asns = _dBContext.GetDbSet<AsnEntity>();
+            var Asnsorts = _dBContext.GetDbSet<AsnsortEntity>();
+
+            var data = await (from m in Asns.AsNoTracking()
+                              join s in Asnsorts.AsNoTracking() on m.id equals s.asn_id
+                              where m.id == id
+                              group new { m, s } by new { m.id, m.goods_owner_id, m.goods_owner_name, m.actual_qty }
+                       into g
+                              select new AsnPendingPutawayViewModel
+                              {
+                                  asn_id = g.Key.id,
+                                  goods_owner_id = g.Key.goods_owner_id,
+                                  goods_owner_name = g.Key.goods_owner_name,
+                                  series_number = "",
+                                  sorted_qty = g.Sum(o => o.s.sorted_qty) - g.Key.actual_qty
+                              }).ToListAsync();
+            return data;
+        }
         /// <summary>
         /// PutAway
         /// </summary>
@@ -591,21 +627,21 @@ namespace ModernWMS.WMS.Services
             var Location = await Goodslocations.FirstOrDefaultAsync(t => t.id.Equals(viewModel.goods_location_id));
             if (Location == null)
             {
-                return (false, string.Format(_stringLocalizer["Required"], _stringLocalizer["location_name"]));
+                return (false, "[202]" + string.Format(_stringLocalizer["Required"], _stringLocalizer["location_name"]));
             }
 
             var entity = await Asns.FirstOrDefaultAsync(t => t.id == viewModel.asn_id);
             if (entity == null)
             {
-                return (false, _stringLocalizer["not_exists_entity"]);
+                return (false, "[202]" + _stringLocalizer["not_exists_entity"]);
             }
             else if (entity.asn_status != 3)
             {
-                return (false, $"{entity.asn_no}{_stringLocalizer["ASN_Status_Is_Not_Sorted"]}");
+                return (false, "[202]" + $"{entity.asn_no}{_stringLocalizer["ASN_Status_Is_Not_Sorted"]}");
             }
             else if (entity.actual_qty + viewModel.putaway_qty > entity.sorted_qty)
             {
-                return (false, $"{entity.asn_no}{_stringLocalizer["ASN_Total_PutAway_Qty_Greater_Than_Sorted_Qty"]}");
+                return (false, "[202]" + $"{entity.asn_no}{_stringLocalizer["ASN_Total_PutAway_Qty_Greater_Than_Sorted_Qty"]}");
             }
             entity.actual_qty += viewModel.putaway_qty;
             if (Location.warehouse_area_property.Equals(5))
@@ -650,6 +686,97 @@ namespace ModernWMS.WMS.Services
                 return (false, _stringLocalizer["putaway_failed"]);
             }
         }
+        #endregion
+
+        #region excel import
+        /// <summary>
+        /// excel import
+        /// </summary>
+        /// <param name="excelData">excel data</param>
+        /// <param name="currentUser">current user</param>
+        /// <returns></returns>
+        public async Task<(bool flag, string msg, List<AsnExcelImportViewModel> errList)> ImportAsync(List<AsnExcelImportViewModel> excelData, CurrentUser currentUser)
+        {
+            var Spus = _dBContext.GetDbSet<SpuEntity>().AsNoTracking();
+            var Skus = _dBContext.GetDbSet<SkuEntity>().AsNoTracking();
+
+            var ownerList = excelData.Where(e => e.goods_owner_name != "").Select(e => e.goods_owner_name).ToList();
+            if (ownerList == null)
+            {
+                ownerList = new List<string>();
+            }
+            var goods_owner = await _dBContext.GetDbSet<GoodsownerEntity>().AsNoTracking()
+                .Where(t => t.tenant_id == currentUser.tenant_id)
+                .Where(t => ownerList.Contains(t.goods_owner_name))
+                .Select(t => new { t.id, t.goods_owner_name}).ToListAsync();
+
+            var dbSku = await (from m in Spus
+                               join d in Skus on m.id equals d.spu_id
+                               where m.tenant_id == currentUser.tenant_id
+                               select new
+                               {
+                                   spu_id = m.id,
+                                   m.spu_code,
+                                   m.spu_name,
+                                   m.supplier_id,
+                                   m.supplier_name,
+                                   sku_id = d.id,
+                                   d.sku_code,
+                                   d.sku_name
+                               }).ToListAsync();
+            StringBuilder sb = new StringBuilder();
+            excelData.ForEach(ex =>
+            {
+                var sku = dbSku.FirstOrDefault(t => t.spu_code == ex.spu_code && t.sku_code == ex.sku_code && t.supplier_name == ex.supplier_name);
+                if (sku != null)
+                {
+                    ex.spu_id = sku.spu_id;
+                    ex.sku_id = sku.sku_id;
+                    ex.supplier_id = sku.supplier_id;
+
+                    var owner = goods_owner.FirstOrDefault(t => t.goods_owner_name ==  ex.goods_owner_name);
+                    if (owner != null)
+                    {
+                        ex.goods_owner_id = owner.id;
+                    }
+                }
+                else
+                {
+                    string err = $"[{_stringLocalizer["spu_code"]}:{ex.spu_name},{_stringLocalizer["sku_code"]}:{ex.sku_code},{_stringLocalizer["supplier_name"]}:{ex.supplier_name}{_stringLocalizer["not_exists_entity"]}]";
+                    ex.error_msg = err;
+                    sb.AppendLine(err);
+                }
+            });
+            if (excelData.Any(t => t.error_msg.Length > 0))
+            {
+                return (false, sb.ToString(), excelData.Where(t => t.error_msg.Length > 0).ToList());
+            }
+            else
+            {
+                var DbSet = _dBContext.GetDbSet<AsnEntity>();
+                var entities = excelData.Adapt<List<AsnEntity>>();
+                foreach (var entity in entities)
+                {
+                    entity.id = 0; 
+                    entity.creator = currentUser.user_name;
+                    entity.create_time = DateTime.Now;
+                    entity.last_update_time = DateTime.Now;
+                    entity.tenant_id = currentUser.tenant_id;
+                    entity.is_valid = true;
+                }
+                await DbSet.AddRangeAsync(entities);
+                int qty = await _dBContext.SaveChangesAsync();
+                if (qty > 0)
+                {
+                    return (true, _stringLocalizer["save_success"], new List<AsnExcelImportViewModel>());
+                }
+                else
+                {
+                    return (false, _stringLocalizer["save_failed"], new List<AsnExcelImportViewModel>());
+                }
+            }
+        }
+
         #endregion
     }
 }

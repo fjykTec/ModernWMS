@@ -2,69 +2,75 @@
  * date：2022-12-22
  * developer：NoNo
  */
- using Microsoft.AspNetCore.Mvc;
- using ModernWMS.Core.Controller;
- using ModernWMS.Core.Models;
- using ModernWMS.WMS.Entities.ViewModels;
- using ModernWMS.WMS.IServices;
- using Microsoft.Extensions.Localization;
- 
- namespace ModernWMS.WMS.Controllers
- {
-     /// <summary>
-     /// stock controller
-     /// </summary>
-     [Route("stock")]
-     [ApiController]
-     [ApiExplorerSettings(GroupName = "WMS")]
-     public class StockController : BaseController
-     {
-         #region Args
- 
-         /// <summary>
-         /// stock Service
-         /// </summary>
-         private readonly IStockService _stockService;
- 
-         /// <summary>
-         /// Localizer Service
-         /// </summary>
-         private readonly IStringLocalizer<ModernWMS.Core.MultiLanguage> _stringLocalizer;
-         #endregion
- 
-         #region constructor
-         /// <summary>
-         /// constructor
-         /// </summary>
-         /// <param name="stockService">stock Service</param>
+
+using Microsoft.AspNetCore.Mvc;
+using ModernWMS.Core.Controller;
+using ModernWMS.Core.Models;
+using ModernWMS.WMS.Entities.ViewModels;
+using ModernWMS.WMS.IServices;
+using Microsoft.Extensions.Localization;
+
+namespace ModernWMS.WMS.Controllers
+{
+    /// <summary>
+    /// stock controller
+    /// </summary>
+    [Route("stock")]
+    [ApiController]
+    [ApiExplorerSettings(GroupName = "WMS")]
+    public class StockController : BaseController
+    {
+        #region Args
+
+        /// <summary>
+        /// stock Service
+        /// </summary>
+        private readonly IStockService _stockService;
+
+        /// <summary>
+        /// Localizer Service
+        /// </summary>
+        private readonly IStringLocalizer<ModernWMS.Core.MultiLanguage> _stringLocalizer;
+
+        #endregion Args
+
+        #region constructor
+
+        /// <summary>
+        /// constructor
+        /// </summary>
+        /// <param name="stockService">stock Service</param>
         /// <param name="stringLocalizer">Localizer</param>
-         public StockController(
-             IStockService stockService
-           , IStringLocalizer<ModernWMS.Core.MultiLanguage> stringLocalizer
-             )
-         {
-             this._stockService = stockService;
-            this._stringLocalizer= stringLocalizer;
-         }
-         #endregion
- 
-         #region Api
-         /// <summary>
-         /// stock details page search
-         /// </summary>
-         /// <param name="pageSearch">args</param>
-         /// <returns></returns>
-         [HttpPost("stock-list")]
-         public async Task<ResultModel<PageData<StockManagementViewModel>>> StockPageAsync(PageSearch pageSearch)
-         {
-             var (data, totals) = await _stockService.StockPageAsync(pageSearch, CurrentUser);
-              
-             return ResultModel<PageData<StockManagementViewModel>>.Success(new PageData<StockManagementViewModel>
-             {
-                 Rows = data,
-                 Totals = totals
-             });
-         }
+        public StockController(
+            IStockService stockService
+          , IStringLocalizer<ModernWMS.Core.MultiLanguage> stringLocalizer
+            )
+        {
+            this._stockService = stockService;
+            this._stringLocalizer = stringLocalizer;
+        }
+
+        #endregion constructor
+
+        #region Api
+
+        /// <summary>
+        /// stock details page search
+        /// </summary>
+        /// <param name="pageSearch">args</param>
+        /// <returns></returns>
+        [HttpPost("stock-list")]
+        public async Task<ResultModel<PageData<StockManagementViewModel>>> StockPageAsync(PageSearch pageSearch)
+        {
+            var (data, totals) = await _stockService.StockPageAsync(pageSearch, CurrentUser);
+
+            return ResultModel<PageData<StockManagementViewModel>>.Success(new PageData<StockManagementViewModel>
+            {
+                Rows = data,
+                Totals = totals
+            });
+        }
+
         /// <summary>
         /// location stock page search
         /// </summary>
@@ -115,8 +121,19 @@
                 Totals = totals
             });
         }
-        #endregion
 
+        /// <summary>
+        /// get stock infomation by phone
+        /// </summary>
+        /// <param name="input">input</param>
+        /// <returns></returns>
+        [HttpPost("qrcode-list")]
+        public async Task<ResultModel<List<LocationStockManagementViewModel>>> LocationStockForPhoneAsync(LocationStockForPhoneSearchViewModel input)
+        {
+            var datas = await _stockService.LocationStockForPhoneAsync(input, CurrentUser);
+            return ResultModel<List<LocationStockManagementViewModel>>.Success(datas);
+        }
+
+        #endregion Api
     }
- }
- 
+}

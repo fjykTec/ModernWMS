@@ -30,6 +30,9 @@ using ModernWMS.Core.DI;
 using Microsoft.Extensions.Localization;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 using Microsoft.EntityFrameworkCore.Migrations.Internal;
+using System.Security.AccessControl;
+using Hangfire;
+using Hangfire.MemoryStorage;
 
 namespace ModernWMS.Core.Extentions
 {
@@ -43,6 +46,7 @@ namespace ModernWMS.Core.Extentions
                 var sharedLocalizer = sp.GetRequiredService<IStringLocalizer<MultiLanguage>>();
                 return sharedLocalizer;
             });
+            services.AddHttpClient();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddSingleton<CacheManager>();
             services.AddSingleton<IMemoryCache>(factory =>
@@ -50,25 +54,27 @@ namespace ModernWMS.Core.Extentions
                 var cache = new MemoryCache(new MemoryCacheOptions());
                 return cache;
             });
+            
             var database_config = configuration.GetSection("Database")["db"];
             services.AddDbContextPool<SqlDBContext>(t =>
             {
-                if (database_config == "SqlLite")
+                if (database_config.ToUpper() == "SQLLITE")
                 {
                     var SqlLite_connection = configuration.GetConnectionString("SqlLiteConn");
                     t.UseSqlite(SqlLite_connection, b => b.MigrationsAssembly("ModernWMS"));
                 }
-                else if (database_config == "MySql")
+                else if (database_config.ToUpper() == "MYSQL")
                 {
                     var Mysql_connection = configuration.GetConnectionString("MySqlConn");
                     t.UseMySql(Mysql_connection, new MySqlServerVersion(new Version(8, 0, 26)));
                 }
-                else if (database_config == "SqlServer")
+                else if (database_config.ToUpper() == "SQLSERVER")
                 {
                     var SqlServer_connection = configuration.GetConnectionString("SqlServerConn");
                     t.UseSqlServer(SqlServer_connection);
                 }
-                else if (database_config == "PostGres")
+
+                else if (database_config.ToUpper() == "POSTGRES")
                 {
                     var Postgre_connection = configuration.GetConnectionString("PostGresConn");
                     t.UseNpgsql(Postgre_connection);
@@ -79,7 +85,7 @@ namespace ModernWMS.Core.Extentions
                 t.UseLoggerFactory(new LoggerFactory(new[] { new DebugLoggerProvider() }));
             }, 100); ;
             services.AddMemoryCache();
-            services.AddScoped<MultiTenancy.ITenantProvider, MultiTenancy.TenantProvider>();
+            services.AddScoped<MultiTenancy.ITenantProvider, MultiTenancy.TenantProvider>();            
             services.AddSwaggerService(configuration, AppContext.BaseDirectory);
             services.AddTokenGeneratorService(configuration);
             services.RegisterAssembly();
@@ -98,13 +104,20 @@ namespace ModernWMS.Core.Extentions
                   options.SerializerSettings.Converters.Add(new JsonStringTrimConverter());
                   options.SerializerSettings.Formatting = Formatting.Indented;
                   options.SerializerSettings.ContractResolver = new Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver();
-              }).AddDataAnnotationsLocalization(options =>
-              {
+              }).AddDataAnnotationsLocalization(options => {
                   options.DataAnnotationLocalizerProvider = (type, factory) =>
                       factory.Create(typeof(ModernWMS.Core.MultiLanguage));
-              }); ;
-        }
+              });
 
+            // Hangfire
+            services.AddHangfire(x => x.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+                .UseSimpleAssemblyNameTypeSerializer()
+                .UseRecommendedSerializerSettings()
+                .UseStorage(new MemoryStorage()));
+            services.AddHangfireServer();
+
+
+        }
         public static void UseExtensionsConfigure(this IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider, IConfiguration configuration)
         {
             if (env.IsDevelopment())
@@ -118,20 +131,28 @@ namespace ModernWMS.Core.Extentions
             app.UseTokenGeneratorConfigure(configuration);
             app.UseAuthorization();
             app.UseMiddleware<GlobalExceptionMiddleware>();
-            var support_languages = new[] { "zh-cn", "en-us" };
+            var support_languages = new[] {  "zh-cn", "en-us" };
             var localization_options = new RequestLocalizationOptions()
                 .SetDefaultCulture(support_languages[0])
                 .AddSupportedCultures(support_languages)
                 .AddSupportedUICultures(support_languages);
             app.UseRequestLocalization(localization_options);
+
+            var option = new BackgroundJobServerOptions
+            {
+                ServerName = String.Format("{0}.{1}", Environment.MachineName, Guid.NewGuid().ToString()),
+                WorkerCount = Environment.ProcessorCount * 5,
+                Queues = new[] { "wms" }
+            };
+            app.UseHangfireServer(option);
+            app.UseHangfireDashboard();
+            AddHangfireJob(serviceProvider);
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
             });
         }
-
         #region Swagger
-
         /// <summary>
         /// Swagger
         /// </summary>
@@ -163,6 +184,7 @@ namespace ModernWMS.Core.Extentions
                         });
                     });
 
+
                     if (settings.XmlFiles != null && settings.XmlFiles.Count > 0)
                     {
                         settings.XmlFiles.ForEach(fileName =>
@@ -178,6 +200,7 @@ namespace ModernWMS.Core.Extentions
                     c.OperationFilter<AppendAuthorizeToSummaryOperationFilter>();
                     c.OperationFilter<SecurityRequirementsOperationFilter>();
 
+
                     c.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
                     {
                         Description = "please input Bearer {token}",
@@ -186,10 +209,10 @@ namespace ModernWMS.Core.Extentions
                         Type = SecuritySchemeType.ApiKey
                     });
                     c.SwaggerGeneratorOptions.DescribeAllParametersInCamelCase = false;
+
                 });
             }
         }
-
         /// <summary>
         /// register Swagger
         /// </summary>
@@ -197,6 +220,7 @@ namespace ModernWMS.Core.Extentions
         /// <param name="configuration">配置文件</param>
         private static void UseSwaggerConfigure(this IApplicationBuilder app, IConfiguration configuration)
         {
+
             var swaggerSettings = configuration.GetSection("SwaggerSettings");
 
             if (swaggerSettings != null && swaggerSettings["Name"].Equals("ModernWMS"))
@@ -212,14 +236,14 @@ namespace ModernWMS.Core.Extentions
 
                     c.IndexStream = () => Assembly.GetExecutingAssembly().GetManifestResourceStream("ModernWMS.Core.Swagger.index.html");
                     c.RoutePrefix = "";
+
                 });
+
             }
         }
-
-        #endregion Swagger
+        #endregion
 
         #region JWT
-
         /// <summary>
         /// register JWT
         /// </summary>
@@ -227,6 +251,7 @@ namespace ModernWMS.Core.Extentions
         /// <param name="configuration">configuration</param>
         private static void AddTokenGeneratorService(this IServiceCollection services, IConfiguration configuration)
         {
+
             if (services == null)
             {
                 throw new ArgumentNullException(nameof(services));
@@ -239,7 +264,7 @@ namespace ModernWMS.Core.Extentions
             {
                 options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = nameof(ApiResponseHandler);
+                options.DefaultChallengeScheme = nameof(ApiResponseHandler); 
                 options.DefaultForbidScheme = nameof(ApiResponseHandler);
             }
             )
@@ -258,23 +283,24 @@ namespace ModernWMS.Core.Extentions
                 };
             })
             .AddScheme<AuthenticationSchemeOptions, ApiResponseHandler>(nameof(ApiResponseHandler), o => { });
+
         }
 
         private static void UseTokenGeneratorConfigure(this IApplicationBuilder app, IConfiguration configuration)
         {
             app.UseAuthentication();
         }
+        #endregion
 
-        #endregion JWT
-
-        #region dynamic injection
-
+        #region  dynamic injection
         /// <summary>
-        /// judge the dll to be injected by IDependency
+        /// judge the dll to be injected by IDependency 
         /// </summary>
         /// <param name="services">services</param>
         private static IServiceCollection RegisterAssembly(this IServiceCollection services)
         {
+
+
             var path = AppDomain.CurrentDomain.RelativeSearchPath ?? AppDomain.CurrentDomain.BaseDirectory;
             var referencedAssemblies = System.IO.Directory.GetFiles(path, "ModernWMS*.dll").Select(Assembly.LoadFrom).ToArray();
 
@@ -292,9 +318,50 @@ namespace ModernWMS.Core.Extentions
             }
 
             services.AddScoped<Services.IAccountService, Services.AccountService>();
+
+            // Register Job
+            var typeJobs = referencedAssemblies
+               .SelectMany(a => a.DefinedTypes)
+            .Select(type => type.AsType())
+               .Where(x => x != typeof(Job.IJob) && typeof(Job.IJob).IsAssignableFrom(x)).ToArray();
+            if (types != null && types.Length > 0)
+            {
+                var implementJobs = typeJobs.Where(x => x.IsClass).ToArray();
+                foreach (var implementType in implementJobs)
+                {
+                    services.AddScoped(implementType);
+                }
+            }
+
             return services;
         }
+        /// <summary>
+        /// AddHangfireJob
+        /// </summary>
+        /// <param name="serviceProvider"></param>
+        private static void AddHangfireJob(IServiceProvider serviceProvider)
+        {
+            var baseType = typeof(Core.Job.IJob);
+            var path = AppDomain.CurrentDomain.RelativeSearchPath ?? AppDomain.CurrentDomain.BaseDirectory;
+            var referencedAssemblies = System.IO.Directory.GetFiles(path, "ModernWMS*.dll").Select(Assembly.LoadFrom).ToArray();
+            var types = referencedAssemblies
+                .SelectMany(a => a.DefinedTypes)
+                .Select(type => type.AsType())
+                .Where(x => x != baseType && baseType.IsAssignableFrom(x)).ToArray();
+            if (types != null && types.Length > 0)
+            {
+                var implementTypes = types.Where(x => x.IsClass).ToArray();
+                foreach (var implementType in implementTypes)
+                {
+                    var job = serviceProvider.GetService(implementType) as Core.Job.IJob;
+                    if (job != null)
+                    {
+                        Hangfire.RecurringJob.AddOrUpdate(() => job.Execute(), job.CronExpression, TimeZoneInfo.Local, "wms");
+                    }
+                }
+            }
+        }
+        #endregion
 
-        #endregion dynamic injection
     }
 }

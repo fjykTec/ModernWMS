@@ -645,4 +645,13 @@
   <data name="username_existed" xml:space="preserve">
     <value>User name already exists</value>
   </data>
+  <data name="stock_insufficiency" xml:space="preserve">
+    <value>present stock is not sufficient.</value>
+  </data>
+  <data name="job_number" xml:space="preserve">
+    <value>Job Number</value>
+  </data>
+  <data name="process_valid" xml:space="preserve">
+    <value>Processing details cannot all be source products or target products.</value>
+  </data>
 </root>
