@@ -49,6 +49,7 @@
                   <vxe-column field="spu_code" :title="$t('wms.warehouseWorking.warehouseProcessing.spu_code')"></vxe-column>
                   <vxe-column field="spu_name" :title="$t('wms.warehouseWorking.warehouseProcessing.spu_name')"></vxe-column>
                   <vxe-column field="sku_code" :title="$t('wms.warehouseWorking.warehouseProcessing.sku_code')"></vxe-column>
+                  <vxe-column field="series_number" :title="$t('wms.stockLocation.series_number')"></vxe-column>
                   <vxe-column
                     field="qty"
                     :title="$t('wms.warehouseWorking.warehouseProcessing.qty')"
@@ -172,7 +173,10 @@ const jobTypeComp = computed(() => (data.form.job_type === PROCESS_JOB_COMBINE
     ? i18n.global.t('wms.warehouseWorking.warehouseProcessing.process_combine')
     : i18n.global.t('wms.warehouseWorking.warehouseProcessing.process_split')))
 const operateDisabled = computed(() => !!isUpdate.value)
-const qrCodeValue = computed(() => data.form.id.toString())
+const qrCodeValue = computed(() => JSON.stringify({
+    id: data.form.id.toString(),
+    type: 'warehouseProcessing'
+  }))
 
 const method = reactive({
   initForm: () => {
@@ -261,6 +265,7 @@ const method = reactive({
             spu_code: record.spu_code,
             spu_name: record.spu_name,
             sku_code: record.sku_code,
+            series_number: record.series_number,
             unit: record.unit,
             is_update_stock: false,
             qty_available: record.qty_available
@@ -286,6 +291,7 @@ const method = reactive({
           spu_code: selectRecords[0].spu_code,
           spu_name: selectRecords[0].spu_name,
           sku_code: selectRecords[0].sku_code,
+          series_number: selectRecords[0].series_number,
           unit: selectRecords[0].unit,
           is_update_stock: false,
           qty_available: selectRecords[0].qty_available

@@ -1,11 +1,11 @@
 <template>
-  <v-dialog v-model="isShow" :width="'70%'" transition="dialog-top-transition" :persistent="true">
+  <v-dialog v-model="isShow" transition="dialog-top-transition" :persistent="true">
     <template #default>
-      <v-card class="formCard">
+      <v-card class="formCard" :width="dialogWidth">
         <v-toolbar color="white" :title="`${$t('router.sideBar.deliveryManagement')}`"></v-toolbar>
         <v-card-text>
           <v-form ref="formRef">
-            <v-select
+            <!-- <v-select
               v-model="data.form.customer_name"
               :items="data.combobox.customer_name"
               item-title="label"
@@ -15,7 +15,25 @@
               variant="outlined"
               clearable
               @update:model-value="method.customerNameChange"
-            ></v-select>
+            ></v-select> -->
+            <customFilterSelect
+              v-model="data.form"
+              :items="data.combobox.customer_name"
+              item-title="label"
+              :rules="data.rules.customer_name"
+              :label="$t('wms.deliveryManagement.customer_name')"
+              :mapping="[
+                {
+                  in: 'customer_name',
+                  out: 'label'
+                },
+                {
+                  in: 'customer_id',
+                  out: 'value'
+                }
+              ]"
+            />
+
             <v-row v-for="(item, index) of data.form.detailList" :key="index" style="margin-top: 5px">
               <!-- <v-select
                   v-model="item.sku_id"
@@ -99,6 +117,7 @@ import { checkDetailRepeatGetBool } from '@/utils/dataVerification/page'
 import skuSelect from '@/components/select/sku-select.vue'
 import { CommodityDetailJoinMainVO } from '@/types/Base/CommodityManagement'
 import { IsInteger } from '@/utils/dataVerification/formRule'
+import customFilterSelect from '@/components/custom-filter-select.vue'
 
 const formRef = ref()
 const emit = defineEmits(['close', 'saveSuccess'])
@@ -109,7 +128,8 @@ const props = defineProps<{
 }>()
 
 const isShow = computed(() => props.showDialog)
-
+// eslint-disable-next-line vue/return-in-computed-property
+const dialogWidth = computed(() => (data.form.detailList.length === 0 ? '30%' : '70%'))
 const data = reactive({
   curSelectType: '',
   showSkuDialogSelect: false,
@@ -324,4 +344,8 @@ watch(
 // .v-col {
 //   padding: 0 !important;
 // }
+.v-card {
+  margin: 0 auto;
+  transition: width 0.3s;
+}
 </style>

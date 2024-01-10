@@ -3,8 +3,11 @@
     <v-row no-gutters>
       <!-- Operate Btn -->
       <v-col cols="3" class="col">
-        <tooltip-btn icon="mdi-refresh" :tooltip-text="$t('system.page.refresh')" @click="method.refresh"></tooltip-btn>
-        <tooltip-btn icon="mdi-export-variant" :tooltip-text="$t('system.page.export')" @click="method.exportTable"> </tooltip-btn>
+        <!-- <tooltip-btn icon="mdi-refresh" :tooltip-text="$t('system.page.refresh')" @click="method.refresh"></tooltip-btn>
+        <tooltip-btn icon="mdi-export-variant" :tooltip-text="$t('system.page.export')" @click="method.exportTable"> </tooltip-btn> -->
+
+        <!-- new version -->
+        <BtnGroup :authority-list="data.authorityList" :btn-list="data.btnList" />
       </v-col>
 
       <!-- Search Input -->
@@ -71,14 +74,21 @@
       <vxe-column field="actual_qty" :title="$t('wms.stockAsnInfo.actual_qty')"></vxe-column>
       <vxe-column field="operate" :title="$t('system.page.operate')" width="160" :resizable="false" show-overflow>
         <template #default="{ row }">
-          <tooltip-btn :flat="true" icon="mdi-pencil-outline" :tooltip-text="$t('system.page.edit')" @click="method.editRow(row)"></tooltip-btn>
           <tooltip-btn
+            :flat="true"
+            icon="mdi-package-up"
+            :tooltip-text="$t('wms.stockAsnInfo.grounding')"
+            :disabled="!data.authorityList.includes('putOnTheShelf-editArrival')"
+            @click="method.editRow(row)"
+          ></tooltip-btn>
+          <!-- <tooltip-btn
             :flat="true"
             icon="mdi-delete-outline"
             :tooltip-text="$t('system.page.delete')"
             :icon-color="errorColor"
+            :disabled="!data.authorityList.includes('putOnTheShelf-delete')"
             @click="method.deleteRow(row)"
-          ></tooltip-btn>
+          ></tooltip-btn> -->
         </template>
       </vxe-column>
     </vxe-table>
@@ -94,28 +104,35 @@
     </custom-pager>
   </div>
   <updateGrounding :show-dialog="data.showDialog" :form="data.dialogForm" @close="method.closeDialog" @saveSuccess="method.saveSuccess" />
+
+  <!-- Listing operation box -->
+  <confirmGroudingDialog ref="confirmGroudingDialogRef" @sure="method.confirmGroudingSure" />
   <skuInfo :show-dialog="data.showDialogShowInfo" :form="data.dialogForm" @close="method.closeDialogShowInfo" />
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, reactive, watch } from 'vue'
+import { computed, ref, reactive, watch, onMounted } from 'vue'
 import { VxePagerEvents } from 'vxe-table'
-import { computedCardHeight, computedTableHeight, errorColor } from '@/constant/style'
+import { computedCardHeight, computedTableHeight } from '@/constant/style'
 import { StockAsnVO } from '@/types/WMS/StockAsn'
 import { PAGE_SIZE, PAGE_LAYOUT, DEFAULT_PAGE_SIZE } from '@/constant/vxeTable'
 import { hookComponent } from '@/components/system'
 import { DEBOUNCE_TIME } from '@/constant/system'
-import { setSearchObject } from '@/utils/common'
-import { SearchObject } from '@/types/System/Form'
-import { getStockAsnList, sortedAsnCancel } from '@/api/wms/stockAsn'
+import { setSearchObject, getMenuAuthorityList } from '@/utils/common'
+import { SearchObject, btnGroupItem } from '@/types/System/Form'
+import { getStockAsnList, sortedAsnCancel, revokeSorting, confirmPutaway } from '@/api/wms/stockAsn'
 import tooltipBtn from '@/components/tooltip-btn.vue'
 import i18n from '@/languages/i18n'
 import updateGrounding from './update-grounding.vue'
 import customPager from '@/components/custom-pager.vue'
 import skuInfo from './sku-info.vue'
 import { exportData } from '@/utils/exportTable'
+import BtnGroup from '@/components/system/btnGroup.vue'
+import confirmGroudingDialog from './confirm-grouding.vue'
+import { httpCodeJudge } from '@/utils/http/httpCodeJudge'
 
 const xTableStockLocation = ref()
+const confirmGroudingDialogRef = ref()
 
 const data = reactive({
   showDialog: false,
@@ -128,30 +145,17 @@ const data = reactive({
   dialogForm: ref<StockAsnVO>({
     id: 0,
     asn_no: '',
-    asn_status: 0,
-    spu_id: 0,
-    spu_code: '',
-    spu_name: '',
-    sku_id: 0,
-    sku_code: '',
-    sku_name: '',
-    origin: '',
-    length_unit: 0,
-    volume_unit: 0,
-    weight_unit: 0,
-    asn_qty: 0,
-    actual_qty: 0,
-    sorted_qty: 0,
-    shortage_qty: 0,
-    more_qty: 0,
-    damage_qty: 0,
-    weight: 0,
-    volume: 0,
-    supplier_id: 0,
-    supplier_name: '',
-    goods_owner_id: 0,
-    goods_owner_name: '',
-    is_valid: true
+    asn_batch: '',
+    estimated_arrival_time: '',
+    // asn_status: 0,
+    // weight: 0,
+    // volume: 0,
+    // goods_owner_id: 0,
+    // goods_owner_name: '',
+    // creator: '',
+    // create_time: '',
+    // last_update_time: '',
+    detailList: []
   }),
   tableData: ref<StockAsnVO[]>([]),
   tablePage: reactive({
@@ -161,10 +165,76 @@ const data = reactive({
     pageSize: DEFAULT_PAGE_SIZE,
     searchObjects: ref<Array<SearchObject>>([])
   }),
-  timer: ref<any>(null)
+  timer: ref<any>(null),
+  btnList: [] as btnGroupItem[],
+  // Menu operation permissions
+  authorityList: getMenuAuthorityList()
 })
 
 const method = reactive({
+  // Confirm listing data
+  confirmGroudingSure: async (tableData: any) => {
+    const { data: res } = await confirmPutaway(tableData)
+    if (!res.isSuccess) {
+      // 2023-12-06 Add automatic refresh of expired data
+      if (httpCodeJudge(res.errorMessage)) {
+        method.refresh()
+        confirmGroudingDialogRef.value.closeDialog()
+
+        return
+      }
+
+      hookComponent.$message({
+        type: 'error',
+        content: res.errorMessage
+      })
+      return
+    }
+    hookComponent.$message({
+      type: 'success',
+      content: `${ i18n.global.t('system.page.submit') }${ i18n.global.t('system.tips.success') }`
+    })
+
+    confirmGroudingDialogRef.value.closeDialog()
+    method.refresh()
+  },
+  // Withdrawal process
+  handleRevoke: () => {
+    const checkRecords = xTableStockLocation.value.getCheckboxRecords()
+    if (checkRecords.length > 0) {
+      const idList = checkRecords.map((item: StockAsnVO) => item.id)
+      hookComponent.$dialog({
+        content: i18n.global.t('system.tips.beforeOperation'),
+        handleConfirm: async () => {
+          const { data: res } = await revokeSorting(idList)
+          if (!res.isSuccess) {
+            // 2023-12-06 Add automatic refresh of expired data
+            if (httpCodeJudge(res.errorMessage)) {
+              method.refresh()
+
+              return
+            }
+
+            hookComponent.$message({
+              type: 'error',
+              content: res.errorMessage
+            })
+            return
+          }
+          hookComponent.$message({
+            type: 'success',
+            content: `${ i18n.global.t('system.page.delete') }${ i18n.global.t('system.tips.success') }`
+          })
+          method.refresh()
+        }
+      })
+    } else {
+      hookComponent.$message({
+        type: 'error',
+        content: i18n.global.t('wms.stockAsnInfo.selectOne')
+      })
+    }
+  },
   closeDialogShowInfo: () => {
     data.showDialogShowInfo = false
   },
@@ -182,8 +252,10 @@ const method = reactive({
     method.closeDialog()
   },
   editRow(row: StockAsnVO) {
-    data.dialogForm = JSON.parse(JSON.stringify(row))
-    data.showDialog = true
+    // data.dialogForm = JSON.parse(JSON.stringify(row))
+    // data.showDialog = true
+
+    confirmGroudingDialogRef.value.openDialog(row.id)
   },
   deleteRow(row: StockAsnVO) {
     hookComponent.$dialog({
@@ -200,7 +272,7 @@ const method = reactive({
           }
           hookComponent.$message({
             type: 'success',
-            content: `${ i18n.global.t('system.page.delete') }${ i18n.global.t('system.tips.success') }`
+            content: `${ i18n.global.t('system.page.revoke') }${ i18n.global.t('system.tips.success') }`
           })
           method.refresh()
         }
@@ -243,6 +315,29 @@ const method = reactive({
     data.tablePage.searchObjects = setSearchObject(data.searchForm)
     method.getStockAsnList()
   }
+})
+
+onMounted(() => {
+  data.btnList = [
+    {
+      name: i18n.global.t('system.page.refresh'),
+      icon: 'mdi-refresh',
+      code: '',
+      click: method.refresh
+    },
+    {
+      name: i18n.global.t('system.page.export'),
+      icon: 'mdi-export-variant',
+      code: 'putOnTheShelf-export',
+      click: method.exportTable
+    },
+    {
+      name: i18n.global.t('wms.stockAsnInfo.revoke'),
+      icon: 'mdi-arrow-left-top',
+      code: 'putOnTheShelf-delete',
+      click: method.handleRevoke
+    }
+  ]
 })
 
 const cardHeight = computed(() => computedCardHeight({}))

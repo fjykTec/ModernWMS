@@ -30,7 +30,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, onMounted, watch, nextTick } from 'vue'
+import { ref, reactive, onMounted, nextTick } from 'vue'
 import i18n from '@/languages/i18n'
 import tabWarehouse from './tab-warehouse.vue'
 import tabReservoir from './tab-reservoir.vue'

@@ -48,7 +48,7 @@
                     clearable
                     class="mb-4"
                   ></v-text-field>
-                  <v-text-field
+                  <!-- <v-text-field
                     v-model="data.form.bar_code"
                     :rules="data.rules.bar_code"
                     :label="$t('base.commodityManagement.bar_code')"
@@ -56,7 +56,7 @@
                     density="compact"
                     clearable
                     class="mb-4"
-                  ></v-text-field>
+                  ></v-text-field> -->
                   <v-select
                     v-model="data.form.supplier_name"
                     :items="data.combobox.supplier_name"
@@ -167,6 +167,11 @@
                       <vxe-input v-model="row.unit" type="text"></vxe-input>
                     </template>
                   </vxe-column>
+                  <vxe-column field="bar_code" :title="$t('base.commodityManagement.bar_code')" :edit-render="{ autofocus: '.vxe-input--inner' }">
+                    <template #edit="{ row }">
+                      <vxe-input v-model="row.bar_code" type="text"></vxe-input>
+                    </template>
+                  </vxe-column>
                   <vxe-column field="weight" :title="$t('base.commodityManagement.weight')" :edit-render="{ autofocus: '.vxe-input--inner' }">
                     <template #edit="{ row }">
                       <vxe-input v-model="row.weight" type="text"></vxe-input>
@@ -200,12 +205,6 @@
                   </vxe-column>
                   <vxe-column field="operate" :title="$t('system.page.operate')" width="100" :resizable="false" show-overflow>
                     <template #default="{ row }">
-                      <!-- <tooltip-btn
-                        :flat="true"
-                        icon="mdi-pencil-outline"
-                        :tooltip-text="$t('system.page.edit')"
-                        @click="method.editRow(row)"
-                      ></tooltip-btn> -->
                       <tooltip-btn
                         :flat="true"
                         icon="mdi-delete-outline"
@@ -223,8 +222,10 @@
         <v-card-actions class="justify-end">
           <v-btn variant="text" @click="method.closeDialog">{{ $t('system.page.close') }}</v-btn>
           <v-btn color="primary" variant="text" @click="method.submit">{{ $t('system.page.submit') }}</v-btn>
+          <v-btn color="primary" variant="text" @click="method.print">{{ $t('system.page.print') }}</v-btn>
         </v-card-actions>
       </v-card>
+      <hprintDialog ref="hprintDialogRef" :form="data.form" :tab-page="'print_page_detail'" />
     </template>
   </v-dialog>
 </template>
@@ -245,11 +246,12 @@ import { removeArrayNull } from '@/utils/common'
 import { StringLength } from '@/utils/dataVerification/formRule'
 import { isDecimal } from '@/utils/dataVerification/tableRule'
 import { exportData } from '@/utils/exportTable'
+import hprintDialog from '@/components/hiprint/hiprintFast.vue'
 
 const formRef = ref()
 const emit = defineEmits(['close', 'saveSuccess'])
 const xTable = ref()
-
+const hprintDialogRef = ref()
 const props = defineProps<{
   showDialog: boolean
   form: CommodityVO
@@ -272,7 +274,6 @@ const data = reactive({
     category_id: 0,
     category_name: '',
     spu_description: '',
-    bar_code: '',
     supplier_id: 0,
     supplier_name: '',
     brand: '',
@@ -293,7 +294,7 @@ const data = reactive({
       (val: string) => StringLength(val, 0, 200) === '' || StringLength(val, 0, 200)
     ],
     spu_description: [(val: string) => StringLength(val, 0, 1000) === '' || StringLength(val, 0, 1000)],
-    bar_code: [(val: string) => StringLength(val, 0, 64) === '' || StringLength(val, 0, 64)],
+    // bar_code: [(val: string) => StringLength(val, 0, 64) === '' || StringLength(val, 0, 64)],
     brand: [(val: string) => StringLength(val, 0, 128) === '' || StringLength(val, 0, 128)],
     category_name: [
       (val: string) => !!val || `${ i18n.global.t('system.checkText.mustInput') }${ i18n.global.t('base.commodityManagement.category_name') }!`
@@ -312,6 +313,15 @@ const data = reactive({
     ]
   },
   validRules: ref<any>({
+    bar_code: [
+      {
+        type: 'string',
+        min: 0,
+        max: 64,
+        message: `${ i18n.global.t('system.checkText.lengthValid') }${ 0 }-${ 64 }`,
+        trigger: 'change'
+      }
+    ],
     sku_code: [
       { required: true, message: `${ i18n.global.t('system.checkText.mustInput') }${ i18n.global.t('base.commodityManagement.sku_code') }` },
       {
@@ -587,6 +597,10 @@ const method = reactive({
         content: i18n.global.t('system.checkText.checkFormFail')
       })
     }
+  },
+  print() {
+    const ref = hprintDialogRef.value
+    ref.method.handleOpen()
   },
   editRow: (row: CommodityDetailVO) => {
     const $table = xTable.value

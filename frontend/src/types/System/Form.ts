@@ -26,6 +26,7 @@ export interface PageConfigProps {
   pageSize: number
   sqlTitle?: string
   searchObjects?: any
+  total?: number
 }
 
 export interface VxeTableRow {
@@ -42,4 +43,11 @@ export interface SearchObject {
 export enum SearchOperator {
   INCLUDE = 6,
   EQUAL = 1
+}
+
+export interface btnGroupItem {
+  name: string
+  icon: string
+  code: string
+  click: () => void
 }

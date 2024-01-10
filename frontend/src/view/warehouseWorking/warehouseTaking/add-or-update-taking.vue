@@ -55,6 +55,7 @@
               variant="outlined"
               disabled
             ></v-text-field>
+            <v-text-field v-model="data.form.series_number" :label="$t('wms.stockLocation.series_number')" variant="outlined" disabled></v-text-field>
             <v-text-field
               v-model="data.form.warehouse_name"
               :label="$t('wms.warehouseWorking.warehouseTaking.warehouse')"
@@ -116,7 +117,10 @@ const emit = defineEmits(['close', 'saveSuccess'])
 const isUpdate = computed(() => props.form.id && props.form.id > 0)
 const operateDisabled = computed(() => !!isUpdate.value)
 const isFromStock = computed(() => data.curStockID > 0)
-const qrCodeValue = computed(() => data.form.id.toString())
+const qrCodeValue = computed(() => JSON.stringify({
+    id: data.form.id.toString(),
+    type: 'warehouseTaking'
+  }))
 
 const props = defineProps<{
   showDialog: boolean
@@ -146,6 +150,7 @@ const data = reactive({
     spu_code: '',
     spu_name: '',
     sku_code: '',
+    series_number: '',
     warehouse_name: '',
     location_name: '',
     handler: '',
@@ -198,6 +203,7 @@ const method = reactive({
       data.form.spu_code = selectRecords[0].spu_code
       data.form.spu_name = selectRecords[0].spu_name
       data.form.sku_code = selectRecords[0].sku_code
+      data.form.series_number = selectRecords[0].series_number
       data.form.book_qty = selectRecords[0].qty_available
     } catch (error) {
       // console.error(error)

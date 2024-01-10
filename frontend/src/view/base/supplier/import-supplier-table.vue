@@ -159,12 +159,12 @@ const method = reactive({
         data.importData = []
         ws.forEach((value: any, index: number, ws: any) => {
           data.importData.push({
-            supplier_name: ws[index][i18n.global.t('base.supplier.supplier_name')] ? ws[index][i18n.global.t('base.supplier.supplier_name')] + '' : '',
-            city: ws[index][i18n.global.t('base.supplier.city')] ? ws[index][i18n.global.t('base.supplier.city')] + '' : '',
-            address: ws[index][i18n.global.t('base.supplier.address')] ? ws[index][i18n.global.t('base.supplier.address')] + '' : '',
-            manager: ws[index][i18n.global.t('base.supplier.manager')] ? ws[index][i18n.global.t('base.supplier.manager')] + '' : '',
-            email: ws[index][i18n.global.t('base.supplier.email')] ? ws[index][i18n.global.t('base.supplier.email')] + '' : '',
-            contact_tel: ws[index][i18n.global.t('base.supplier.contact_tel')] ? ws[index][i18n.global.t('base.supplier.contact_tel')] + '' : ''
+            supplier_name: ws[index][i18n.global.t('base.supplier.supplier_name')] ? `${ ws[index][i18n.global.t('base.supplier.supplier_name')] }` : '',
+            city: ws[index][i18n.global.t('base.supplier.city')] ? `${ ws[index][i18n.global.t('base.supplier.city')] }` : '',
+            address: ws[index][i18n.global.t('base.supplier.address')] ? `${ ws[index][i18n.global.t('base.supplier.address')] }` : '',
+            manager: ws[index][i18n.global.t('base.supplier.manager')] ? `${ ws[index][i18n.global.t('base.supplier.manager')] }` : '',
+            email: ws[index][i18n.global.t('base.supplier.email')] ? `${ ws[index][i18n.global.t('base.supplier.email')] }` : '',
+            contact_tel: ws[index][i18n.global.t('base.supplier.contact_tel')] ? `${ ws[index][i18n.global.t('base.supplier.contact_tel')] }` : ''
           })
         })
       }

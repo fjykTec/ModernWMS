@@ -1,4 +1,4 @@
-import { UniformFileNaming, TablePage } from '../System/Form'
+import { UniformFileNaming, TablePage, btnGroupItem } from '../System/Form'
 
 export interface UserVO extends UniformFileNaming {
   id: number
@@ -33,6 +33,8 @@ export interface DataProps {
   showDialog: boolean
   dialogForm: UserVO
   timer: any
+  btnList: btnGroupItem[]
+  authorityList: string[]
 }
 
 export interface ChangePwdAPIParams {

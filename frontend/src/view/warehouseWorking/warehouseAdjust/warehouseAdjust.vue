@@ -12,8 +12,10 @@
                   <!-- Operate Btn -->
                   <v-col cols="3" class="col">
                     <!-- <tooltip-btn icon="mdi-plus" :tooltip-text="$t('system.page.add')" @click="method.add()"></tooltip-btn> -->
-                    <tooltip-btn icon="mdi-refresh" :tooltip-text="$t('system.page.refresh')" @click="method.refresh"></tooltip-btn>
-                    <tooltip-btn icon="mdi-export-variant" :tooltip-text="$t('system.page.export')" @click="method.exportTable"> </tooltip-btn>
+                    <!-- <tooltip-btn icon="mdi-refresh" :tooltip-text="$t('system.page.refresh')" @click="method.refresh"></tooltip-btn>
+                    <tooltip-btn icon="mdi-export-variant" :tooltip-text="$t('system.page.export')" @click="method.exportTable"> </tooltip-btn> -->
+
+                    <BtnGroup :authority-list="data.authorityList" :btn-list="data.btnList" />
                   </v-col>
 
                   <!-- Search Input -->
@@ -70,7 +72,12 @@
                     :title="$t('wms.warehouseWorking.warehouseAdjust.handle_time')"
                   ></vxe-column> -->
                   <vxe-column field="creator" :title="$t('wms.warehouseWorking.warehouseAdjust.creator')"></vxe-column>
-                  <vxe-column field="create_time" width="170px" :title="$t('wms.warehouseWorking.warehouseAdjust.create_time')"></vxe-column>
+                  <vxe-column
+                    field="create_time"
+                    width="170px"
+                    :formatter="['formatDate', 'yyyy-MM-dd HH:mm']"
+                    :title="$t('wms.warehouseWorking.warehouseAdjust.create_time')"
+                  ></vxe-column>
                   <!-- <vxe-column field="operate" :title="$t('system.page.operate')" width="200" :resizable="false" show-overflow>
                     <template #default="{ row }">
                       <tooltip-btn
@@ -124,7 +131,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, reactive, watch, nextTick, onActivated } from 'vue'
+import { computed, ref, reactive, watch, nextTick, onActivated, onMounted } from 'vue'
 import { VxePagerEvents } from 'vxe-table'
 import { computedCardHeight, computedTableHeight } from '@/constant/style'
 import { WarehouseAdjustVO } from '@/types/WarehouseWorking/WarehouseAdjust'
@@ -133,14 +140,14 @@ import { hookComponent } from '@/components/system'
 import { deleteStockAdjust, getStockAdjustList, getStockAdjustOne, confirmStockAdjust } from '@/api/wms/warehouseAdjust'
 import { PROCESS_JOB_COMBINE } from '@/constant/warehouseWorking'
 import { DEBOUNCE_TIME } from '@/constant/system'
-import { setSearchObject } from '@/utils/common'
-import { SearchObject } from '@/types/System/Form'
+import { setSearchObject, getMenuAuthorityList } from '@/utils/common'
+import { SearchObject, btnGroupItem } from '@/types/System/Form'
 import { formatAdjustJobType } from '@/utils/format/formatWarehouseWorking'
-import tooltipBtn from '@/components/tooltip-btn.vue'
 import addOrUpdateDialog from './add-or-update-adjust.vue'
 import i18n from '@/languages/i18n'
 import customPager from '@/components/custom-pager.vue'
 import { exportData } from '@/utils/exportTable'
+import BtnGroup from '@/components/system/btnGroup.vue'
 
 const xTable = ref()
 
@@ -174,7 +181,10 @@ const data = reactive({
     pageIndex: 1,
     pageSize: DEFAULT_PAGE_SIZE,
     searchObjects: ref<Array<SearchObject>>([])
-  })
+  }),
+  btnList: [] as btnGroupItem[],
+  // Menu operation permissions
+  authorityList: getMenuAuthorityList()
 })
 
 const method = reactive({
@@ -325,6 +335,23 @@ const method = reactive({
 
 onActivated(() => {
   method.refresh()
+})
+
+onMounted(() => {
+  data.btnList = [
+    {
+      name: i18n.global.t('system.page.refresh'),
+      icon: 'mdi-refresh',
+      code: '',
+      click: method.refresh
+    },
+    {
+      name: i18n.global.t('system.page.export'),
+      icon: 'mdi-export-variant',
+      code: 'export',
+      click: method.exportTable
+    }
+  ]
 })
 
 const cardHeight = computed(() => computedCardHeight({ hasTab: false }))

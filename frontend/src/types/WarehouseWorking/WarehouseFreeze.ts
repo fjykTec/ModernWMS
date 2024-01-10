@@ -14,4 +14,5 @@ export interface WarehouseFreezeVO extends UniformFileNaming {
   spu_code: string
   spu_name: string
   sku_code: string
+  series_number: string
 }

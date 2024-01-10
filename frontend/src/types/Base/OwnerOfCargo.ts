@@ -1,4 +1,4 @@
-import { UniformFileNaming, TablePage } from '../System/Form'
+import { UniformFileNaming, TablePage, btnGroupItem } from '../System/Form'
 
 export interface OwnerOfCargoVO extends UniformFileNaming {
   id: number
@@ -27,4 +27,6 @@ export interface DataProps {
   }
   tablePage: TablePage
   timer: any
+  btnList: btnGroupItem[]
+  authorityList: string[]
 }

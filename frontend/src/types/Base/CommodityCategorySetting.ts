@@ -1,5 +1,5 @@
 import { VxeTablePropTypes } from 'vxe-table'
-import { UniformFileNaming } from '../System/Form'
+import { UniformFileNaming, btnGroupItem } from '../System/Form'
 
 export interface CategoryVO extends UniformFileNaming {
   id: number
@@ -13,4 +13,6 @@ export interface DataProps {
   tableTreeConfig: VxeTablePropTypes.TreeConfig
   showDialog: boolean
   dialogForm: CategoryVO
+  btnList: btnGroupItem[]
+  authorityList: string[]
 }

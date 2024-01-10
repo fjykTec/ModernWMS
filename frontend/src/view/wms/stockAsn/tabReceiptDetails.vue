@@ -3,8 +3,11 @@
     <v-row no-gutters>
       <!-- Operate Btn -->
       <v-col cols="3" class="col">
-        <tooltip-btn icon="mdi-refresh" :tooltip-text="$t('system.page.refresh')" @click="method.refresh"></tooltip-btn>
-        <tooltip-btn icon="mdi-export-variant" :tooltip-text="$t('system.page.export')" @click="method.exportTable"> </tooltip-btn>
+        <!-- <tooltip-btn icon="mdi-refresh" :tooltip-text="$t('system.page.refresh')" @click="method.refresh"></tooltip-btn>
+        <tooltip-btn icon="mdi-export-variant" :tooltip-text="$t('system.page.export')" @click="method.exportTable"> </tooltip-btn> -->
+
+        <!-- new version -->
+        <BtnGroup :authority-list="data.authorityList" :btn-list="data.btnList" />
       </v-col>
 
       <!-- Search Input -->
@@ -72,6 +75,11 @@
       <vxe-column field="shortage_qty" :title="$t('wms.stockAsnInfo.shortage_qty')"></vxe-column>
       <vxe-column field="more_qty" :title="$t('wms.stockAsnInfo.more_qty')"></vxe-column>
       <vxe-column field="damage_qty" :title="$t('wms.stockAsnInfo.damage_qty')"></vxe-column>
+      <!-- <vxe-column field="operate" :title="$t('system.page.operate')" width="160" :resizable="false" show-overflow>
+        <template #default="{ row }">
+          <tooltip-btn :flat="true" icon="mdi-eye-outline" :tooltip-text="$t('system.page.view')" @click="method.viewRow(row)"></tooltip-btn>
+        </template>
+      </vxe-column> -->
     </vxe-table>
     <custom-pager
       :current-page="data.tablePage.pageIndex"
@@ -85,26 +93,31 @@
     </custom-pager>
   </div>
   <skuInfo :show-dialog="data.showDialogShowInfo" :form="data.dialogForm" @close="method.closeDialogShowInfo" />
+
+  <!-- View Details Box -->
+  <view-detail-dialog ref="ViewDetailDialogRef" />
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, reactive, watch } from 'vue'
+import { computed, ref, reactive, watch, onMounted } from 'vue'
 import { VxePagerEvents } from 'vxe-table'
-import { computedCardHeight, computedTableHeight, errorColor } from '@/constant/style'
+import { computedCardHeight, computedTableHeight } from '@/constant/style'
 import { StockAsnVO } from '@/types/WMS/StockAsn'
 import { PAGE_SIZE, PAGE_LAYOUT, DEFAULT_PAGE_SIZE } from '@/constant/vxeTable'
 import { hookComponent } from '@/components/system'
 import { DEBOUNCE_TIME } from '@/constant/system'
-import { setSearchObject } from '@/utils/common'
-import { SearchObject } from '@/types/System/Form'
+import { setSearchObject, getMenuAuthorityList } from '@/utils/common'
+import { SearchObject, btnGroupItem } from '@/types/System/Form'
 import { getStockAsnList } from '@/api/wms/stockAsn'
-import tooltipBtn from '@/components/tooltip-btn.vue'
 import i18n from '@/languages/i18n'
 import customPager from '@/components/custom-pager.vue'
 import skuInfo from './sku-info.vue'
 import { exportData } from '@/utils/exportTable'
+import BtnGroup from '@/components/system/btnGroup.vue'
+import ViewDetailDialog from './view-detail-dialog.vue'
 
 const xTableStockLocation = ref()
+const ViewDetailDialogRef = ref()
 
 const data = reactive({
   showDialog: false,
@@ -118,30 +131,17 @@ const data = reactive({
   dialogForm: ref<StockAsnVO>({
     id: 0,
     asn_no: '',
-    asn_status: 0,
-    spu_id: 0,
-    spu_code: '',
-    spu_name: '',
-    sku_id: 0,
-    sku_code: '',
-    sku_name: '',
-    origin: '',
-    length_unit: 0,
-    volume_unit: 0,
-    weight_unit: 0,
-    asn_qty: 0,
-    actual_qty: 0,
-    sorted_qty: 0,
-    shortage_qty: 0,
-    more_qty: 0,
-    damage_qty: 0,
-    weight: 0,
-    volume: 0,
-    supplier_id: 0,
-    supplier_name: '',
-    goods_owner_id: 0,
-    goods_owner_name: '',
-    is_valid: true
+    asn_batch: '',
+    estimated_arrival_time: '',
+    // asn_status: 0,
+    // weight: 0,
+    // volume: 0,
+    // goods_owner_id: 0,
+    // goods_owner_name: '',
+    // creator: '',
+    // create_time: '',
+    // last_update_time: '',
+    detailList: []
   }),
   tablePage: reactive({
     total: 0,
@@ -150,10 +150,17 @@ const data = reactive({
     pageSize: DEFAULT_PAGE_SIZE,
     searchObjects: ref<Array<SearchObject>>([])
   }),
-  timer: ref<any>(null)
+  timer: ref<any>(null),
+  btnList: [] as btnGroupItem[],
+  // Menu operation permissions
+  authorityList: getMenuAuthorityList()
 })
 
 const method = reactive({
+  // View Rows
+  viewRow: (row: StockAsnVO) => {
+    ViewDetailDialogRef.value.openDialog(row.id)
+  },
   closeDialogShowInfo: () => {
     data.showDialogShowInfo = false
   },
@@ -197,6 +204,23 @@ const method = reactive({
     data.tablePage.searchObjects = setSearchObject(data.searchForm)
     method.getStockAsnList()
   }
+})
+
+onMounted(() => {
+  data.btnList = [
+    {
+      name: i18n.global.t('system.page.refresh'),
+      icon: 'mdi-refresh',
+      code: '',
+      click: method.refresh
+    },
+    {
+      name: i18n.global.t('system.page.export'),
+      icon: 'mdi-export-variant',
+      code: 'detail-export',
+      click: method.exportTable
+    }
+  ]
 })
 
 const cardHeight = computed(() => computedCardHeight({}))

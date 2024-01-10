@@ -3,9 +3,11 @@
     <v-row no-gutters>
       <!-- Operate Btn -->
       <v-col cols="3" class="col">
-        <tooltip-btn icon="mdi-plus" :tooltip-text="$t('system.page.add')" @click="method.add"></tooltip-btn>
+        <!-- <tooltip-btn icon="mdi-plus" :tooltip-text="$t('system.page.add')" @click="method.add"></tooltip-btn>
         <tooltip-btn icon="mdi-refresh" :tooltip-text="$t('system.page.refresh')" @click="method.refresh"></tooltip-btn>
-        <tooltip-btn icon="mdi-export-variant" :tooltip-text="$t('system.page.export')" @click="method.exportTable"> </tooltip-btn>
+        <tooltip-btn icon="mdi-export-variant" :tooltip-text="$t('system.page.export')" @click="method.exportTable"> </tooltip-btn> -->
+        <!-- new version -->
+        <BtnGroup :authority-list="data.authorityList" :btn-list="data.btnList" />
       </v-col>
 
       <!-- Search Input -->
@@ -48,9 +50,15 @@
       height: cardHeight
     }"
   >
-    <vxe-table ref="xTableGoodsLocation" :column-config="{ minWidth: '100px' }" :data="data.tableData" :height="tableHeight" align="center">
+    <vxe-table
+      ref="xTableGoodsLocation"
+      :column-config="{ minWidth: '100px' }"
+      :data="data.tableData"
+      :height="tableHeight"
+      align="center"
+    >
+      <vxe-column type="checkbox" width="50" fixed="left"></vxe-column>
       <vxe-column type="seq" width="60"></vxe-column>
-      <vxe-column type="checkbox" width="50"></vxe-column>
       <vxe-column field="warehouse_name" :title="$t('base.warehouseSetting.warehouse_name')"></vxe-column>
       <vxe-column field="warehouse_area_name" :title="$t('base.warehouseSetting.area_name')"></vxe-column>
       <vxe-column field="warehouse_area_property" :title="$t('base.warehouseSetting.area_property')">
@@ -73,14 +81,35 @@
           <span>{{ formatIsValid(row[column.property]) }}</span>
         </template>
       </vxe-column>
-      <vxe-column field="operate" :title="$t('system.page.operate')" width="160" :resizable="false" show-overflow>
+      <vxe-column field="operate" :title="$t('system.page.operate')" width="140px" :resizable="false" show-overflow>
         <template #default="{ row }">
-          <tooltip-btn :flat="true" icon="mdi-pencil-outline" :tooltip-text="$t('system.page.edit')" @click="method.editRow(row)"></tooltip-btn>
+          <!-- <tooltip-btn
+            :flat="true"
+            icon="mdi-qrcode"
+            :tooltip-text="$t('base.commodityManagement.printQrCode')"
+            :disabled="!data.authorityList.includes('location-printQrCode')"
+            @click="method.printQrCode(row)"
+          ></tooltip-btn> -->
+          <!-- <tooltip-btn
+            :flat="true"
+            icon="mdi-barcode"
+            :tooltip-text="$t('base.commodityManagement.printBarCode')"
+            :disabled="!data.authorityList.includes('location-printBarCode')"
+            @click="method.printBarCode(row)"
+          ></tooltip-btn> -->
+          <tooltip-btn
+            :flat="true"
+            icon="mdi-pencil-outline"
+            :tooltip-text="$t('system.page.edit')"
+            :disabled="!data.authorityList.includes('location-save')"
+            @click="method.editRow(row)"
+          ></tooltip-btn>
           <tooltip-btn
             :flat="true"
             icon="mdi-delete-outline"
             :tooltip-text="$t('system.page.delete')"
             :icon-color="errorColor"
+            :disabled="!data.authorityList.includes('location-delete')"
             @click="method.deleteRow(row)"
           ></tooltip-btn>
         </template>
@@ -98,28 +127,44 @@
     </custom-pager>
   </div>
   <add-or-update-dialog :show-dialog="data.showDialog" :form="data.dialogForm" @close="method.closeDialog" @saveSuccess="method.saveSuccess" />
+
+  <!-- Print QR code -->
+  <qr-code-dialog ref="qrCodeDialogRef" :menu="'warehouseSetting-location'">
+    <template #left="{ slotData }">
+      <p>{{ $t('base.warehouseSetting.warehouse_name') }}:{{ slotData.warehouse_name }}</p> &nbsp;
+      <p>{{ $t('base.warehouseSetting.area_name') }}:{{ slotData.warehouse_area_name }}</p> &nbsp;
+      <p>{{ $t('base.warehouseSetting.location_name') }}:{{ slotData.location_name }}</p> &nbsp;
+    </template>
+  </qr-code-dialog>
+  <!-- Print barcode -->
+  <bar-code-dialog ref="barCodeDialogRef" :menu="'warehouseSetting-location'" />
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, reactive, watch } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { VxePagerEvents } from 'vxe-table'
 import { computedCardHeight, computedTableHeight, errorColor } from '@/constant/style'
 import { GoodsLocationVO } from '@/types/Base/Warehouse'
-import { PAGE_SIZE, PAGE_LAYOUT, DEFAULT_PAGE_SIZE } from '@/constant/vxeTable'
+import { DEFAULT_PAGE_SIZE, PAGE_LAYOUT, PAGE_SIZE } from '@/constant/vxeTable'
 import { hookComponent } from '@/components/system'
 import { deleteGoodsLocation, getGoodsLocationList } from '@/api/base/warehouseSetting'
-import tooltipBtn from '@/components/tooltip-btn.vue'
-import addOrUpdateDialog from './add-or-update-location.vue'
 import i18n from '@/languages/i18n'
 import { formatIsValid } from '@/utils/format/formatSystem'
 import { formatAreaProperty } from '@/utils/format/formatWarehouse'
-import customPager from '@/components/custom-pager.vue'
-import { setSearchObject } from '@/utils/common'
+import { getMenuAuthorityList, setSearchObject } from '@/utils/common'
 import { DEBOUNCE_TIME } from '@/constant/system'
-import { SearchObject } from '@/types/System/Form'
+import { btnGroupItem, SearchObject } from '@/types/System/Form'
 import { exportData } from '@/utils/exportTable'
+import tooltipBtn from '@/components/tooltip-btn.vue'
+import addOrUpdateDialog from './add-or-update-location.vue'
+import customPager from '@/components/custom-pager.vue'
+import BtnGroup from '@/components/system/btnGroup.vue'
+import BarCodeDialog from '@/components/codeDialog/barCodeDialog.vue'
+import QrCodeDialog from '@/components/codeDialog/qrCodeDialog.vue'
 
 const xTableGoodsLocation = ref()
+const qrCodeDialogRef = ref()
+const barCodeDialogRef = ref()
 
 const data = reactive({
   showDialog: false,
@@ -151,10 +196,54 @@ const data = reactive({
     pageSize: DEFAULT_PAGE_SIZE,
     searchObjects: ref<Array<SearchObject>>([])
   }),
-  timer: ref<any>(null)
+  selectRowData: [],
+  timer: ref<any>(null),
+  btnList: [] as btnGroupItem[],
+  // Menu operation permissions
+  authorityList: getMenuAuthorityList() as string[]
 })
 
 const method = reactive({
+  // Print QR code
+  printQrCode: () => {
+    const records = xTableGoodsLocation.value.getCheckboxRecords()
+
+    // data.selectRowData.length === 0 ? (data.selectRowData = [row]) : ''
+    // const records: any[] = data.selectRowData
+    if (records.length > 0) {
+      for (const item of records) {
+        item.type = 'warehouse'
+      }
+      qrCodeDialogRef.value.openDialog(records)
+    } else {
+      hookComponent.$message({
+        type: 'error',
+        content: i18n.global.t('base.userManagement.checkboxIsNull')
+      })
+    }
+  },
+  printBarCode: () => {
+    let records = xTableGoodsLocation.value.getCheckboxRecords()
+    records = records.filter((item) => item.id)
+    // data.selectRowData.length === 0 ? (data.selectRowData = [row]) : ''
+    // let records: any[] = data.selectRowData
+
+    if (records.length > 0) {
+      barCodeDialogRef.value.openDialog(records)
+    } else {
+      hookComponent.$message({
+        type: 'error',
+        content: i18n.global.t('base.userManagement.checkboxIsNull')
+      })
+    }
+  },
+  selectAllEvent({ checked }) {
+    const records = xTableGoodsLocation.value.getCheckboxRecords()
+    checked ? (data.selectRowData = records) : (data.selectRowData = [])
+  },
+  selectChangeEvent() {
+    data.selectRowData = xTableGoodsLocation.value.getCheckboxRecords()
+  },
   // Open a dialog to add
   add: () => {
     data.dialogForm = {
@@ -246,6 +335,41 @@ const method = reactive({
     data.tablePage.searchObjects = setSearchObject(data.searchForm)
     method.getGoodsLocationList()
   }
+})
+
+onMounted(() => {
+  data.btnList = [
+    {
+      name: i18n.global.t('system.page.add'),
+      icon: 'mdi-plus',
+      code: 'location-save',
+      click: method.add
+    },
+    {
+      name: i18n.global.t('system.page.refresh'),
+      icon: 'mdi-refresh',
+      code: '',
+      click: method.refresh
+    },
+    {
+      name: i18n.global.t('system.page.export'),
+      icon: 'mdi-export-variant',
+      code: 'location-export',
+      click: method.exportTable
+    },
+    {
+      name: i18n.global.t('base.commodityManagement.printQrCode'),
+      icon: 'mdi-qrcode',
+      code: 'location-printQrCode',
+      click: method.printQrCode
+    },
+    {
+      name: i18n.global.t('base.commodityManagement.printBarCode'),
+      icon: 'mdi-barcode',
+      code: 'location-printBarCode',
+      click: method.printBarCode
+    }
+  ]
 })
 
 const cardHeight = computed(() => computedCardHeight({}))

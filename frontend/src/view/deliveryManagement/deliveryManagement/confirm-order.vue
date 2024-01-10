@@ -67,6 +67,7 @@
                 <vxe-column field="location_name" :title="$t('wms.stock.location_name')"> </vxe-column>
                 <vxe-column field="goods_owner_name" :title="$t('base.ownerOfCargo.goods_owner_name')"> </vxe-column>
                 <vxe-column field="qty_available" :title="$t('wms.deliveryManagement.qty_available')"></vxe-column>
+                <vxe-column field="series_number" :title="$t('wms.stockLocation.series_number')"></vxe-column>
                 <vxe-column field="pick_qty" :title="$t('wms.deliveryManagement.detailQty')" :edit-render="{}">
                   <template #edit="{ row }">
                     <vxe-input v-model="row.pick_qty" type="text"></vxe-input>
@@ -93,6 +94,7 @@ import { getConfirmOrderInfoAndStock, confirmOrder } from '@/api/wms/deliveryMan
 import { hookComponent } from '@/components/system/index'
 import { isInteger } from '@/utils/dataVerification/tableRule'
 import CustomCheckbox from '@/components/custom-checkbox.vue'
+import { httpCodeJudge } from '@/utils/http/httpCodeJudge'
 
 const xTable = ref()
 const detailXTable = ref()
@@ -195,6 +197,15 @@ const method = reactive({
       // console.log(data.treeData)
       const { data: res } = await confirmOrder(data.treeData)
       if (!res.isSuccess) {
+        // 2023-12-06 Add automatic refresh of expired data
+        if (httpCodeJudge(res.errorMessage, false)) {
+          hookComponent.$message({
+            type: 'error',
+            content: i18n.global.t('system.tips.dataExpiration')
+          })
+          return
+        }
+
         hookComponent.$message({
           type: 'error',
           content: res.errorMessage

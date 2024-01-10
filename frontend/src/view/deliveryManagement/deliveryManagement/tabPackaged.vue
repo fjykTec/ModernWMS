@@ -3,8 +3,10 @@
     <v-row no-gutters>
       <!-- Operate Btn -->
       <v-col cols="3" class="col">
-        <tooltip-btn icon="mdi-refresh" :tooltip-text="$t('system.page.refresh')" @click="method.refresh"></tooltip-btn>
-        <tooltip-btn icon="mdi-export-variant" :tooltip-text="$t('system.page.export')" @click="method.exportTable"> </tooltip-btn>
+        <!-- <tooltip-btn icon="mdi-refresh" :tooltip-text="$t('system.page.refresh')" @click="method.refresh"></tooltip-btn>
+        <tooltip-btn icon="mdi-export-variant" :tooltip-text="$t('system.page.export')" @click="method.exportTable"> </tooltip-btn> -->
+
+        <BtnGroup :authority-list="data.authorityList" :btn-list="data.btnList" />
       </v-col>
 
       <!-- Search Input -->
@@ -58,15 +60,30 @@
       height: cardHeight
     }"
   >
-    <vxe-table ref="xTable" :column-config="{ minWidth: '100px' }" :data="data.tableData" :height="tableHeight" align="center">
+    <vxe-table
+      ref="xTable"
+      :checkbox-config="{
+        checkMethod: method.getCheckBoxDisableState,
+        visibleMethod: method.getCheckBoxDisableState
+      }"
+      :column-config="{ minWidth: '100px' }"
+      :data="data.tableData"
+      :height="tableHeight"
+      align="center"
+    >
       <template #empty>
         {{ i18n.global.t('system.page.noData') }}
       </template>
       <vxe-column type="seq" width="60"></vxe-column>
-      <!-- <vxe-column type="checkbox" width="50"></vxe-column> -->
+      <vxe-column type="checkbox" width="50"></vxe-column>
+      <vxe-column :title="$t('wms.deliveryManagement.state')">
+        <template #default="{ row }">
+          <span>{{ `${row.is_todo ? $t('wms.deliveryManagement.packageTodo') : $t('wms.deliveryManagement.packageReady')}` }}</span>
+        </template>
+      </vxe-column>
       <vxe-column field="dispatch_no" :title="$t('wms.deliveryManagement.dispatch_no')"></vxe-column>
       <vxe-column field="spu_code" :title="$t('wms.deliveryManagement.spu_code')"></vxe-column>
-      <vxe-column field="spu_description" :title="$t('wms.deliveryManagement.spu_description')"></vxe-column>
+      <vxe-column field="spu_description" width="200px" :title="$t('wms.deliveryManagement.spu_description')"></vxe-column>
       <vxe-column field="spu_name" :title="$t('wms.deliveryManagement.spu_name')"></vxe-column>
       <vxe-column field="sku_code" :title="$t('wms.deliveryManagement.sku_code')"></vxe-column>
       <vxe-column field="bar_code" :title="$t('wms.deliveryManagement.bar_code')"></vxe-column>
@@ -84,10 +101,20 @@
         </template>
       </vxe-column>
       <vxe-column field="package_person" :title="$t('wms.deliveryManagement.package_person')"></vxe-column>
-      <vxe-column field="package_time" width="170px" :title="$t('wms.deliveryManagement.package_time')"></vxe-column>
+      <vxe-column
+        field="package_time"
+        width="170px"
+        :formatter="['formatDate', 'yyyy-MM-dd HH:mm']"
+        :title="$t('wms.deliveryManagement.package_time')"
+      ></vxe-column>
       <vxe-column field="customer_name" :title="$t('wms.deliveryManagement.customer_name')"></vxe-column>
       <vxe-column field="creator" :title="$t('wms.deliveryManagement.creator')"></vxe-column>
-      <vxe-column field="create_time" width="170px" :title="$t('wms.deliveryManagement.create_time')"></vxe-column>
+      <vxe-column
+        field="create_time"
+        width="170px"
+        :formatter="['formatDate', 'yyyy-MM-dd HH:mm']"
+        :title="$t('wms.deliveryManagement.create_time')"
+      ></vxe-column>
       <vxe-column field="operate" :title="$t('system.page.operate')" width="140" :resizable="false" show-overflow>
         <template #default="{ row }">
           <div style="width: 100%; display: flex; justify-content: center">
@@ -96,6 +123,7 @@
               :flat="true"
               icon="mdi-arrow-u-left-top"
               :tooltip-text="$t('wms.deliveryManagement.backToThePreviousStep')"
+              :disabled="!data.authorityList.includes('packaged-revoke')"
               @click="method.backToThePreviousStep(row)"
             ></tooltip-btn>
           </div>
@@ -113,28 +141,34 @@
     >
     </custom-pager>
     <SearchDeliveredDetail :id="data.showDeliveredDetailID" :show-dialog="data.showDeliveredDetail" @close="method.closeDeliveredDetail" />
+
+    <PackageConfirm ref="PackageConfirmRef" :dialog-title="$t('wms.deliveryManagement.package')" :is-weight="false" @submit="method.dialogSubmit" />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, reactive, watch } from 'vue'
+import { computed, ref, reactive, watch, onMounted } from 'vue'
 import { VxePagerEvents } from 'vxe-table'
 import { computedCardHeight, computedTableHeight } from '@/constant/style'
-import { DeliveryManagementDetailVO } from '@/types/DeliveryManagement/DeliveryManagement'
+import { DeliveryManagementDetailVO, ConfirmItem } from '@/types/DeliveryManagement/DeliveryManagement'
 import { PAGE_SIZE, PAGE_LAYOUT, DEFAULT_PAGE_SIZE } from '@/constant/vxeTable'
 import { hookComponent } from '@/components/system'
-import { getPackaged, cancelOrderByDetail } from '@/api/wms/deliveryManagement'
+import { getPackaged, cancelOrderByDetail, handlePackage } from '@/api/wms/deliveryManagement'
 import tooltipBtn from '@/components/tooltip-btn.vue'
 import i18n from '@/languages/i18n'
 import { GetUnit } from '@/constant/commodityManagement'
 import customPager from '@/components/custom-pager.vue'
-import { setSearchObject } from '@/utils/common'
-import { TablePage } from '@/types/System/Form'
+import { setSearchObject, getMenuAuthorityList } from '@/utils/common'
+import { TablePage, btnGroupItem } from '@/types/System/Form'
 import SearchDeliveredDetail from './search-delivered-detail.vue'
 import { exportData } from '@/utils/exportTable'
 import { DEBOUNCE_TIME } from '@/constant/system'
+import BtnGroup from '@/components/system/btnGroup.vue'
+import PackageConfirm from './package-confirm.vue'
+import { httpCodeJudge } from '@/utils/http/httpCodeJudge'
 
 const xTable = ref()
+const PackageConfirmRef = ref()
 
 const data = reactive({
   showDeliveredDetailID: 0,
@@ -155,7 +189,10 @@ const data = reactive({
     pageIndex: 1,
     pageSize: DEFAULT_PAGE_SIZE,
     searchObjects: []
-  })
+  }),
+  btnList: [] as btnGroupItem[],
+  // Menu operation permissions
+  authorityList: getMenuAuthorityList()
 })
 
 const method = reactive({
@@ -222,7 +259,93 @@ const method = reactive({
   sureSearch: () => {
     data.tablePage.searchObjects = setSearchObject(data.searchForm)
     method.getPackaged()
-  }
+  },
+  handlePackage: async () => {
+    const $table = xTable.value
+    const checkTableList = $table.getCheckboxRecords()
+    const confirmList: ConfirmItem[] = []
+    if (checkTableList.length > 0) {
+      // Processing the data required by the window
+      for (const item of checkTableList) {
+        confirmList.push({
+          id: item.id,
+          spu_name: item.spu_name,
+          spu_code: item.spu_code,
+          sku_code: item.sku_code,
+          maxQty: item.unpackage_qty,
+          qty: item.unpackage_qty,
+          dispatch_no: item.dispatch_no,
+          dispatch_status: item.dispatch_status,
+          picked_qty: item.picked_qty
+        })
+      }
+
+      PackageConfirmRef.value.openDialog(confirmList)
+    } else {
+      hookComponent.$message({
+        type: 'error',
+        content: `${ i18n.global.t('base.userManagement.checkboxIsNull') }`
+      })
+    }
+  },
+  // Callback after entering packaging value
+  dialogSubmit: async (list: ConfirmItem[]) => {
+    const packList = list.map((item) => ({
+      id: item.id,
+      dispatch_no: item.dispatch_no,
+      dispatch_status: item.dispatch_status,
+      package_qty: item.qty,
+      picked_qty: item.picked_qty
+    }))
+    const { data: res } = await handlePackage(packList)
+    if (!res.isSuccess) {
+      // 2023-12-06 Add automatic refresh of expired data
+      if (httpCodeJudge(res.errorMessage)) {
+        method.refresh()
+
+        PackageConfirmRef.value.closeDialog()
+
+        return
+      }
+
+      hookComponent.$message({
+        type: 'error',
+        content: res.errorMessage
+      })
+      return
+    }
+    hookComponent.$message({
+      type: 'success',
+      content: res.data
+    })
+    PackageConfirmRef.value.closeDialog()
+    method.refresh()
+  },
+  // Check if the checkbox can be checked
+  getCheckBoxDisableState: ({ row }: { row: DeliveryManagementDetailVO }): boolean => row.is_todo
+})
+
+onMounted(() => {
+  data.btnList = [
+    {
+      name: i18n.global.t('system.page.refresh'),
+      icon: 'mdi-refresh',
+      code: '',
+      click: method.refresh
+    },
+    {
+      name: i18n.global.t('system.page.export'),
+      icon: 'mdi-export-variant',
+      code: 'packaged-export',
+      click: method.exportTable
+    },
+    {
+      name: i18n.global.t('wms.deliveryManagement.package'),
+      icon: 'mdi-package-down',
+      code: 'packaged-package',
+      click: method.handlePackage
+    }
+  ]
 })
 
 watch(

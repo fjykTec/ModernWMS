@@ -3,9 +3,11 @@
     <v-row no-gutters>
       <!-- Operate Btn -->
       <v-col cols="3" class="col">
-        <tooltip-btn icon="mdi-refresh" :tooltip-text="$t('system.page.refresh')" @click="method.refresh"></tooltip-btn>
+        <!-- <tooltip-btn icon="mdi-refresh" :tooltip-text="$t('system.page.refresh')" @click="method.refresh"></tooltip-btn>
         <tooltip-btn icon="mdi-export-variant" :tooltip-text="$t('system.page.export')" @click="method.exportTable"> </tooltip-btn>
-        <tooltip-btn icon="mdi-package-down" :tooltip-text="$t('wms.deliveryManagement.package')" @click="method.handlePackage"> </tooltip-btn>
+        <tooltip-btn icon="mdi-package-down" :tooltip-text="$t('wms.deliveryManagement.package')" @click="method.handlePackage"> </tooltip-btn> -->
+
+        <BtnGroup :authority-list="data.authorityList" :btn-list="data.btnList" />
       </v-col>
 
       <!-- Search Input -->
@@ -67,7 +69,7 @@
       <vxe-column type="checkbox" width="50"></vxe-column>
       <vxe-column field="dispatch_no" :title="$t('wms.deliveryManagement.dispatch_no')"></vxe-column>
       <vxe-column field="spu_code" :title="$t('wms.deliveryManagement.spu_code')"></vxe-column>
-      <vxe-column field="spu_description" :title="$t('wms.deliveryManagement.spu_description')"></vxe-column>
+      <vxe-column field="spu_description" width="200px" :title="$t('wms.deliveryManagement.spu_description')"></vxe-column>
       <vxe-column field="spu_name" :title="$t('wms.deliveryManagement.spu_name')"></vxe-column>
       <vxe-column field="sku_code" :title="$t('wms.deliveryManagement.sku_code')"></vxe-column>
       <vxe-column field="bar_code" :title="$t('wms.deliveryManagement.bar_code')"></vxe-column>
@@ -127,7 +129,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, reactive, watch } from 'vue'
+import { computed, ref, reactive, watch, onMounted } from 'vue'
 import { VxePagerEvents } from 'vxe-table'
 import { computedCardHeight, computedTableHeight } from '@/constant/style'
 import { DeliveryManagementDetailVO, ConfirmItem } from '@/types/DeliveryManagement/DeliveryManagement'
@@ -140,11 +142,12 @@ import i18n from '@/languages/i18n'
 import PackageConfirm from './package-confirm.vue'
 import { GetUnit } from '@/constant/commodityManagement'
 import customPager from '@/components/custom-pager.vue'
-import { setSearchObject } from '@/utils/common'
-import { TablePage } from '@/types/System/Form'
+import { setSearchObject, getMenuAuthorityList } from '@/utils/common'
+import { TablePage, btnGroupItem } from '@/types/System/Form'
 import SearchDeliveredDetail from './search-delivered-detail.vue'
 import { exportData } from '@/utils/exportTable'
 import { DEBOUNCE_TIME } from '@/constant/system'
+import BtnGroup from '@/components/system/btnGroup.vue'
 
 const xTable = ref()
 
@@ -171,7 +174,10 @@ const data = reactive({
     pageIndex: 1,
     pageSize: DEFAULT_PAGE_SIZE,
     searchObjects: []
-  })
+  }),
+  btnList: [] as btnGroupItem[],
+  // Menu operation permissions
+  authorityList: getMenuAuthorityList()
 })
 
 const method = reactive({
@@ -278,6 +284,29 @@ const method = reactive({
     data.tablePage.searchObjects = setSearchObject(data.searchForm)
     method.getToBePackaged()
   }
+})
+
+onMounted(() => {
+  data.btnList = [
+    {
+      name: i18n.global.t('system.page.refresh'),
+      icon: 'mdi-refresh',
+      code: '',
+      click: method.refresh
+    },
+    {
+      name: i18n.global.t('system.page.export'),
+      icon: 'mdi-export-variant',
+      code: 'packaged-export',
+      click: method.exportTable
+    },
+    {
+      name: i18n.global.t('wms.deliveryManagement.package'),
+      icon: 'mdi-package-down',
+      code: 'packaged-package',
+      click: method.handlePackage
+    }
+  ]
 })
 
 const cardHeight = computed(() => computedCardHeight({}))

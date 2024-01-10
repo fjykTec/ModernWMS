@@ -1,17 +1,49 @@
 <template>
-  <v-dialog v-model="isShow" :width="'30%'" transition="dialog-top-transition" :persistent="true">
+  <v-dialog v-model="data.showDialog" :width="'70%'" transition="dialog-top-transition" :persistent="true">
     <template #default>
       <v-card>
-        <v-toolbar color="white" :title="`${$t('wms.stockAsn.tabNotice')}`"></v-toolbar>
+        <v-toolbar color="white" :title="`${$t('wms.stockAsnInfo.editSorting')}`"></v-toolbar>
         <v-card-text>
-          <v-form ref="formRef">
-            <v-text-field
-              v-model="data.form.sorted_qty"
-              :label="$t('wms.stockAsnInfo.sorted_qty')"
-              :rules="data.rules.sorted_qty"
-              variant="outlined"
-            ></v-text-field>
-          </v-form>
+          <vxe-table
+            ref="xTable"
+            keep-source
+            :column-config="{ minWidth: '100px' }"
+            :data="data.tableData"
+            :height="SYSTEM_HEIGHT.SELECT_TABLE"
+            align="center"
+            :edit-rules="data.validRules"
+            :edit-config="{ trigger: 'click', mode: 'cell', activeMethod: method.activeMethod }"
+            :mouse-config="{ selected: true }"
+            :keyboard-config="{ isArrow: true, isDel: true, isEnter: true, isTab: true, isEdit: true, isChecked: true }"
+          >
+            <template #empty>
+              {{ i18n.global.t('system.page.noData') }}
+            </template>
+            <vxe-column type="seq" width="60"></vxe-column>
+            <vxe-column field="series_number" :title="$t('wms.stockAsnInfo.series_number')" :edit-render="{ autofocus: '.vxe-input--inner' }">
+              <template #edit="{ row }">
+                <vxe-input v-model="row.series_number" type="text"></vxe-input>
+              </template>
+            </vxe-column>
+            <vxe-column field="sorted_qty" :title="$t('wms.stockAsnInfo.sorted_qty')" :edit-render="{ autofocus: '.vxe-input--inner' }">
+              <template #edit="{ row }">
+                <vxe-input v-model="row.sorted_qty" type="text"></vxe-input>
+              </template>
+            </vxe-column>
+            <vxe-column field="creator" :title="$t('wms.deliveryManagement.creator')"> </vxe-column>
+            <vxe-column field="create_time" :formatter="['formatDate', 'yyyy-MM-dd']" :title="$t('wms.deliveryManagement.create_time')"> </vxe-column>
+            <vxe-column field="operate" :title="$t('system.page.operate')" width="100" :resizable="false" show-overflow>
+              <template #default="{ row }">
+                <tooltip-btn
+                  :flat="true"
+                  icon="mdi-delete-outline"
+                  :tooltip-text="$t('system.page.delete')"
+                  :icon-color="errorColor"
+                  @click="method.deleteRow(row)"
+                ></tooltip-btn>
+              </template>
+            </vxe-column>
+          </vxe-table>
         </v-card-text>
         <v-card-actions class="justify-end">
           <v-btn variant="text" @click="method.closeDialog">{{ $t('system.page.close') }}</v-btn>
@@ -23,84 +55,99 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, computed, ref, watch } from 'vue'
-import { StockAsnVO, SortingVo } from '@/types/WMS/StockAsn'
+import { reactive, ref } from 'vue'
 import i18n from '@/languages/i18n'
 import { hookComponent } from '@/components/system/index'
-import { sortingAsn } from '@/api/wms/stockAsn'
+import { errorColor, SYSTEM_HEIGHT } from '@/constant/style'
+import { getSorting } from '@/api/wms/stockAsn'
+import { UpdateSortingVo } from '@/types/WMS/StockAsn'
+import tooltipBtn from '@/components/tooltip-btn.vue'
+import { isInteger } from '@/utils/dataVerification/tableRule'
 
-const formRef = ref()
-const emit = defineEmits(['close', 'saveSuccess'])
+const xTable = ref()
 
-const props = defineProps<{
-  showDialog: boolean
-  form: StockAsnVO
-}>()
-
-const isShow = computed(() => props.showDialog)
-
-const dialogTitle = computed(() => 'update')
+const emit = defineEmits(['sure'])
 
 const data = reactive({
-  form: ref<StockAsnVO>({
-    id: 0,
-    asn_no: '',
-    asn_status: 0,
-    spu_id: 0,
-    spu_code: '',
-    spu_name: '',
-    sku_id: 0,
-    sku_code: '',
-    sku_name: '',
-    origin: '',
-    length_unit: 0,
-    volume_unit: 0,
-    weight_unit: 0,
-    asn_qty: 0,
-    actual_qty: 0,
-    sorted_qty: 0,
-    shortage_qty: 0,
-    more_qty: 0,
-    damage_qty: 0,
-    weight: 0,
-    volume: 0,
-    supplier_id: 0,
-    supplier_name: '',
-    goods_owner_id: 0,
-    goods_owner_name: '',
-    is_valid: true
-  }),
-  formSorting: ref<SortingVo>({
-    asn_id: 0,
-    sorted_qty: 0
-  }),
-  rules: {
-    sorted_qty: [(val: string) => !!val || `${ i18n.global.t('system.checkText.mustInput') }${ i18n.global.t('wms.stockAsnInfo.sorted_qty') }!`]
-  }
+  showDialog: false,
+  tableData: [],
+  validRules: {
+    sorted_qty: [
+      { required: true, message: `${ i18n.global.t('system.checkText.mustInput') }${ i18n.global.t('wms.stockAsnInfo.sorted_qty') }` },
+      {
+        validator: isInteger,
+        validNumerical: 'nonNegative',
+        trigger: 'change'
+      }
+    ],
+    series_number: [
+      {
+        type: 'string',
+        min: 0,
+        max: 64,
+        message: `${ i18n.global.t('system.checkText.lengthValid') }${ 0 }-${ 64 }`,
+        trigger: 'change'
+      }
+    ]
+  } as any
 })
 
 const method = reactive({
+  activeMethod({ row, column }: any) {
+    if (!row.series_number && column.field === 'series_number') {
+      return false
+    }
+    return true
+  },
+  // delete row
+  deleteRow: (row: UpdateSortingVo) => {
+    const $table = xTable.value
+    hookComponent.$dialog({
+      content: i18n.global.t('system.tips.beforeDeleteDetailMessage'),
+      handleConfirm: async () => {
+        $table.remove(row)
+      }
+    })
+  },
+  // Initialize window data
+  initDialogData: async (id: number) => {
+    const { data: res } = await getSorting(id)
+    if (!res.isSuccess) {
+      hookComponent.$message({
+        type: 'error',
+        content: res.errorMessage
+      })
+      data.showDialog = false
+      return
+    }
+    data.tableData = res.data
+  },
+
+  openDialog: async (id: number) => {
+    // Initialized Data
+    method.initDialogData(id)
+
+    data.showDialog = true
+  },
   closeDialog: () => {
-    emit('close')
+    data.showDialog = false
   },
   submit: async () => {
-    const { valid } = await formRef.value.validate()
-    if (valid) {
-      data.formSorting.asn_id = data.form.id
-      data.formSorting.sorted_qty = data.form.sorted_qty
-      const { data: res } = await sortingAsn(data.formSorting)
-      if (!res.isSuccess) {
-        hookComponent.$message({
-          type: 'error',
-          content: res.errorMessage
-        })
-        return
+    const $table = xTable.value
+    const errMap = await $table.validate(true)
+    if (!errMap) {
+      // Find the deleted data, assign a negative id to represent deletion
+      const removeTableData = xTable.value.getRemoveRecords()
+
+      // Traversing and modifying the original data, as the data is a shallow copy, there is no need to assign a value
+      if (removeTableData) {
+        for (const item of removeTableData) {
+          item.id = 0 - item.id
+        }
       }
-      hookComponent.$message({
-        type: 'success',
-        content: `${ i18n.global.t('system.page.submit') }${ i18n.global.t('system.tips.success') }`
-      })
-      emit('saveSuccess')
+
+      const tableData: any = data.tableData
+      emit('sure', tableData)
     } else {
       hookComponent.$message({
         type: 'error',
@@ -110,20 +157,10 @@ const method = reactive({
   }
 })
 
-watch(
-  () => isShow.value,
-  (val) => {
-    if (val) {
-      data.form = props.form
-    }
-  }
-)
+defineExpose({
+  openDialog: method.openDialog,
+  closeDialog: method.closeDialog
+})
 </script>
 
-<style scoped lang="less">
-.v-form {
-  div {
-    margin-bottom: 7px;
-  }
-}
-</style>
+<style scoped lang="less"></style>

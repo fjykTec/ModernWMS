@@ -11,9 +11,11 @@
                 <v-row no-gutters>
                   <!-- Operate Btn -->
                   <v-col cols="3" class="col">
-                    <tooltip-btn icon="mdi-plus" :tooltip-text="$t('system.page.add')" @click="method.add()"></tooltip-btn>
+                    <!-- <tooltip-btn icon="mdi-plus" :tooltip-text="$t('system.page.add')" @click="method.add()"></tooltip-btn>
                     <tooltip-btn icon="mdi-refresh" :tooltip-text="$t('system.page.refresh')" @click="method.refresh"></tooltip-btn>
-                    <tooltip-btn icon="mdi-export-variant" :tooltip-text="$t('system.page.export')" @click="method.exportTable"> </tooltip-btn>
+                    <tooltip-btn icon="mdi-export-variant" :tooltip-text="$t('system.page.export')" @click="method.exportTable"> </tooltip-btn> -->
+
+                    <BtnGroup :authority-list="data.authorityList" :btn-list="data.btnList" />
                   </v-col>
 
                   <!-- Search Input -->
@@ -60,19 +62,27 @@
                   <vxe-column field="spu_code" width="150px" :title="$t('base.commodityManagement.spu_code')"></vxe-column>
                   <vxe-column field="spu_name" width="150px" :title="$t('base.commodityManagement.spu_name')"></vxe-column>
                   <vxe-column field="sku_code" width="150px" :title="$t('base.commodityManagement.sku_code')"></vxe-column>
+                  <vxe-column field="series_number" width="150px" :title="$t('wms.stockLocation.series_number')"></vxe-column>
                   <vxe-column field="warehouse_name" width="150px" :title="$t('wms.warehouseWorking.warehouseTaking.warehouse')"></vxe-column>
                   <vxe-column field="location_name" width="150px" :title="$t('wms.warehouseWorking.warehouseTaking.location_name')"></vxe-column>
                   <vxe-column field="book_qty" width="150px" :title="$t('wms.warehouseWorking.warehouseTaking.book_qty')"></vxe-column>
                   <vxe-column field="counted_qty" width="150px" :title="$t('wms.warehouseWorking.warehouseTaking.counted_qty')"></vxe-column>
                   <vxe-column field="difference_qty" width="150px" :title="$t('wms.warehouseWorking.warehouseTaking.difference_qty')"></vxe-column>
                   <vxe-column field="handler" width="150px" :title="$t('wms.warehouseWorking.warehouseTaking.handler')"></vxe-column>
-                  <vxe-column field="handle_time" width="170px" :title="$t('wms.warehouseWorking.warehouseTaking.handle_time')">
-                    <template #default="{ row, column }">
-                      <span>{{ formatDate(row[column.property]) }}</span>
-                    </template>
+                  <vxe-column
+                    field="handle_time"
+                    width="170px"
+                    :formatter="['formatDate', 'yyyy-MM-dd HH:mm']"
+                    :title="$t('wms.warehouseWorking.warehouseTaking.handle_time')"
+                  >
                   </vxe-column>
                   <vxe-column field="creator" :title="$t('wms.warehouseWorking.warehouseTaking.creator')"></vxe-column>
-                  <vxe-column field="create_time" width="170px" :title="$t('wms.warehouseWorking.warehouseTaking.create_time')"></vxe-column>
+                  <vxe-column
+                    field="create_time"
+                    width="170px"
+                    :formatter="['formatDate', 'yyyy-MM-dd HH:mm']"
+                    :title="$t('wms.warehouseWorking.warehouseTaking.create_time')"
+                  ></vxe-column>
                   <vxe-column field="operate" :title="$t('system.page.operate')" width="250" :resizable="false" show-overflow>
                     <template #default="{ row }">
                       <tooltip-btn
@@ -85,22 +95,22 @@
                         :flat="true"
                         icon="mdi-book-check-outline"
                         :tooltip-text="$t('wms.warehouseWorking.warehouseTaking.confirmTaking')"
-                        :disabled="method.isConfirmTaking(row)"
+                        :disabled="!data.authorityList.includes('confirmOpeartion') || method.isConfirmTaking(row)"
                         @click="method.confirmTaking(row)"
                       ></tooltip-btn>
                       <tooltip-btn
                         :flat="true"
                         icon="mdi-book-open-outline"
                         :tooltip-text="$t('wms.warehouseWorking.warehouseProcessing.confirmAdjust')"
-                        :disabled="method.confirmAdjustBtnDisabled(row)"
+                        :disabled="!data.authorityList.includes('confirmAdjust') || method.confirmAdjustBtnDisabled(row)"
                         @click="method.confirmAdjust(row)"
                       ></tooltip-btn>
                       <tooltip-btn
                         :flat="true"
                         icon="mdi-delete-outline"
                         :tooltip-text="$t('system.page.delete')"
-                        :icon-color="errorColor"
-                        :disabled="method.isConfirmTaking(row)"
+                        :icon-color="!data.authorityList.includes('delete') || method.isConfirmTaking(row)?'':errorColor"
+                        :disabled="!data.authorityList.includes('delete') || method.isConfirmTaking(row)"
                         @click="method.deleteRow(row)"
                       ></tooltip-btn>
                     </template>
@@ -133,7 +143,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, reactive, onActivated, watch, nextTick } from 'vue'
+import { computed, ref, reactive, onActivated, watch, nextTick, onMounted } from 'vue'
 import { VxePagerEvents } from 'vxe-table'
 import { computedCardHeight, computedTableHeight, errorColor } from '@/constant/style'
 import { WarehouseTakingVO } from '@/types/WarehouseWorking/WarehouseTaking'
@@ -142,16 +152,16 @@ import { hookComponent } from '@/components/system'
 import { TAKING_JOB_FINISH, TAKING_JOB_UNFINISH } from '@/constant/warehouseWorking'
 import { deleteStockTaking, getStockTakingList, getStockTakingOne, confirmAdjustment } from '@/api/wms/warehouseTaking'
 import { DEBOUNCE_TIME } from '@/constant/system'
-import { setSearchObject } from '@/utils/common'
-import { SearchObject } from '@/types/System/Form'
+import { setSearchObject, getMenuAuthorityList } from '@/utils/common'
+import { SearchObject, btnGroupItem } from '@/types/System/Form'
 import { formatTakingJobStatus } from '@/utils/format/formatWarehouseWorking'
-import { formatDate } from '@/utils/format/formatSystem'
 import tooltipBtn from '@/components/tooltip-btn.vue'
 import addOrUpdateDialog from './add-or-update-taking.vue'
 import numberInput from './number-input.vue'
 import i18n from '@/languages/i18n'
 import customPager from '@/components/custom-pager.vue'
 import { exportData } from '@/utils/exportTable'
+import BtnGroup from '@/components/system/btnGroup.vue'
 
 const xTable = ref()
 
@@ -174,6 +184,7 @@ const data = reactive({
     spu_code: '',
     spu_name: '',
     sku_code: '',
+    series_number: '',
     warehouse_name: '',
     location_name: '',
     handler: '',
@@ -190,7 +201,10 @@ const data = reactive({
     pageIndex: 1,
     pageSize: DEFAULT_PAGE_SIZE,
     searchObjects: ref<Array<SearchObject>>([])
-  })
+  }),
+  btnList: [] as btnGroupItem[],
+  // Menu operation permissions
+  authorityList: getMenuAuthorityList()
 })
 
 const method = reactive({
@@ -209,6 +223,7 @@ const method = reactive({
       spu_code: '',
       spu_name: '',
       sku_code: '',
+      series_number: '',
       warehouse_name: '',
       location_name: '',
       handler: '',
@@ -367,6 +382,29 @@ const method = reactive({
 
 onActivated(() => {
   method.refresh()
+})
+
+onMounted(() => {
+  data.btnList = [
+    {
+      name: i18n.global.t('system.page.add'),
+      icon: 'mdi-plus',
+      code: 'save',
+      click: method.add
+    },
+    {
+      name: i18n.global.t('system.page.refresh'),
+      icon: 'mdi-refresh',
+      code: '',
+      click: method.refresh
+    },
+    {
+      name: i18n.global.t('system.page.export'),
+      icon: 'mdi-export-variant',
+      code: 'export',
+      click: method.exportTable
+    }
+  ]
 })
 
 const cardHeight = computed(() => computedCardHeight({ hasTab: false }))

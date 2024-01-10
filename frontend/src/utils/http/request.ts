@@ -1,6 +1,6 @@
 import axios from 'axios' // 引入axios
 import { store } from '@/store'
-import { emitter } from '@/utils/bus.js'
+import { emitter } from '@/utils/bus'
 import { router } from '@/router'
 import { hookComponent } from '@/components/system'
 import i18n from '@/languages/i18n'

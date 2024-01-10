@@ -10,16 +10,19 @@
           <div class="operateArea">
             <v-row no-gutters>
               <!-- Operate Btn -->
-              <v-col cols="12" sm="3" class="col">
-                <tooltip-btn icon="mdi-plus" :tooltip-text="$t('system.page.add')" @click="method.add()"></tooltip-btn>
+              <v-col cols="12" sm="4" class="col">
+                <!-- <tooltip-btn icon="mdi-plus" :tooltip-text="$t('system.page.add')" @click="method.add()"></tooltip-btn>
                 <tooltip-btn icon="mdi-refresh" :tooltip-text="$t('system.page.refresh')" @click="method.refresh()"></tooltip-btn>
                 <tooltip-btn icon="mdi-database-import-outline" :tooltip-text="$t('system.page.import')" @click="method.openDialogImport">
                 </tooltip-btn>
-                <tooltip-btn icon="mdi-export-variant" :tooltip-text="$t('system.page.export')" @click="method.exportTable"> </tooltip-btn>
+                <tooltip-btn icon="mdi-export-variant" :tooltip-text="$t('system.page.export')" @click="method.exportTable"> </tooltip-btn> -->
+
+                <!-- new version -->
+                <BtnGroup :authority-list="data.authorityList" :btn-list="data.btnList" />
               </v-col>
 
               <!-- Search Input -->
-              <v-col cols="12" sm="9">
+              <v-col cols="12" sm="8">
                 <v-row no-gutters @keyup.enter="method.sureSearch">
                   <v-col cols="12" sm="4"></v-col>
                   <v-col cols="12" sm="4"></v-col>
@@ -47,7 +50,15 @@
               height: cardHeight
             }"
           >
-            <vxe-table ref="xTable" :data="data.tableData" :height="tableHeight" align="center">
+            <vxe-table
+              ref="xTable"
+              :data="data.tableData"
+              :column-config="{
+                minWidth: '100px'
+              }"
+              :height="tableHeight"
+              align="center"
+            >
               <template #empty>
                 {{ i18n.global.t('system.page.noData') }}
               </template>
@@ -60,16 +71,14 @@
               <vxe-column field="email" :title="$t('base.customer.email')"></vxe-column>
               <vxe-column field="contact_tel" :title="$t('base.customer.contact_tel')"></vxe-column>
               <vxe-column field="creator" :title="$t('base.customer.creator')"></vxe-column>
-              <vxe-column field="create_time" :title="$t('base.customer.create_time')">
-                <!-- :formatter="['formatDate', 'yyyy-MM-dd HH:mm:ss']" -->
-                <template #default="{ row, column }">
-                  <span>{{ formatDate(row[column.property]) }}</span>
-                </template>
+              <vxe-column field="create_time" width="170px" :formatter="['formatDate', 'yyyy-MM-dd HH:mm']" :title="$t('base.customer.create_time')">
               </vxe-column>
-              <vxe-column field="last_update_time" :title="$t('base.customer.last_update_time')">
-                <template #default="{ row, column }">
-                  <span>{{ formatDate(row[column.property]) }}</span>
-                </template>
+              <vxe-column
+                field="last_update_time"
+                width="170px"
+                :formatter="['formatDate', 'yyyy-MM-dd HH:mm']"
+                :title="$t('base.customer.last_update_time')"
+              >
               </vxe-column>
               <vxe-column field="operate" :title="$t('system.page.operate')" width="160" :resizable="false" show-overflow>
                 <template #default="{ row }">
@@ -77,13 +86,15 @@
                     :flat="true"
                     icon="mdi-pencil-outline"
                     :tooltip-text="$t('system.page.edit')"
+                    :disabled="!data.authorityList.includes('save')"
                     @click="method.editRow(row)"
                   ></tooltip-btn>
                   <tooltip-btn
                     :flat="true"
                     icon="mdi-delete-outline"
                     :tooltip-text="$t('system.page.delete')"
-                    :icon-color="errorColor"
+                    :icon-color="!data.authorityList.includes('delete')?'':errorColor"
+                    :disabled="!data.authorityList.includes('delete')"
                     @click="method.deleteRow(row)"
                   ></tooltip-btn>
                 </template>
@@ -108,28 +119,31 @@
   </div>
   <addOrUpdateDialog :show-dialog="data.showDialog" :form="data.dialogForm" @close="method.closeDialog" @saveSuccess="method.saveSuccess" />
   <importCustomerTable :show-dialog="data.showDialogImport" @close="method.closeDialogImport" @saveSuccess="method.saveSuccessImport" />
+  <hprintDialog ref="hprintDialogRef" :form="data.printForm" :tab-page="'print_page_main'" />
 </template>
 
 <script lang="tsx" setup>
 import { computed, ref, reactive, onMounted, watch } from 'vue'
 import { VxePagerEvents } from 'vxe-table'
 import { computedCardHeight, computedTableHeight, errorColor } from '@/constant/style'
-import { CustomerVO, DataProps } from '@/types/Base/Customer'
+import { CustomerVO } from '@/types/Base/Customer'
 import { PAGE_SIZE, PAGE_LAYOUT, DEFAULT_PAGE_SIZE } from '@/constant/vxeTable'
 import tooltipBtn from '@/components/tooltip-btn.vue'
 import addOrUpdateDialog from './add-or-update-customer.vue'
 import { hookComponent } from '@/components/system'
 import { DEBOUNCE_TIME } from '@/constant/system'
-import { setSearchObject } from '@/utils/common'
-import { SearchObject } from '@/types/System/Form'
+import { setSearchObject, getMenuAuthorityList } from '@/utils/common'
+import { SearchObject, btnGroupItem } from '@/types/System/Form'
 import i18n from '@/languages/i18n'
 import { getCustomerList, deleteCustomer } from '@/api/base/customer'
 import importCustomerTable from './import-customer-table.vue'
-import { formatDate } from '@/utils/format/formatSystem'
 import customPager from '@/components/custom-pager.vue'
 import { exportData } from '@/utils/exportTable'
+import BtnGroup from '@/components/system/btnGroup.vue'
+import hprintDialog from '@/components/hiprint/hiprintFast.vue'
 
 const xTable = ref()
+const hprintDialogRef = ref()
 
 const data = reactive({
   searchForm: {
@@ -155,7 +169,11 @@ const data = reactive({
     pageSize: DEFAULT_PAGE_SIZE,
     searchObjects: ref<Array<SearchObject>>([])
   },
-  timer: ref<any>(null)
+   printForm: {} as any,
+  timer: ref<any>(null),
+  btnList: [] as btnGroupItem[],
+  // Menu operation permissions
+  authorityList: getMenuAuthorityList() as string[]
 })
 
 const method = reactive({
@@ -253,9 +271,55 @@ const method = reactive({
     }
     data.tableData = res.data.rows
     data.tablePage.total = res.data.totals
-  }
+  },
+    print: () => {
+    const records = xTable.value.getCheckboxRecords()
+    if (records.length > 0) {
+      data.printForm = { detailList: records }
+      const ref = hprintDialogRef.value
+      ref.method.handleOpen()
+    } else {
+      hookComponent.$message({
+        type: 'error',
+        content: i18n.global.t('base.userManagement.checkboxIsNull')
+      })
+    }
+  },
 })
 onMounted(() => {
+  data.btnList = [
+    {
+      name: i18n.global.t('system.page.add'),
+      icon: 'mdi-plus',
+      code: 'save',
+      click: method.add
+    },
+    {
+      name: i18n.global.t('system.page.refresh'),
+      icon: 'mdi-refresh',
+      code: '',
+      click: method.refresh
+    },
+    {
+      name: i18n.global.t('system.page.import'),
+      icon: 'mdi-database-import-outline',
+      code: 'import',
+      click: method.openDialogImport
+    },
+    {
+      name: i18n.global.t('system.page.export'),
+      icon: 'mdi-export-variant',
+      code: 'export',
+      click: method.exportTable
+    },
+    {
+      name: i18n.global.t('system.page.print'),
+      icon: 'mdi-printer',
+      code: '',
+      click: method.print
+    }
+  ]
+
   method.getData()
 })
 

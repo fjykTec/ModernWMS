@@ -28,13 +28,12 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, computed, ref, watch } from 'vue'
-import { StockAsnVO, SkuInfoVo } from '@/types/WMS/StockAsn'
+import { reactive, computed, watch } from 'vue'
+import { StockAsnVO } from '@/types/WMS/StockAsn'
 import i18n from '@/languages/i18n'
 import { hookComponent } from '@/components/system/index'
 import { getSkuInfo } from '@/api/wms/stockAsn'
 
-const formRef = ref()
 const emit = defineEmits(['close'])
 
 const props = defineProps<{
@@ -45,7 +44,7 @@ const props = defineProps<{
 const isShow = computed(() => props.showDialog)
 
 const data = reactive({
-  form: ref<StockAsnVO>({
+  form: {
     id: 0,
     asn_no: '',
     asn_status: 0,
@@ -72,8 +71,8 @@ const data = reactive({
     goods_owner_id: 0,
     goods_owner_name: '',
     is_valid: true
-  }),
-  tableData: ref<SkuInfoVo>({
+  } as any,
+  tableData: {
     spu_id: 0,
     spu_code: '',
     spu_name: '',
@@ -99,7 +98,7 @@ const data = reactive({
     unit: '',
     cost: 0,
     price: 0
-  })
+  } as any
 })
 
 const method = reactive({

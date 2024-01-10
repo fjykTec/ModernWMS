@@ -157,10 +157,17 @@ const method = reactive({
         })
         return
       }
-      hookComponent.$message({
-        type: 'success',
-        content: `${ i18n.global.t('system.page.submit') }${ i18n.global.t('system.tips.success') }`
-      })
+      if (dialogTitle.value === 'add') {
+        hookComponent.$dialog({
+          content: i18n.global.t('base.userManagement.addSuccessTip') + res.errorMessage,
+          handleConfirm: async () => {}
+        })
+      } else {
+        hookComponent.$message({
+          type: 'success',
+          content: `${ i18n.global.t('system.page.submit') }${ i18n.global.t('system.tips.success') }`
+        })
+      }
       emit('saveSuccess')
     } else {
       hookComponent.$message({

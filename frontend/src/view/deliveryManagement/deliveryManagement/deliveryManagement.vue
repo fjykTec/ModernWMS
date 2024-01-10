@@ -27,21 +27,21 @@
             <v-window-item value="tabPicked">
               <tabPicked ref="tabPickedRef" />
             </v-window-item>
-            <v-window-item value="tabToBePackaged">
+            <!-- <v-window-item value="tabToBePackaged">
               <tabToBePackaged ref="tabToBePackagedRef" />
-            </v-window-item>
+            </v-window-item> -->
             <v-window-item value="tabPackaged">
               <tabPackaged ref="tabPackagedRef" />
             </v-window-item>
-            <v-window-item value="tabToBeWeighed">
+            <!-- <v-window-item value="tabToBeWeighed">
               <tabToBeWeighed ref="tabToBeWeighedRef" />
-            </v-window-item>
+            </v-window-item> -->
             <v-window-item value="tabWeighed">
               <tabWeighed ref="tabWeighedRef" />
             </v-window-item>
-            <v-window-item value="tabToBeDelivered">
+            <!-- <v-window-item value="tabToBeDelivered">
               <tabToBeDelivered ref="tabToBeDeliveredRef" />
-            </v-window-item>
+            </v-window-item> -->
             <v-window-item value="tabDelivered">
               <tabDelivered ref="tabDeliveredRef" />
             </v-window-item>
@@ -63,11 +63,11 @@ import tabPreShipment from './tabPreShipment.vue'
 import tabNewShipment from './tabNewShipment.vue'
 import tabGoodsToBePicked from './tabGoodsToBePicked.vue'
 import tabPicked from './tabPicked.vue'
-import tabToBePackaged from './tabToBePackaged.vue'
+// import tabToBePackaged from './tabToBePackaged.vue'
 import tabPackaged from './tabPackaged.vue'
-import tabToBeWeighed from './tabToBeWeighed.vue'
+// import tabToBeWeighed from './tabToBeWeighed.vue'
 import tabWeighed from './tabWeighed.vue'
-import tabToBeDelivered from './tabToBeDelivered.vue'
+// import tabToBeDelivered from './tabToBeDelivered.vue'
 import tabDelivered from './tabDelivered.vue'
 import tabSignIn from './tabSignIn.vue'
 
@@ -110,34 +110,37 @@ const tabsConfig = [
     icon: 'mdi-human-dolly',
     tabName: i18n.global.t('wms.deliveryManagement.picked')
   },
-  {
-    value: 'tabToBePackaged',
-    icon: 'mdi-package-variant',
-    tabName: i18n.global.t('wms.deliveryManagement.toBePackaged')
-  },
+  // {
+  //   value: 'tabToBePackaged',
+  //   icon: 'mdi-package-variant',
+  //   tabName: i18n.global.t('wms.deliveryManagement.toBePackaged')
+  // },
   {
     value: 'tabPackaged',
-    icon: 'mdi-package-variant-closed-check',
+    icon: 'mdi-package-variant',
+    // icon: 'mdi-package-variant-closed-check',
     tabName: i18n.global.t('wms.deliveryManagement.packaged')
   },
-  {
-    value: 'tabToBeWeighed',
-    icon: 'mdi-basket-fill',
-    tabName: i18n.global.t('wms.deliveryManagement.toBeWeighed')
-  },
+  // {
+  //   value: 'tabToBeWeighed',
+  //   icon: 'mdi-basket-fill',
+  //   tabName: i18n.global.t('wms.deliveryManagement.toBeWeighed')
+  // },
   {
     value: 'tabWeighed',
-    icon: 'mdi-weight',
+    icon: 'mdi-basket-fill',
+    // icon: 'mdi-weight',
     tabName: i18n.global.t('wms.deliveryManagement.weighed')
   },
-  {
-    value: 'tabToBeDelivered',
-    icon: 'mdi-send-outline',
-    tabName: i18n.global.t('wms.deliveryManagement.toBeDelivered')
-  },
+  // {
+  //   value: 'tabToBeDelivered',
+  //   icon: 'mdi-send-outline',
+  //   tabName: i18n.global.t('wms.deliveryManagement.toBeDelivered')
+  // },
   {
     value: 'tabDelivered',
-    icon: 'mdi-send',
+    icon: 'mdi-send-outline',
+    // icon: 'mdi-send',
     tabName: i18n.global.t('wms.deliveryManagement.outOfWarehouse')
   },
   {
