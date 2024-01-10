@@ -13,6 +13,7 @@
 using ModernWMS.Core.DynamicSearch;
 using ModernWMS.Core.Models;
 using ModernWMS.Core.JWT;
+using Microsoft.AspNetCore.Mvc;
 
 namespace ModernWMS.WMS.Services
 {
@@ -69,6 +70,8 @@ namespace ModernWMS.WMS.Services
             var Categorys = _dBContext.GetDbSet<CategoryEntity>();
             var Spus = _dBContext.GetDbSet<SpuEntity>();
             var Skus = _dBContext.GetDbSet<SkuEntity>();
+            var SkuSafetyStocks = _dBContext.GetDbSet<SkuSafetyStockEntity>();
+            var Warehouses = _dBContext.GetDbSet<WarehouseEntity>();
             var query = from m in Spus.AsNoTracking()
                         join c in Categorys.AsNoTracking() on m.category_id equals c.id
                         where m.tenant_id == currentUser.tenant_id
@@ -80,7 +83,6 @@ namespace ModernWMS.WMS.Services
                             category_id = m.category_id,
                             category_name = c.category_name,
                             spu_description = m.spu_description,
-                            bar_code = m.bar_code,
                             supplier_id = m.supplier_id,
                             supplier_name = m.supplier_name,
                             brand = m.brand,
@@ -99,6 +101,7 @@ namespace ModernWMS.WMS.Services
                                              spu_id = t.spu_id,
                                              sku_code = t.sku_code,
                                              sku_name = t.sku_name,
+                                             bar_code = t.bar_code,
                                              weight = t.weight,
                                              lenght = t.lenght,
                                              width = t.width,
@@ -108,7 +111,18 @@ namespace ModernWMS.WMS.Services
                                              cost = t.cost,
                                              price = t.price,
                                              create_time = t.create_time,
-                                             last_update_time = t.last_update_time
+                                             last_update_time = t.last_update_time,
+                                             detailList = (from sss in SkuSafetyStocks.AsNoTracking()
+                                                           join wh in Warehouses on sss.warehouse_id equals wh.id
+                                                           where sss.sku_id.Equals(t.id)
+                                                           select new SkuSafetyStockViewModel
+                                                           {
+                                                               id = sss.id,
+                                                               sku_id = sss.sku_id,
+                                                               safety_stock_qty = sss.safety_stock_qty,
+                                                               warehouse_id = sss.warehouse_id,
+                                                               warehouse_name = wh.warehouse_name
+                                                           }).ToList()
                                          }).ToList()
 
                         };
@@ -130,6 +144,8 @@ namespace ModernWMS.WMS.Services
             var Categorys = _dBContext.GetDbSet<CategoryEntity>();
             var Spus = _dBContext.GetDbSet<SpuEntity>();
             var Skus = _dBContext.GetDbSet<SkuEntity>();
+            var SkuSafetyStocks = _dBContext.GetDbSet<SkuSafetyStockEntity>();
+            var Warehouses = _dBContext.GetDbSet<WarehouseEntity>();
             var query = from m in Spus.AsNoTracking()
                         join c in Categorys.AsNoTracking() on m.category_id equals c.id
                         where m.id == id
@@ -141,7 +157,6 @@ namespace ModernWMS.WMS.Services
                             category_id = m.category_id,
                             category_name = c.category_name,
                             spu_description = m.spu_description,
-                            bar_code = m.bar_code,
                             supplier_id = m.supplier_id,
                             supplier_name = m.supplier_name,
                             brand = m.brand,
@@ -160,6 +175,7 @@ namespace ModernWMS.WMS.Services
                                              spu_id = t.spu_id,
                                              sku_code = t.sku_code,
                                              sku_name = t.sku_name,
+                                             bar_code = t.bar_code,
                                              weight = t.weight,
                                              lenght = t.lenght,
                                              width = t.width,
@@ -169,7 +185,18 @@ namespace ModernWMS.WMS.Services
                                              cost = t.cost,
                                              price = t.price,
                                              create_time = t.create_time,
-                                             last_update_time = t.last_update_time
+                                             last_update_time = t.last_update_time,
+                                             detailList = (from sss in SkuSafetyStocks.AsNoTracking()
+                                                           join wh in Warehouses on sss.warehouse_id equals wh.id
+                                                           where sss.sku_id.Equals(t.id)
+                                                           select new SkuSafetyStockViewModel
+                                                           {
+                                                               id = sss.id,
+                                                               sku_id = sss.sku_id,
+                                                               safety_stock_qty = sss.safety_stock_qty,
+                                                               warehouse_id = sss.warehouse_id,
+                                                               warehouse_name = wh.warehouse_name
+                                                           }).ToList()
                                          }).ToList()
 
                         };
@@ -205,7 +232,6 @@ namespace ModernWMS.WMS.Services
                             category_id = m.category_id,
                             category_name = c.category_name,
                             spu_description = m.spu_description,
-                            bar_code = m.bar_code,
                             supplier_id = m.supplier_id,
                             supplier_name = m.supplier_name,
                             brand = m.brand,
@@ -216,6 +242,61 @@ namespace ModernWMS.WMS.Services
                             sku_id = d.id,
                             sku_code = d.sku_code,
                             sku_name = d.sku_name,
+                            bar_code = d.bar_code,
+                            weight = d.weight,
+                            lenght = d.lenght,
+                            width = d.width,
+                            height = d.height,
+                            volume = d.volume,
+                            unit = d.unit,
+                            cost = d.cost,
+                            price = d.price
+                        };
+            var data = await query.FirstOrDefaultAsync();
+            if (data != null)
+            {
+                return data;
+            }
+            else
+            {
+                return new SkuDetailViewModel();
+            }
+
+        }
+
+        /// <summary>
+        /// get sku info by bar_code
+        /// </summary>
+        /// <param name="bar_code">bar_code</param>
+        /// <returns></returns>
+        public async Task<SkuDetailViewModel> GetSkuByBarCodeAsync(string bar_code)
+        {
+            var Categorys = _dBContext.GetDbSet<CategoryEntity>();
+            var Spus = _dBContext.GetDbSet<SpuEntity>();
+            var Skus = _dBContext.GetDbSet<SkuEntity>();
+            var query = from m in Spus.AsNoTracking()
+                        join c in Categorys.AsNoTracking() on m.category_id equals c.id
+                        join d in Skus.AsNoTracking() on m.id equals d.spu_id
+                        where d.bar_code == bar_code
+                        select new SkuDetailViewModel
+                        {
+                            spu_id = m.id,
+                            spu_code = m.spu_code,
+                            spu_name = m.spu_name,
+                            category_id = m.category_id,
+                            category_name = c.category_name,
+                            spu_description = m.spu_description,
+                            supplier_id = m.supplier_id,
+                            supplier_name = m.supplier_name,
+                            brand = m.brand,
+                            origin = m.origin,
+                            length_unit = m.length_unit,
+                            volume_unit = m.volume_unit,
+                            weight_unit = m.weight_unit,
+                            sku_id = d.id,
+                            sku_code = d.sku_code,
+                            sku_name = d.sku_name,
+                            bar_code = d.bar_code,
                             weight = d.weight,
                             lenght = d.lenght,
                             width = d.width,
@@ -347,6 +428,67 @@ namespace ModernWMS.WMS.Services
             }
 
         }
+
+        private async Task<SpuEntity?> GetSpuEntityAsync(int id)
+        {
+            var Spus = _dBContext.GetDbSet<SpuEntity>();
+            var Skus = _dBContext.GetDbSet<SkuEntity>();
+            var SkuSafetyStocks = _dBContext.GetDbSet<SkuSafetyStockEntity>();
+            var entity = await (
+                 from m in Spus
+                 where m.id == id
+                 select new SpuEntity
+                 {
+                     id = m.id,
+                     spu_code = m.spu_code,
+                     spu_name = m.spu_name,
+                     category_id = m.category_id,
+                     spu_description = m.spu_description,
+                     supplier_id = m.supplier_id,
+                     supplier_name = m.supplier_name,
+                     brand = m.brand,
+                     origin = m.origin,
+                     length_unit = m.length_unit,
+                     volume_unit = m.volume_unit,
+                     weight_unit = m.weight_unit,
+                     creator = m.creator,
+                     create_time = m.create_time,
+                     last_update_time = m.last_update_time,
+                     is_valid = m.is_valid,
+                     detailList = Skus.Where(t => t.spu_id.Equals(m.id))
+                                  .Select(t => new SkuEntity
+                                  {
+                                      Spu = m,
+                                      id = t.id,
+                                      spu_id = t.spu_id,
+                                      sku_code = t.sku_code,
+                                      sku_name = t.sku_name,
+                                      bar_code = t.bar_code,
+                                      weight = t.weight,
+                                      lenght = t.lenght,
+                                      width = t.width,
+                                      height = t.height,
+                                      volume = t.volume,
+                                      unit = t.unit,
+                                      cost = t.cost,
+                                      price = t.price,
+                                      create_time = t.create_time,
+                                      last_update_time = t.last_update_time,
+                                      detailList = (from sss in SkuSafetyStocks
+                                                    where sss.sku_id.Equals(t.id)
+                                                    select new SkuSafetyStockEntity
+                                                    {
+                                                        Sku = t,
+                                                        id = sss.id,
+                                                        sku_id = sss.sku_id,
+                                                        safety_stock_qty = sss.safety_stock_qty,
+                                                        warehouse_id = sss.warehouse_id
+                                                    }).ToList()
+                                  }).ToList()
+
+                 }).FirstOrDefaultAsync();
+            return entity;
+        }
         /// <summary>
         /// update a record
         /// </summary>
@@ -355,7 +497,8 @@ namespace ModernWMS.WMS.Services
         public async Task<(bool flag, string msg)> UpdateAsync(SpuBothViewModel viewModel)
         {
             var DbSet = _dBContext.GetDbSet<SpuEntity>();
-            var entity = await DbSet.Include(d => d.detailList).FirstOrDefaultAsync(t => t.id.Equals(viewModel.id));
+            var entity = await DbSet.Include(d => d.detailList)
+                .FirstOrDefaultAsync(t => t.id.Equals(viewModel.id));
             if (entity == null)
             {
                 return (false, _stringLocalizer["not_exists_entity"]);
@@ -368,7 +511,6 @@ namespace ModernWMS.WMS.Services
             entity.spu_name = viewModel.spu_name;
             entity.category_id = viewModel.category_id;
             entity.spu_description = viewModel.spu_description;
-            entity.bar_code = viewModel.bar_code;
             entity.supplier_id = viewModel.supplier_id;
             entity.supplier_name = viewModel.supplier_name;
             entity.brand = viewModel.brand;
@@ -389,6 +531,7 @@ namespace ModernWMS.WMS.Services
                     {
                         d.sku_code = vm.sku_code;
                         d.sku_name = vm.sku_name;
+                        d.bar_code = vm.bar_code;
                         d.weight = vm.weight;
                         d.lenght = vm.lenght;
                         d.width = vm.width;
@@ -447,6 +590,54 @@ namespace ModernWMS.WMS.Services
             }
         }
         #endregion
+
+        #region add or update sku_safety_stock
+        /// <summary>
+        /// add or update sku_safety_stock
+        /// </summary>
+        /// <param name="viewModel">args</param>
+        /// <returns></returns>
+        public async Task<(bool flag, string msg)> InsertOrUpdateSkuSafetyStockAsync(SkuSafetyStockPutViewModel viewModel)
+        {
+            if (viewModel.detailList.Any())
+            {
+                var SafetyDB = _dBContext.GetDbSet<SkuSafetyStockEntity>();
+                var entities = await SafetyDB.Where(t => t.sku_id == viewModel.sku_id)
+                    .ToListAsync();
+                viewModel.detailList.ForEach(async t =>
+                {
+                    if (t.id == 0)
+                    {
+                        await SafetyDB.AddAsync(new SkuSafetyStockEntity { sku_id = viewModel.sku_id, safety_stock_qty = t.safety_stock_qty, warehouse_id = t.warehouse_id });
+                        
+                    }
+                    else
+                    {
+                        var ent = entities.FirstOrDefault(e => e.id == Math.Abs(t.id));
+                        if (ent != null)
+                        {
+                            if (t.id < 0)
+                            {
+                                SafetyDB.Remove(ent);
+                            }
+                            else
+                            {
+                                ent.warehouse_id = t.warehouse_id;
+                                ent.safety_stock_qty = t.safety_stock_qty;
+                            }
+                        }
+                    }
+                });
+                await _dBContext.SaveChangesAsync();
+                return (true, _stringLocalizer["save_success"]);
+            }
+            else
+            {
+                return (false, _stringLocalizer["save_failed"]);
+            }
+        }
+
+        #endregion
     }
- }
+}
  

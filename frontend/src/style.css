@@ -1,0 +1,43 @@
+html,
+body {
+  padding: 0;
+  margin: 0;
+  height: 100%;
+  width: 100%;
+}
+
+#app {
+  height: 100vh;
+  width: 100vw;
+}
+
+.hiprint-headerLine, .hiprint-footerLine {
+  border-color: red !important;
+}
+
+.hiprint-headerLine:hover, .hiprint-footerLine:hover {
+  border-top: 3px dashed red !important;
+}
+
+.hiprint-headerLine:hover:before {
+  content: "页眉线";
+  left: calc(50% - 18px);
+  position: relative;
+  background: #FFFF;
+  top: -12px;
+  color: red;
+  font-size: 12px;
+}
+
+.hiprint-footerLine:hover:before {
+  content: "页脚线";
+  left: calc(50% - 18px);
+  position: relative;
+  color: red;
+  background: #FFFF;
+  top: -12px;
+  font-size: 12px;
+}
+/* .hiprint-printElement-image-content img{
+  content: url('@/assets/img/webLogoMini.png')!important;
+} */

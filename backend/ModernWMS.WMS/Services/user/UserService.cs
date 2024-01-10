@@ -457,12 +457,48 @@ namespace ModernWMS.WMS.Services
                         tenant_id = tenant_id
                     },new MenuEntity
                     {
+                        menu_name = "print",
+                        module = "baseModule",
+                        vue_path = "print",
+                        vue_path_detail = "",
+                        vue_directory = "base/print",
+                        sort = 12,
+                        tenant_id = tenant_id
+                    },new MenuEntity
+                    {
                         menu_name = "stockManagement",
-                        module = "",
+                        module = "statisticAnalysis ",
                         vue_path = "stockManagement",
                         vue_path_detail = "",
                         vue_directory = "wms/stockManagement",
                         sort = 3,
+                        tenant_id = tenant_id
+                    },new MenuEntity
+                    {
+                        menu_name = "saftyStock",
+                        module = "statisticAnalysis ",
+                        vue_path = "saftyStock",
+                        vue_path_detail = "",
+                        vue_directory = "statisticAnalysis/saftyStock",
+                        sort = 4,
+                        tenant_id = tenant_id
+                    },new MenuEntity
+                    {
+                        menu_name = "asnStatistic",
+                        module = "statisticAnalysis ",
+                        vue_path = "asnStatistic",
+                        vue_path_detail = "",
+                        vue_directory = "statisticAnalysis/asnStatistic",
+                        sort = 5,
+                        tenant_id = tenant_id
+                    },new MenuEntity
+                    {
+                        menu_name = "deliveryStatistic",
+                        module = "statisticAnalysis ",
+                        vue_path = "deliveryStatistic",
+                        vue_path_detail = "",
+                        vue_directory = "statisticAnalysis/deliveryStatistic",
+                        sort = 6,
                         tenant_id = tenant_id
                     },new MenuEntity
                     {

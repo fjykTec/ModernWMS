@@ -158,7 +158,7 @@ namespace ModernWMS.WMS.IServices
         /// <param name="currentUser">currentUser</param>
         /// <returns></returns>
         Task<(bool flag, string msg)> Import(List<DispatchlistImportViewModel> viewModels, CurrentUser currentUser);
-        #endregion
-    }
+         #endregion
+     }
  }
  

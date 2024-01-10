@@ -2,6 +2,7 @@
  * date：2022-12-26
  * developer：NoNo
  */
+
 using System;
 using System.ComponentModel.DataAnnotations;
 using ModernWMS.Core.Utility;
@@ -13,23 +14,24 @@ namespace ModernWMS.WMS.Entities.ViewModels
     /// </summary>
     public class StockadjustViewModel
     {
+        #region constructor
 
-         #region constructor
-         /// <summary>
-         /// constructor
-         /// </summary>
-         public StockadjustViewModel()
-         {
- 
-         }
-         #endregion
+        /// <summary>
+        /// constructor
+        /// </summary>
+        public StockadjustViewModel()
+        {
+        }
+
+        #endregion constructor
+
         #region Property
 
         /// <summary>
         /// id
         /// </summary>
         [Display(Name = "id")]
-        public int id { get; set; }  = 0;
+        public int id { get; set; } = 0;
 
         /// <summary>
         /// job_type
@@ -41,8 +43,8 @@ namespace ModernWMS.WMS.Entities.ViewModels
         /// job_code
         /// </summary>
         [Display(Name = "job_code")]
-        [MaxLength(32,ErrorMessage = "MaxLength")]
-        public string job_code { get; set; }  = string.Empty;
+        [MaxLength(32, ErrorMessage = "MaxLength")]
+        public string job_code { get; set; } = string.Empty;
 
         /// <summary>
         /// spu_code
@@ -101,49 +103,54 @@ namespace ModernWMS.WMS.Entities.ViewModels
         /// qty
         /// </summary>
         [Display(Name = "qty")]
-        public int qty { get; set; }  = 0;
+        public int qty { get; set; } = 0;
 
         /// <summary>
         /// creator
         /// </summary>
         [Display(Name = "creator")]
-        [MaxLength(64,ErrorMessage = "MaxLength")]
-        public string creator { get; set; }  = string.Empty;
+        [MaxLength(64, ErrorMessage = "MaxLength")]
+        public string creator { get; set; } = string.Empty;
 
         /// <summary>
         /// create_time
         /// </summary>
         [Display(Name = "create_time")]
-         [DataType(DataType.DateTime, ErrorMessage = "DataType_DateTime")]
-        public DateTime create_time { get; set; }  = UtilConvert.MinDate;
+        [DataType(DataType.DateTime, ErrorMessage = "DataType_DateTime")]
+        public DateTime create_time { get; set; } = UtilConvert.MinDate;
 
         /// <summary>
         /// last_update_time
         /// </summary>
         [Display(Name = "last_update_time")]
-         [DataType(DataType.DateTime, ErrorMessage = "DataType_DateTime")]
-        public DateTime last_update_time { get; set; }  = UtilConvert.MinDate;
+        [DataType(DataType.DateTime, ErrorMessage = "DataType_DateTime")]
+        public DateTime last_update_time { get; set; } = UtilConvert.MinDate;
 
         /// <summary>
         /// tenant_id
         /// </summary>
         [Display(Name = "tenant_id")]
-        public long tenant_id { get; set; }  = 0;
+        public long tenant_id { get; set; } = 0;
 
         /// <summary>
         /// is_update_stock
         /// </summary>
         [Display(Name = "is_update_stock")]
-        public bool is_update_stock { get; set; } =false;
+        public bool is_update_stock { get; set; } = false;
 
         /// <summary>
         /// source_table_id
         /// </summary>
         [Display(Name = "source_table_id")]
-        public int source_table_id { get; set; }  = 0;
+        public int source_table_id { get; set; } = 0;
 
+        /// <summary>
+        /// series_number
+        /// </summary>
+        [Display(Name = "series_number")]
+        [MaxLength(64, ErrorMessage = "MaxLength")]
+        public string series_number { get; set; } = string.Empty;
 
-        #endregion
-
+        #endregion Property
     }
 }

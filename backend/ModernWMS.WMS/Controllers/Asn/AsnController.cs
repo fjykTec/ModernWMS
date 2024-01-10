@@ -9,6 +9,7 @@
  using ModernWMS.WMS.IServices;
  using Microsoft.Extensions.Localization;
 using ModernWMS.Core.JWT;
+using ModernWMS.WMS.Entities.Models;
 
 namespace ModernWMS.WMS.Controllers
 {
@@ -46,6 +47,100 @@ namespace ModernWMS.WMS.Controllers
         {
             this._asnService = asnService;
             this._stringLocalizer = stringLocalizer;
+        }
+        #endregion
+
+
+        #region Arrival list 
+        /// <summary>
+        /// Arrival list
+        /// </summary>
+        /// <param name="pageSearch">args</param>
+        /// <returns></returns>
+        [HttpPost("asnmaster/list")]
+        public async Task<ResultModel<PageData<AsnmasterBothViewModel>>> PageAsnmasterAsync(PageSearch pageSearch)
+        {
+            var (data, totals) = await _asnService.PageAsnmasterAsync(pageSearch, CurrentUser);
+
+            return ResultModel<PageData<AsnmasterBothViewModel>>.Success(new PageData<AsnmasterBothViewModel>
+            {
+                Rows = data,
+                Totals = totals
+            });
+        }
+        /// <summary>
+        /// get Arrival list
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet("asnmaster")]
+        public async Task<ResultModel<AsnmasterBothViewModel>> GetAsnmasterAsync(int id)
+        {
+            var data = await _asnService.GetAsnmasterAsync(id, CurrentUser);
+            if (data != null && data.id > 0)
+            {
+                return ResultModel<AsnmasterBothViewModel>.Success(data);
+            }
+            else
+            {
+                return ResultModel<AsnmasterBothViewModel>.Error(_stringLocalizer["not_exists_entity"]);
+            }
+        }
+
+        /// <summary>
+        /// add a new record
+        /// </summary>
+        /// <param name="viewModel">viewmodel</param>
+        /// <returns></returns>
+        [HttpPost("asnmaster")]
+        public async Task<ResultModel<int>> AddAsnmasterAsync(AsnmasterBothViewModel viewModel)
+        {
+            var (id, msg) = await _asnService.AddAsnmasterAsync(viewModel, CurrentUser);
+            if (id > 0)
+            {
+                return ResultModel<int>.Success(id);
+            }
+            else
+            {
+                return ResultModel<int>.Error(msg);
+            }
+        }
+        /// <summary>
+        /// update record
+        /// </summary>
+        /// <param name="viewModel">viewmodel</param>
+        /// <returns></returns>
+        [HttpPut("asnmaster")]
+        public async Task<ResultModel<bool>> UpdateAsnmasterAsync(AsnmasterBothViewModel viewModel)
+        {
+            var (flag, msg) = await _asnService.UpdateAsnmasterAsync(viewModel, CurrentUser);
+            if (flag)
+            {
+                return ResultModel<bool>.Success(flag);
+            }
+            else
+            {
+                return ResultModel<bool>.Error(msg, 400, flag);
+            }
+        }
+
+        /// <summary>
+        /// delete a record
+        /// </summary>
+        /// <param name="id">id</param>
+        /// <returns></returns>
+        [HttpDelete("asnmaster")]
+        public async Task<ResultModel<string>> DeleteAsnmasterAsync(int id)
+        {
+            var (flag, msg) = await _asnService.DeleteAsnmasterAsync(id);
+            if (flag)
+            {
+                return ResultModel<string>.Success(msg);
+            }
+            else
+            {
+                return ResultModel<string>.Error(msg);
+            }
         }
         #endregion
 
@@ -162,17 +257,17 @@ namespace ModernWMS.WMS.Controllers
 
         #endregion
 
-        #region Flow Api
+        #region New Flow Api
         /// <summary>
         /// Confirm Delivery
         /// change the asn_status from 0 to 1
         /// </summary>
-        /// <param name="id">id</param>
+        /// <param name="viewModels">args</param>
         /// <returns></returns>
-        [HttpPut("confirm/{id}")]
-        public async Task<ResultModel<string>> ConfirmAsync(int id)
+        [HttpPut("confirm")]
+        public async Task<ResultModel<string>> ConfirmAsync(List<AsnConfirmInputViewModel> viewModels)
         {
-            var (flag, msg) = await _asnService.ConfirmAsync(id);
+            var (flag, msg) = await _asnService.ConfirmAsync(viewModels);
             if (flag)
             {
                 return ResultModel<string>.Success(msg);
@@ -186,12 +281,12 @@ namespace ModernWMS.WMS.Controllers
         /// <summary>
         /// Cancel confirm, change asn_status 1 to 0
         /// </summary>
-        /// <param name="id">id</param>
+        /// <param name="idList">id list</param>
         /// <returns></returns>
-        [HttpPut("confirm-cancel/{id}")]
-        public async Task<ResultModel<string>> ConfirmCancelAsync(int id)
+        [HttpPut("confirm-cancel")]
+        public async Task<ResultModel<string>> ConfirmCancelAsync(List<int> idList)
         {
-            var (flag, msg) = await _asnService.ConfirmCancelAsync(id);
+            var (flag, msg) = await _asnService.ConfirmCancelAsync(idList);
             if (flag)
             {
                 return ResultModel<string>.Success(msg);
@@ -206,12 +301,12 @@ namespace ModernWMS.WMS.Controllers
         /// Unload
         /// change the asn_status from 1 to 2
         /// </summary>
-        /// <param name="id">id</param>
+        /// <param name="viewModels">args</param>
         /// <returns></returns>
-        [HttpPut("unload/{id}")]
-        public async Task<ResultModel<string>> UnloadAsync(int id)
+        [HttpPut("unload")]
+        public async Task<ResultModel<string>> UnloadAsync(List<AsnUnloadInputViewModel> viewModels)
         {
-            var (flag, msg) = await _asnService.UnloadAsync(id);
+            var (flag, msg) = await _asnService.UnloadAsync(viewModels, CurrentUser);
             if (flag)
             {
                 return ResultModel<string>.Success(msg);
@@ -226,12 +321,12 @@ namespace ModernWMS.WMS.Controllers
         /// Cancel unload
         /// change the asn_status from 2 to 1
         /// </summary>
-        /// <param name="id">id</param>
+        /// <param name="idList">id list</param>
         /// <returns></returns>
-        [HttpPut("unload-cancel/{id}")]
-        public async Task<ResultModel<string>> UnloadCancelAsync(int id)
+        [HttpPut("unload-cancel")]
+        public async Task<ResultModel<string>> UnloadCancelAsync(List<int> idList)
         {
-            var (flag, msg) = await _asnService.UnloadCancelAsync(id);
+            var (flag, msg) = await _asnService.UnloadCancelAsync(idList);
             if (flag)
             {
                 return ResultModel<string>.Success(msg);
@@ -245,12 +340,12 @@ namespace ModernWMS.WMS.Controllers
         /// <summary>
         /// sorting， add a new asnsort record and update asn sorted_qty
         /// </summary>
-        /// <param name="viewModel">args</param>
+        /// <param name="viewModels">args</param>
         /// <returns></returns>
         [HttpPut("sorting")]
-        public async Task<ResultModel<string>> SortingAsync(AsnsortInputViewModel viewModel)
+        public async Task<ResultModel<string>> SortingAsync(List<AsnsortInputViewModel> viewModels)
         {
-            var (flag, msg) = await _asnService.SortingAsync(viewModel, CurrentUser);
+            var (flag, msg) = await _asnService.SortingAsync(viewModels, CurrentUser);
             if (flag)
             {
                 return ResultModel<string>.Success(msg);
@@ -260,17 +355,48 @@ namespace ModernWMS.WMS.Controllers
                 return ResultModel<string>.Error(msg);
             }
         }
-        
+
+        /// <summary>
+        /// get asnsorts list by asn_id
+        /// </summary>
+        /// <param name="asn_id">asn id</param>
+        /// <returns></returns>
+        [HttpGet("sorting")]
+        public async Task<ResultModel<List<AsnsortEntity>>> GetAsnsortsAsync(int asn_id)
+        {
+            var data = await _asnService.GetAsnsortsAsync(asn_id);
+            return ResultModel<List<AsnsortEntity>>.Success(data);
+        }
+
+        /// <summary>
+        /// update or delete asnsorts data
+        /// </summary>
+        /// <param name="entities">data</param>
+        /// <returns></returns>
+        [HttpPut("sorting-modify")]
+        public async Task<ResultModel<string>> ModifyAsnsortsAsync(List<AsnsortEntity> entities)
+        {
+            var (flag, msg) = await _asnService.ModifyAsnsortsAsync(entities, CurrentUser);
+            if (flag)
+            {
+                return ResultModel<string>.Success(msg);
+            }
+            else
+            {
+                return ResultModel<string>.Error(msg);
+            }
+        }
+
         /// <summary>
         /// Sorted
         /// change the asn_status from 2 to 3
         /// </summary>
-        /// <param name="id">id</param>
+        /// <param name="idList">id list</param>
         /// <returns></returns>
-        [HttpPut("sorted/{id}")]
-        public async Task<ResultModel<string>> SortedAsync(int id)
+        [HttpPut("sorted")]
+        public async Task<ResultModel<string>> SortedAsync(List<int> idList)
         {
-            var (flag, msg) = await _asnService.SortedAsync(id);
+            var (flag, msg) = await _asnService.SortedAsync(idList);
             if (flag)
             {
                 return ResultModel<string>.Success(msg);
@@ -285,12 +411,12 @@ namespace ModernWMS.WMS.Controllers
         /// Cancel sorted
         /// change the asn_status from 3 to 2
         /// </summary>
-        /// <param name="id">id</param>
+        /// <param name="idList">id list</param>
         /// <returns></returns>
-        [HttpPut("sorted-cancel/{id}")]
-        public async Task<ResultModel<string>> SortedCancelAsync(int id)
+        [HttpPut("sorted-cancel")]
+        public async Task<ResultModel<string>> SortedCancelAsync(List<int> idList)
         {
-            var (flag, msg) = await _asnService.SortedCancelAsync(id);
+            var (flag, msg) = await _asnService.SortedCancelAsync(idList);
             if (flag)
             {
                 return ResultModel<string>.Success(msg);
@@ -317,12 +443,12 @@ namespace ModernWMS.WMS.Controllers
         /// <summary>
         /// PutAway
         /// </summary>
-        /// <param name="viewModel">args</param>
+        /// <param name="viewModels">args</param>
         /// <returns></returns>
         [HttpPut("putaway")]
-        public async Task<ResultModel<string>> PutAwayAsync(AsnPutAwayInputViewModel viewModel)
+        public async Task<ResultModel<string>> PutAwayAsync(List<AsnPutAwayInputViewModel> viewModels)
         {
-            var (flag, msg) = await _asnService.PutAwayAsync(viewModel, CurrentUser);
+            var (flag, msg) = await _asnService.PutAwayAsync(viewModels, CurrentUser);
             if (flag)
             {
                 return ResultModel<string>.Success(msg);
@@ -332,29 +458,8 @@ namespace ModernWMS.WMS.Controllers
                 return ResultModel<string>.Error(msg);
             }
         }
-
         #endregion
 
-        #region excel import
-        /// <summary>
-        /// excel import
-        /// </summary>
-        /// <param name="excelData">excel data</param>
-        /// <returns></returns>
-        [HttpPost("excel-import")]
-        public async Task<ResultModel<List<AsnExcelImportViewModel>>> ImportAsync(List<AsnExcelImportViewModel> excelData)
-        {
-            var (flag, msg, errList) = await _asnService.ImportAsync(excelData, CurrentUser);
-            if (flag)
-            {
-                return ResultModel<List<AsnExcelImportViewModel>>.Success(errList);
-            }
-            else
-            {
-                return ResultModel<List<AsnExcelImportViewModel>>.Error(msg, 400, errList);
-            }
-        }
-        #endregion
     }
 }
  

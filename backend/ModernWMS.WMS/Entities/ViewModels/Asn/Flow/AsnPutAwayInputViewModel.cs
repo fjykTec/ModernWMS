@@ -32,6 +32,18 @@ namespace ModernWMS.WMS.Entities.ViewModels
         public int asn_id { get; set; } = 0;
 
         /// <summary>
+        /// goods_owner_id
+        /// </summary>
+        [Display(Name = "goods_owner_id")]
+        public int goods_owner_id { get; set; } = 0;
+
+        /// <summary>
+        /// series_number
+        /// </summary>
+        [Display(Name = "series_number")]
+        public string series_number { get; set; } = string.Empty;
+
+        /// <summary>
         /// goods_location_id
         /// </summary>
         [Display(Name = "goods_location_id")]

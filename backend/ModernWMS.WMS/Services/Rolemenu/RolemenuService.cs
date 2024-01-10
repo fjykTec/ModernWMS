@@ -2,16 +2,17 @@
  * date：2022-12-20
  * developer：AMo
  */
-using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using ModernWMS.Core.DBContext;
 using ModernWMS.Core.JWT;
+using ModernWMS.Core.Models;
 using ModernWMS.Core.Services;
+using ModernWMS.Core.Utility;
 using ModernWMS.WMS.Entities.Models;
 using ModernWMS.WMS.Entities.ViewModels;
 using ModernWMS.WMS.IServices;
-using ModernWMS.Core.Models;
+
 namespace ModernWMS.WMS.Services
 {
     /// <summary>
@@ -104,6 +105,7 @@ namespace ModernWMS.WMS.Services
                                       rm.menu_id,
                                       m.menu_name,
                                       rm.authority,
+                                      rm.menu_actions_authority,
                                       rm.create_time,
                                       rm.last_update_time
                                   }).ToListAsync();
@@ -114,7 +116,14 @@ namespace ModernWMS.WMS.Services
                     userrole_id = entities.First().userrole_id,
                     role_name = entities.First().role_name,
                     is_valid = entities.First().is_valid,
-                    detailList = entities.Adapt<List<RolemenuViewModel>>()
+                    detailList = entities.Select(t => new RolemenuViewModel
+                    {
+                        id = t.id,
+                        menu_id = t.menu_id,
+                        menu_name = t.menu_name,
+                        authority = t.authority,
+                        menu_actions_authority = JsonHelper.DeserializeObject<List<string>>(t.menu_actions_authority)
+                    }).ToList()
                 };
                 return data;
             }
@@ -133,7 +142,7 @@ namespace ModernWMS.WMS.Services
             var Menus = _dBContext.GetDbSet<MenuEntity>();
             var data = await Menus.AsNoTracking()
                 .Where(t => t.tenant_id == currentUser.tenant_id)
-                .Select(m => new MenuViewModel
+                .Select(m => new 
                 {
                     id = m.id,
                     menu_name = m.menu_name,
@@ -141,9 +150,22 @@ namespace ModernWMS.WMS.Services
                     vue_path = m.vue_path,
                     vue_path_detail = m.vue_path_detail,
                     vue_directory = m.vue_directory,
-                    sort = m.sort
+                    sort = m.sort,
+                    menu_actions = m.menu_actions
                 }).ToListAsync();
-            return data;
+
+            var result = data.Select(m => new MenuViewModel
+            {
+                id = m.id,
+                menu_name = m.menu_name,
+                module = m.module,
+                vue_path = m.vue_path,
+                vue_path_detail = m.vue_path_detail,
+                vue_directory = m.vue_directory,
+                sort = m.sort,
+                menu_actions = JsonHelper.DeserializeObject<List<string>>(m.menu_actions)
+            }).ToList();
+            return result;
         }
         /// <summary>
         /// Get menu's authority by user role id
@@ -158,7 +180,7 @@ namespace ModernWMS.WMS.Services
                               join m in Menus.AsNoTracking() on rm.menu_id equals m.id
                               where rm.userrole_id == userrole_id
                               orderby m.sort, m.menu_name
-                              select new MenuViewModel
+                              select new 
                               {
                                   id = m.id,
                                   menu_name = m.menu_name,
@@ -166,9 +188,25 @@ namespace ModernWMS.WMS.Services
                                   vue_path = m.vue_path,
                                   vue_path_detail = m.vue_path_detail,
                                   vue_directory = m.vue_directory,
-                                  sort = m.sort
+                                  sort = m.sort,
+                                  rm.menu_actions_authority
                               }).ToListAsync();
-            return data;
+            if (data.Any())
+            {
+                var result = data.Select(m => new MenuViewModel
+                {
+                    id = m.id,
+                    menu_name = m.menu_name,
+                    module = m.module,
+                    vue_path = m.vue_path,
+                    vue_path_detail = m.vue_path_detail,
+                    vue_directory = m.vue_directory,
+                    sort = m.sort,
+                    menu_actions = JsonHelper.DeserializeObject<List<string>>(m.menu_actions_authority)
+                }).ToList();
+                return result;
+            }
+            return new List<MenuViewModel>();
         }
         /// <summary>
         /// add a new record
@@ -189,6 +227,7 @@ namespace ModernWMS.WMS.Services
                 userrole_id = viewModel.userrole_id,
                 menu_id = t.menu_id,
                 authority = t.authority,
+                menu_actions_authority = JsonHelper.SerializeObject(t.menu_actions_authority),
                 create_time = DateTime.Now,
                 last_update_time = DateTime.Now,
                 tenant_id = currentUser.tenant_id
@@ -229,6 +268,7 @@ namespace ModernWMS.WMS.Services
                                 userrole_id = viewModel.userrole_id,
                                 menu_id = vm.menu_id,
                                 authority = vm.authority,
+                                menu_actions_authority = JsonHelper.SerializeObject(vm.menu_actions_authority),
                                 create_time = db == null ? DateTime.Now : db.create_time,
                                 last_update_time = DateTime.Now,
                                 tenant_id = currentUser.tenant_id

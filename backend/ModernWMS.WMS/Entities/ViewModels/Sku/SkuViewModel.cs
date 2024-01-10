@@ -55,6 +55,13 @@ namespace ModernWMS.WMS.Entities.ViewModels
         public string sku_name { get; set; } = string.Empty;
 
         /// <summary>
+        /// bar_code
+        /// </summary>
+        [Display(Name = "bar_code")]
+        [MaxLength(64, ErrorMessage = "MaxLength")]
+        public string bar_code { get; set; } = string.Empty;
+
+        /// <summary>
         /// weight
         /// </summary>
         [Display(Name = "weight")]
@@ -118,5 +125,12 @@ namespace ModernWMS.WMS.Entities.ViewModels
         public DateTime last_update_time { get; set; } = DateTime.Now;
         #endregion
 
+        #region sku safety stock
+        /// <summary>
+        /// sku safety sotck
+        /// </summary>
+        public List<SkuSafetyStockViewModel> detailList { get; set; } = new List<SkuSafetyStockViewModel>();
+
+        #endregion
     }
 }

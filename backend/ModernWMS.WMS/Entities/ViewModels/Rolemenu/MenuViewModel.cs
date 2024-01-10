@@ -47,5 +47,9 @@ namespace ModernWMS.WMS.Entities.ViewModels
         /// </summary>
         public int sort { get; set; } = 0;
 
+        /// <summary>
+        /// menu's actions
+        /// </summary>
+        public List<string> menu_actions { get; set; } = new List<string>();
     }
 }

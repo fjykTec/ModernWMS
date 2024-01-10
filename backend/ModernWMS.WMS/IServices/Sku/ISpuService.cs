@@ -35,6 +35,14 @@ using ModernWMS.WMS.Entities.ViewModels;
         /// <param name="sku_id">sku_id</param>
         /// <returns></returns>
         Task<SkuDetailViewModel> GetSkuAsync(int sku_id);
+
+        /// <summary>
+        /// get sku info by bar_code
+        /// </summary>
+        /// <param name="bar_code">bar_code</param>
+        /// <returns></returns>
+        Task<SkuDetailViewModel> GetSkuByBarCodeAsync(string bar_code);
+
         /// <summary>
         /// add a new record
         /// </summary>
@@ -56,6 +64,15 @@ using ModernWMS.WMS.Entities.ViewModels;
         /// <returns></returns>
         Task<(bool flag, string msg)> DeleteAsync(int id);
         #endregion
+
+        #region add or update sku_safety_stock
+        /// <summary>
+        /// add or update sku_safety_stock
+        /// </summary>
+        /// <param name="viewModel">args</param>
+        /// <returns></returns>
+        Task<(bool flag, string msg)> InsertOrUpdateSkuSafetyStockAsync(SkuSafetyStockPutViewModel viewModel);
+        #endregion
     }
- }
+}
  

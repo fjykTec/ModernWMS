@@ -2,6 +2,7 @@
  * date：2022-12-23
  * developer：NoNo
  */
+
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using ModernWMS.Core.DBContext;
@@ -19,7 +20,6 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc.Formatters.Xml;
 using Microsoft.AspNetCore.SignalR.Protocol;
 using System.Linq;
-using Microsoft.CodeAnalysis;
 
 namespace ModernWMS.WMS.Services
 {
@@ -29,6 +29,7 @@ namespace ModernWMS.WMS.Services
     public class StockprocessService : BaseService<StockprocessEntity>, IStockprocessService
     {
         #region Args
+
         /// <summary>
         /// The DBContext
         /// </summary>
@@ -38,9 +39,11 @@ namespace ModernWMS.WMS.Services
         /// Localizer Service
         /// </summary>
         private readonly IStringLocalizer<ModernWMS.Core.MultiLanguage> _stringLocalizer;
-        #endregion
+
+        #endregion Args
 
         #region constructor
+
         /// <summary>
         ///Stockprocess  constructor
         /// </summary>
@@ -54,9 +57,11 @@ namespace ModernWMS.WMS.Services
             this._dBContext = dBContext;
             this._stringLocalizer = stringLocalizer;
         }
-        #endregion
+
+        #endregion constructor
 
         #region Api
+
         /// <summary>
         /// page search
         /// </summary>
@@ -98,7 +103,7 @@ namespace ModernWMS.WMS.Services
                             create_time = m.create_time,
                             last_update_time = m.last_update_time,
                             tenant_id = m.tenant_id,
-                            adjust_status = (m.process_status && (a.stockprocess_id == null ? false : true)) ? true : false
+                            adjust_status = (m.process_status && (a.stockprocess_id == null ? false : true)) ? true : false,
                         };
             query = query
                 .Where(t => t.tenant_id.Equals(currentUser.tenant_id))
@@ -128,7 +133,6 @@ namespace ModernWMS.WMS.Services
         /// <returns></returns>
         public async Task<StockprocessWithDetailViewModel> GetAsync(int id)
         {
-
             var DbSet = _dBContext.GetDbSet<StockprocessEntity>();
             var entity = await DbSet.AsNoTracking().FirstOrDefaultAsync(t => t.id.Equals(id));
             var details = await (from spd in _dBContext.GetDbSet<StockprocessdetailEntity>().AsNoTracking().Where(t => t.stock_process_id == id)
@@ -151,7 +155,8 @@ namespace ModernWMS.WMS.Services
                                      spu_code = spu.spu_code,
                                      spu_name = spu.spu_name,
                                      unit = sku.unit,
-                                     location_name = gl.location_name == null ? "" : gl.location_name
+                                     location_name = gl.location_name == null ? "" : gl.location_name,
+                                     series_number = spd.series_number,
                                  }).ToListAsync();
             if (entity == null)
             {
@@ -169,6 +174,7 @@ namespace ModernWMS.WMS.Services
             res.target_detail_list = details.Where(t => t.is_source == false).ToList();
             return res;
         }
+
         /// <summary>
         /// add a new record
         /// </summary>
@@ -197,6 +203,10 @@ namespace ModernWMS.WMS.Services
                 PropertyInfo t_prop_owner = typeof(StockEntity).GetProperty("goods_owner_id");
                 MemberExpression t_owner_exp = Expression.Property(parameterExpression, t_prop_owner);
                 BinaryExpression t_owner_full_exp = Expression.Equal(t_owner_exp, t_constan_owner);
+                ConstantExpression t_constan_sn = Expression.Constant(entity.detailList[i].series_number);
+                PropertyInfo t_prop_sn = typeof(StockEntity).GetProperty("series_number");
+                MemberExpression t_sn_exp = Expression.Property(parameterExpression, t_prop_sn);
+                BinaryExpression t_sn_full_exp = Expression.Equal(t_sn_exp, t_constan_sn);
                 var t_exp = Expression.And(t_location_full_exp, t_sku_full_exp);
                 t_exp = Expression.And(t_exp, t_owner_full_exp);
                 if (exp != null)
@@ -211,11 +221,13 @@ namespace ModernWMS.WMS.Services
             var lockeds = await (from d in _dBContext.GetDbSet<StockprocessdetailEntity>().AsNoTracking()
                                  where d.is_update_stock == false && goods_location_id_list.Contains(d.goods_location_id)
                                  && sku_id_list.Contains(d.sku_id)
-                                 group d by new { d.goods_location_id, d.sku_id } into lg
+                                 group d by new { d.goods_location_id, d.sku_id, d.goods_owner_id, d.series_number } into lg
                                  select new
                                  {
                                      sku_id = lg.Key.sku_id,
                                      goods_location_id = lg.Key.goods_location_id,
+                                     goods_owner_id = lg.Key.goods_owner_id,
+                                     series_number = lg.Key.series_number,
                                      qty_locked = lg.Sum(e => e.qty)
                                  }).ToListAsync();
             entity.id = 0;
@@ -230,14 +242,14 @@ namespace ModernWMS.WMS.Services
                 d.tenant_id = currentUser.tenant_id;
                 d.last_update_time = DateTime.Now;
                 d.id = 0;
-                var s = stocks.FirstOrDefault(t => t.sku_id == d.sku_id && t.goods_location_id == d.goods_location_id);
+                var s = stocks.FirstOrDefault(t => t.sku_id == d.sku_id && t.goods_location_id == d.goods_location_id && t.goods_owner_id == d.goods_owner_id && t.series_number == d.series_number);
                 if (d.is_source == true)
                 {
                     if (s == null)
                     {
                         return (0, _stringLocalizer["data_changed"]);
                     }
-                    var locked = lockeds.FirstOrDefault(t => t.sku_id == d.sku_id && t.goods_location_id == d.goods_location_id);
+                    var locked = lockeds.FirstOrDefault(t => t.sku_id == d.sku_id && t.goods_location_id == d.goods_location_id && t.goods_owner_id == d.goods_owner_id && t.series_number == d.series_number);
                     if ((s.qty - (locked == null ? 0 : locked.qty_locked)) < d.qty)
                     {
                         return (0, _stringLocalizer["data_changed"]);
@@ -258,6 +270,7 @@ namespace ModernWMS.WMS.Services
                 return (0, _stringLocalizer["save_failed"]);
             }
         }
+
         /// <summary>
         /// update a record
         /// </summary>
@@ -288,6 +301,7 @@ namespace ModernWMS.WMS.Services
                 return (false, _stringLocalizer["save_failed"]);
             }
         }
+
         /// <summary>
         /// delete a record
         /// </summary>
@@ -348,6 +362,7 @@ namespace ModernWMS.WMS.Services
                                creator = currentUser.user_name,
                                last_update_time = DateTime.Now,
                                tenant_id = currentUser.tenant_id,
+                               series_number = d.series_number,
                            }).ToList();
             entity.last_update_time = DateTime.Now;
             var stock_DBSet = _dBContext.GetDbSet<StockEntity>();
@@ -356,10 +371,10 @@ namespace ModernWMS.WMS.Services
                 return (false, _stringLocalizer["not_exists_entity"]);
             }
 
-            var stocks = await stock_DBSet.Where(s => detail_DBSet.Where(t => t.stock_process_id == id).Any(t => t.goods_location_id == s.goods_location_id && t.sku_id == s.sku_id && t.goods_owner_id == s.goods_owner_id)).ToListAsync();
+            var stocks = await stock_DBSet.Where(s => detail_DBSet.Where(t => t.stock_process_id == id).Any(t => t.goods_location_id == s.goods_location_id && t.sku_id == s.sku_id && t.goods_owner_id == s.goods_owner_id && t.series_number == s.series_number)).ToListAsync();
             foreach (var d in details)
             {
-                var stock = stocks.FirstOrDefault(t => t.goods_location_id == d.goods_location_id && t.sku_id == d.sku_id && t.goods_owner_id == d.goods_owner_id);
+                var stock = stocks.FirstOrDefault(t => t.goods_location_id == d.goods_location_id && t.sku_id == d.sku_id && t.goods_owner_id == d.goods_owner_id && t.series_number == d.series_number);
                 d.is_update_stock = true;
                 d.last_update_time = DateTime.Now;
                 if (d.is_source)
@@ -380,6 +395,7 @@ namespace ModernWMS.WMS.Services
                             sku_id = d.sku_id,
                             goods_location_id = d.goods_location_id,
                             goods_owner_id = d.goods_owner_id,
+                            series_number = d.series_number,
                             is_freeze = false,
                             last_update_time = DateTime.Now,
                             qty = d.qty,
@@ -464,6 +480,7 @@ namespace ModernWMS.WMS.Services
 
             return code;
         }
+
         /// <summary>
         /// get next order code number
         /// </summary>
@@ -495,182 +512,7 @@ namespace ModernWMS.WMS.Services
 
             return code;
         }
-        /// <summary>
-        /// get next order code number
-        /// </summary>
-        /// <returns></returns>
-        public async Task<List<string>> GetOrderCodeList(CurrentUser currentUser, int cnt)
-        {
-            List<string> code = new List<string>();
-            string date = DateTime.Now.ToString("yyyy" + "MM" + "dd");
-            string maxNo = await _dBContext.GetDbSet<DispatchlistEntity>().Where(t => t.tenant_id == currentUser.tenant_id).MaxAsync(t => t.dispatch_no);
-            if (maxNo == null)
-            {
-                for (int i = 1; i <= cnt; i++)
-                {
-                    code.Add(date + "-" + i.ToString("0000"));
-                }
-            }
-            else
-            {
-                string maxDate = maxNo.Substring(0, 8);
-                string maxDateNo = maxNo.Substring(9, 4);
-                if (date == maxDate)
-                {
-                    int.TryParse(maxDateNo, out int dd);
-                    for (int i = 1; i <= cnt; i++)
-                    {
-                        code.Add(date + "-" + (dd + i).ToString("0000"));
-                    }
-                }
-                else
-                {
-                    for (int i = 1; i <= cnt; i++)
-                    {
-                        code.Add(date + "-" + i.ToString("0000"));
-                    }
-                }
-            }
 
-            return code;
-        }
-
-
-        /// <summary>
-        /// Excel Import
-        /// </summary>
-        /// <returns></returns>
-        public async Task<(bool flag, string msg)> Import(List<StockprocessImportViewModel> viewModels, CurrentUser currentUser)
-        {
-            
-            var sku_code_list = viewModels.Select(t => t.sku_code).Distinct().ToList();
-            var sku_list = await (from sku in _dBContext.GetDbSet<SkuEntity>().AsNoTracking()
-                                  join spu in _dBContext.GetDbSet<SpuEntity>().AsNoTracking() on sku.spu_id equals spu.id
-                                  where sku_code_list.Contains(sku.sku_code) && spu.tenant_id == currentUser.tenant_id
-                                  select sku).ToListAsync();
-            var location_name_list = viewModels.Select(t => t.location_name).Distinct().ToList();
-            var location_list = await (from l in _dBContext.GetDbSet<GoodslocationEntity>().AsNoTracking()
-                                   where location_name_list.Contains(l.location_name) &&  l.tenant_id == currentUser.tenant_id
-                                   select new
-                                   {
-                                       l.id,
-                                       l.location_name
-                                   }).ToListAsync();
-            var goods_owner_name_list = viewModels.Select(t => t.goods_owner_name).Distinct().ToList();
-            var goods_owner_list = await _dBContext.GetDbSet<GoodsownerEntity>().AsNoTracking().Where(t => goods_owner_name_list.Contains(t.goods_owner_name) && t.tenant_id == currentUser.tenant_id).ToListAsync();
-
-            var entities = new List<StockprocessEntity>();
-            var vm_group = viewModels.GroupBy(t => t.import_group);
-            foreach(var vg in vm_group)
-            {
-                if (vg.All(t => t.is_ori==true) || vg.All(t=>t.is_ori == false))
-                {
-                    return (false,_stringLocalizer["job_number"]+": " +vg.Key.ToString() +" "+  _stringLocalizer["process_valid"]);
-                }
-            }
-            var groups = vm_group.Select(t => t.Key).ToList();
-            var groups_code = await GetOrderCodeList(currentUser, groups.Count());
-            var group_code_dic = new Dictionary<int, string>();
-            for (int i = 0; i < groups.Count(); i++)
-            {
-                group_code_dic.Add(groups[i], groups_code[i]);
-            }
-            var location_id_list = location_list.Select(t => t.id).ToList();
-            var sku_id_list = sku_list.Select(t => t.id).ToList();
-        
-            var check_details_all = new List<StockprocessdetailViewModel>();
-            foreach (var vg in vm_group)
-            {
-                var ent = new StockprocessEntity();
-                ent.creator = currentUser.user_name;
-                ent.create_time = DateTime.Now;
-                ent.last_update_time = DateTime.Now;
-                ent.tenant_id = currentUser.tenant_id;
-                ent.job_code = group_code_dic[vg.Key];
-                ent.job_type = true;
-                foreach (var v in vg)
-                {
-                    var sku = sku_list.FirstOrDefault(t => t.sku_code == v.sku_code);
-                    if (sku == null)
-                    {
-                        return (false, _stringLocalizer["sku_name"] + ":" + v.sku_name + "-" + _stringLocalizer["sku_code"] + ":" + v.sku_code + " " + _stringLocalizer["not_exists_entity"]);
-                    }
-                    var area = location_list.FirstOrDefault(t =>  t.location_name == v.location_name);
-                    if (area == null)
-                    {
-                        return (false, _stringLocalizer["location_name"] + ":" + v.location_name + " " + _stringLocalizer["not_exists_entity"]);
-                    }
-                    var goods_owner = goods_owner_list.FirstOrDefault(t => t.goods_owner_name == v.goods_owner_name);
-                    ent.detailList.Add(new StockprocessdetailEntity
-                    {
-                        sku_id = sku.id,
-                        is_source = v.is_ori,
-                        last_update_time = DateTime.Now,
-                        goods_owner_id = goods_owner == null ? 0 : goods_owner.id,
-                        is_update_stock = false,
-                        qty = v.qty,
-                        goods_location_id = area.id,
-                        tenant_id = currentUser.tenant_id,
-                       
-                    });
-                    if (v.is_ori)
-                        check_details_all.Add(new StockprocessdetailViewModel
-                        {
-                            sku_id = sku.id,
-                            sku_code = v.sku_code,
-                            goods_location_id = area.id,
-                             qty = v.qty,
-                            goods_owner_id = goods_owner == null ? 0 : goods_owner.id,
-                            location_name = v.location_name
-
-                        });
-                }
-                entities.Add(ent);
-            }
-            
-            var check_details_sum = check_details_all.GroupBy(t => new { t.sku_id, t.goods_location_id, t.goods_owner_id, t.sku_code, t.location_name }).Select(t => new
-            {
-                t.Key.sku_id,
-                t.Key.sku_code,
-                t.Key.goods_location_id,
-                t.Key.location_name,
-                t.Key.goods_owner_id,
-                qty = t.Sum(e=>e.qty),
-            }).ToList();
-            var stocks = await _dBContext.GetDbSet<StockEntity>().Where(t => sku_id_list.Contains(t.sku_id) && location_id_list.Contains(t.goods_location_id)).ToListAsync();
-            var lockeds = await (from d in _dBContext.GetDbSet<StockprocessdetailEntity>().AsNoTracking()
-                                where d.is_update_stock == false && location_id_list.Contains(d.goods_location_id)
-                                && sku_id_list.Contains(d.sku_id)
-                                group d by new { d.goods_location_id, d.sku_id } into lg
-                                select new
-                                {
-                                    sku_id = lg.Key.sku_id,
-                                    goods_location_id = lg.Key.goods_location_id,
-                                    qty_locked = lg.Sum(e => e.qty)
-                                }).ToListAsync();
-            foreach (var c in check_details_sum)
-            {
-                var s = stocks.FirstOrDefault(t => t.sku_id == c.sku_id && t.goods_location_id == c.goods_location_id);
-                    if (s == null)
-                    {
-                        return (false, _stringLocalizer["sku_code"]+":"+c.sku_code + "-" + _stringLocalizer["location_name"] +c.location_name+" "+ _stringLocalizer["stock_insufficiency"]);
-                    }
-                    var locked = lockeds.FirstOrDefault(t => t.sku_id == c.sku_id && t.goods_location_id == c.goods_location_id  );
-                    if ((s.qty - (locked == null ? 0 : locked.qty_locked)) < c.qty)
-                    {
-                        return (false, _stringLocalizer["sku_code"] + ":" + c.sku_code + "-" + _stringLocalizer["location_name"] + c.location_name + " " + _stringLocalizer["stock_insufficiency"]);
-                    }
-                    if (s.is_freeze == true)
-                    {
-                        return (false, _stringLocalizer["stock_frozen"]);
-                    }
-                
-            }
-            await _dBContext.GetDbSet<StockprocessEntity>().AddRangeAsync(entities);
-            await _dBContext.SaveChangesAsync();
-            return (true, "");
-        }
-        #endregion
+        #endregion Api
     }
 }
-

@@ -1,0 +1,8 @@
+.messageItems {
+  position: fixed;
+  /* top: 10px; */
+  left: 50%;
+  max-width: 90%;
+  transform: translate(-50%, 0);
+  transition: all 0.2s;
+}

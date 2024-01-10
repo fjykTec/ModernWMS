@@ -18,7 +18,22 @@ namespace ModernWMS.WMS.Entities.Models
     public class AsnEntity : BaseModel
     {
 
+        #region  foreign table
+
+        /// <summary>
+        /// foreign table
+        /// </summary>
+        [ForeignKey("asnmaster_id")]
+        public AsnmasterEntity Asnmaster { get; set; }
+
+        #endregion
+
         #region Property
+
+        /// <summary>
+        /// asnmaster_id
+        /// </summary>
+        public int asnmaster_id { get; set; } = 0;
 
         /// <summary>
         /// asn_no
@@ -49,6 +64,26 @@ namespace ModernWMS.WMS.Entities.Models
         /// actual_qty
         /// </summary>
         public int actual_qty { get; set; }  = 0;
+
+        /// <summary>
+        /// arrival_time
+        /// </summary>
+        public DateTime arrival_time { get; set; } = Core.Utility.UtilConvert.MinDate;
+
+        /// <summary>
+        /// unload_time
+        /// </summary>
+        public DateTime unload_time { get; set; } = Core.Utility.UtilConvert.MinDate;
+
+        /// <summary>
+        /// unload_person_id
+        /// </summary>
+        public int unload_person_id { get; set; } = 0;
+
+        /// <summary>
+        /// unload_person
+        /// </summary>
+        public string unload_person { get; set; } = string.Empty;
 
         /// <summary>
         /// sorted_qty

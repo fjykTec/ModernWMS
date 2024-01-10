@@ -645,19 +645,4 @@
   <data name="username_existed" xml:space="preserve">
     <value>用户名已存在</value>
   </data>
-  <data name="dest_stock_freeze" xml:space="preserve">
-    <value>目标库位被冻结</value>
-  </data>
-  <data name="qty_not_available" xml:space="preserve">
-    <value>可用数量不足</value>
-  </data>
-  <data name="stock_insufficiency" xml:space="preserve">
-    <value>当前库存不足</value>
-  </data>
-  <data name="job_number" xml:space="preserve">
-    <value>加工序号</value>
-  </data>
-  <data name="process_valid" xml:space="preserve">
-    <value>加工明细不能全部为来源商品也不能全部为目标商品</value>
-  </data>
 </root>

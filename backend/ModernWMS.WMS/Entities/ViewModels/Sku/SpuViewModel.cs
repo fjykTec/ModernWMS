@@ -69,13 +69,6 @@ namespace ModernWMS.WMS.Entities.ViewModels
         public string spu_description { get; set; } = string.Empty;
 
         /// <summary>
-        /// bar_code
-        /// </summary>
-        [Display(Name = "bar_code")]
-        [MaxLength(64, ErrorMessage = "MaxLength")]
-        public string bar_code { get; set; } = string.Empty;
-
-        /// <summary>
         /// supplier_id
         /// </summary>
         [Display(Name = "supplier_id")]

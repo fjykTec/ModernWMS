@@ -2,6 +2,7 @@
  * date：2022-12-23
  * developer：NoNo
  */
+
 using System;
 using System.ComponentModel.DataAnnotations;
 using ModernWMS.Core.Utility;
@@ -13,16 +14,17 @@ namespace ModernWMS.WMS.Entities.ViewModels
     /// </summary>
     public class StockprocessdetailViewModel
     {
-
         #region constructor
+
         /// <summary>
         /// constructor
         /// </summary>
         public StockprocessdetailViewModel()
         {
-
         }
-        #endregion
+
+        #endregion constructor
+
         #region Property
 
         /// <summary>
@@ -72,7 +74,7 @@ namespace ModernWMS.WMS.Entities.ViewModels
         /// tenant_id
         /// </summary>
         [Display(Name = "tenant_id")]
-        public long tenant_id { get; set; }  =  0;
+        public long tenant_id { get; set; } = 0;
 
         /// <summary>
         /// is_source
@@ -109,7 +111,14 @@ namespace ModernWMS.WMS.Entities.ViewModels
         /// goods location name
         /// </summary>
         public string location_name { get; set; } = string.Empty;
-        #endregion
 
+        /// <summary>
+        /// series_number
+        /// </summary>
+        [Display(Name = "series_number")]
+        [MaxLength(64, ErrorMessage = "MaxLength")]
+        public string series_number { get; set; } = string.Empty;
+
+        #endregion Property
     }
 }

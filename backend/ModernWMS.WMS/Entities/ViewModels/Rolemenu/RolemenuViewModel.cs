@@ -49,6 +49,11 @@ namespace ModernWMS.WMS.Entities.ViewModels
         [Display(Name = "authority")]
         public byte authority { get; set; } = 1;
 
+
+        /// <summary>
+        /// actions authority
+        /// </summary>
+        public List<string> menu_actions_authority { get; set; } = new List<string>();
         #endregion
 
     }

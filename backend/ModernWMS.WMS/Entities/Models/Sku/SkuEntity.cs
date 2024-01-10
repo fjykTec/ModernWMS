@@ -44,6 +44,11 @@ namespace ModernWMS.WMS.Entities.Models
         public string sku_name { get; set; } = string.Empty;
 
         /// <summary>
+        /// bar_code
+        /// </summary>
+        public string bar_code { get; set; } = string.Empty;
+
+        /// <summary>
         /// weight
         /// </summary>
         public decimal weight { get; set; } = 0;
@@ -96,5 +101,13 @@ namespace ModernWMS.WMS.Entities.Models
 
         #endregion
 
+        #region Sku Safety Stock
+
+        /// <summary>
+        /// Sku Safety Stock
+        /// </summary>
+        public List<SkuSafetyStockEntity> detailList { get; set; } = new List<SkuSafetyStockEntity>();
+
+        #endregion
     }
 }

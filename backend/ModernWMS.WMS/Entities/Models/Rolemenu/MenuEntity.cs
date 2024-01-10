@@ -47,7 +47,10 @@ namespace ModernWMS.WMS.Entities.Models
         /// </summary>
         public long tenant_id { get; set; } = 1;
 
-
+        /// <summary>
+        /// actions
+        /// </summary>
+        public string menu_actions { get; set; } = "[]";
         #endregion
 
     }

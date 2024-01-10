@@ -9,6 +9,8 @@ using ModernWMS.Core.Models;
 using ModernWMS.WMS.Entities.ViewModels;
 using ModernWMS.WMS.IServices;
 using Microsoft.Extensions.Localization;
+using ModernWMS.WMS.Entities.ViewModels.Stock;
+using System.Collections.Generic;
 
 namespace ModernWMS.WMS.Controllers
 {
@@ -65,6 +67,23 @@ namespace ModernWMS.WMS.Controllers
             var (data, totals) = await _stockService.StockPageAsync(pageSearch, CurrentUser);
 
             return ResultModel<PageData<StockManagementViewModel>>.Success(new PageData<StockManagementViewModel>
+            {
+                Rows = data,
+                Totals = totals
+            });
+        }
+
+        /// <summary>
+        /// safety stock page search
+        /// </summary>
+        /// <param name="pageSearch">args</param>
+        /// <returns></returns>
+        [HttpPost("safety-list")]
+        public async Task<ResultModel<PageData<SafetyStockManagementViewModel>>> SafetyStockPageAsync(PageSearch pageSearch)
+        {
+            var (data, totals) = await _stockService.SafetyStockPageAsync(pageSearch, CurrentUser);
+
+            return ResultModel<PageData<SafetyStockManagementViewModel>>.Success(new PageData<SafetyStockManagementViewModel>
             {
                 Rows = data,
                 Totals = totals
@@ -132,6 +151,22 @@ namespace ModernWMS.WMS.Controllers
         {
             var datas = await _stockService.LocationStockForPhoneAsync(input, CurrentUser);
             return ResultModel<List<LocationStockManagementViewModel>>.Success(datas);
+        }
+
+        /// <summary>
+        /// delivery statistic
+        /// </summary>
+        /// <param name="input">input</param>
+        /// <returns></returns>
+        [HttpPost("delivery-list")]
+        public async Task<ResultModel<PageData<DeliveryStatisticViewModel>>> LocationStockForPhoneAsync(DeliveryStatisticSearchViewModel input)
+        {
+            var (data, totals) = await _stockService.DeliveryStatistic(input, CurrentUser);
+            return ResultModel<PageData<DeliveryStatisticViewModel>>.Success(new PageData<DeliveryStatisticViewModel>
+            {
+                Rows = data,
+                Totals = totals
+            });
         }
 
         #endregion Api

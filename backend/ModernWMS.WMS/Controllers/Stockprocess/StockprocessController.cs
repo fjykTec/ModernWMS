@@ -8,11 +8,12 @@
  using ModernWMS.WMS.Entities.ViewModels;
  using ModernWMS.WMS.IServices;
  using Microsoft.Extensions.Localization;
-namespace ModernWMS.WMS.Controllers
-{
-    /// <summary>
-    /// stockprocess controller
-    /// </summary>
+ 
+ namespace ModernWMS.WMS.Controllers
+ {
+     /// <summary>
+     /// stockprocess controller
+     /// </summary>
      [Route("stockprocess")]
      [ApiController]
      [ApiExplorerSettings(GroupName = "WMS")]
@@ -184,26 +185,6 @@ namespace ModernWMS.WMS.Controllers
         public async Task<ResultModel<string>> ConfirmAdjustment(int id)
         {
             var (flag, msg) = await _stockprocessService.ConfirmAdjustment(id, CurrentUser);
-            if (flag)
-            {
-                return ResultModel<string>.Success(msg);
-            }
-            else
-            {
-                return ResultModel<string>.Error(msg);
-            }
-        }
-
-
-        /// <summary>
-        /// Excel Import
-        /// </summary>
-        /// <param name="viewModels">viewModels</param>
-        /// <returns></returns>
-        [HttpPost("import")]
-        public async Task<ResultModel<string>> Import(List<StockprocessImportViewModel> viewModels)
-        {
-            var (flag, msg) = await _stockprocessService.Import(viewModels, CurrentUser);
             if (flag)
             {
                 return ResultModel<string>.Success(msg);

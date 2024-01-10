@@ -1,4 +1,9 @@
-﻿using System;
+﻿/*
+ * date：2023-9-3
+ * developer：NoNo
+ */
+
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -72,6 +77,13 @@ namespace ModernWMS.WMS.Entities.ViewModels
         /// goods owner name
         /// </summary>
         public string goods_owner_name { get; set; } = string.Empty;
+
+        /// <summary>
+        /// series_number
+        /// </summary>
+        [Display(Name = "series_number")]
+        [MaxLength(64, ErrorMessage = "MaxLength")]
+        public string series_number { get; set; } = string.Empty;
 
         /// <summary>
         /// goods_location_id
