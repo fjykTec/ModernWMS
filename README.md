@@ -36,7 +36,7 @@
 </div>
 <div align="center">
   <h3>
-  <a href="https://github.com/fjykTec/ModernWMS/blob/master/README.zh_CN.md">中文文档</a>
+  <a href="https://gitee.com/modernwms/ModernWMS/blob/master/README.zh_CN.md">中文文档</a>
   </h3>
   <h3>
   <a href="https://modernwms.ikeyly.com">Home Page</a>
@@ -87,7 +87,7 @@
   + Step 1, download the source code
 
   ```bash
-  cd /tmp/ && wget https://github.com/fjykTec/ModernWMS/archive/refs/heads/master.zip
+  cd /tmp/ && wget https://gitee.com/modernwms/ModernWMS/repository/archive/master.zip
   ```  
 
   + Step 2, Install .NET SDK and NodeJS
@@ -133,7 +133,7 @@
   + Step 1, download the source code
   ```PowerShell
   cd C:\
-  wget -Uri https://github.com/fjykTec/ModernWMS/archive/refs/heads/master.zip  -OutFile master.zip
+  wget -Uri https://gitee.com/modernwms/ModernWMS/repository/archive/master.zip  -OutFile master.zip
   Expand-Archive -Path C:\master.zip -DestinationPath C:\
   ```
   + Step 2, Install .NET SDK and NodeJS
@@ -205,9 +205,9 @@
   + Step 1, download the source code
 
   ```bash
-  cd /tmp/ && wget https://github.com/fjykTec/ModernWMS/archive/refs/heads/master.zip
+  cd /tmp/ && wget https://gitee.com/modernwms/ModernWMS/repository/archive/master.zip
   ```  
-  
+
   + Step 2，Install .NET SDK and NodeJS
 
   ```bash
@@ -229,7 +229,7 @@
   yarn && yarn build && cp -rf /tmp/ModernWMS-master/frontend/dist/* /tmp/ModernWMS-master/docker/frontend/
   cd /tmp/ModernWMS-master/backend/ && sudo dotnet publish && cp -rf /tmp/ModernWMS-master/backend/ModernWMS/bin/Debug/net7.0/publish/* /tmp/ModernWMS-master/docker/backend/
   cp -rf /tmp/ModernWMS-master/backend/ModernWMS/wms.db /tmp/ModernWMS-master/docker/backend/
-  ```  
+  ``` 
 
   + Step 4, deploy
 
@@ -262,15 +262,15 @@
 ## Contact
 
 <h4>
-  <a href="https://github.com/fjykTec/ModernWMS/issues/new?template=bug_report.md&title=[BUG]">Report a BUG</a>
+  <a href="https://gitee.com/modernwms/ModernWMS/issues/new?issue%5Bassignee_id%5D=0&issue%5Bmilestone_id%5D=0">Report a BUG</a>
 </h4>
 <h4>
-  <a href="https://github.com/fjykTec/ModernWMS/issues/new?template=feature_request.md&title=[FR]">Submit a suggestion</a>
+  <a href="https://gitee.com/leucoon/vue-element-plus-admin/issues/new?issue%5Bassignee_id%5D=0&issue%5Bmilestone_id%5D=0">Submit a suggestion</a>
 </h4>
 
 ## License
 
-Distributed under the [MIT](https://opensource.org/licenses/MIT/) License. See [LICENSE.txt](https://github.com/fjykTec/ModernWMS/master/LICENSE) for more information.This must be observed.
+Distributed under the [MIT](https://opensource.org/licenses/MIT/) License. See [LICENSE.txt](https://gitee.com/modernwms/ModernWMS/blob/master/LICENSE) for more information.This must be observed.
 
 ## Donate
 
