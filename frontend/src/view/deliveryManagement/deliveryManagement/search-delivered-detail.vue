@@ -19,9 +19,10 @@
             <vxe-column type="seq" width="60"></vxe-column>
             <vxe-column field="spu_code" :title="$t('wms.deliveryManagement.spu_code')"></vxe-column>
             <vxe-column field="spu_name" :title="$t('wms.deliveryManagement.spu_name')"></vxe-column>
-            <vxe-column field="spu_description" :title="$t('wms.deliveryManagement.spu_description')"></vxe-column>
+            <vxe-column field="spu_description" width="200px" :title="$t('wms.deliveryManagement.spu_description')"></vxe-column>
             <vxe-column field="bar_code" :title="$t('wms.deliveryManagement.bar_code')"></vxe-column>
             <vxe-column field="sku_code" :title="$t('wms.deliveryManagement.sku_code')"></vxe-column>
+            <vxe-column field="series_number" :title="$t('wms.stockLocation.series_number')"></vxe-column>
             <vxe-column field="goods_owner_name" :title="$t('base.ownerOfCargo.goods_owner_name')"></vxe-column>
             <vxe-column field="warehouse_name" :title="$t('wms.stockLocation.warehouse_name')"></vxe-column>
             <vxe-column field="warehouse_area_name" :title="$t('base.warehouseSetting.area_name')"></vxe-column>
@@ -39,7 +40,7 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, computed, defineEmits, watch } from 'vue'
+import { reactive, computed, watch } from 'vue'
 import { hookComponent } from '@/components/system/index'
 import { viewInventoryDetails } from '@/api/wms/deliveryManagement'
 import i18n from '@/languages/i18n'

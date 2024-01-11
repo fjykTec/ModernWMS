@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+  <meta charset="utf-8">
+  <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+  <title>WMS</title>
+</head>
+<style>
+    html {
+        height: 100%;
+    }
+
+    body {
+        padding: 0;
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+    }
+
+    ::-webkit-scrollbar {
+        display: none !important; /* Chrome Safari */
+    }
+</style>
+<body>
+<div id="unity-container" class="unity-desktop" style="width: 100%;height: 100%;overflow: hidden">
+  <canvas id="unity-canvas" style="width: 100%;height: 100%;overflow: hidden"></canvas>
+  <div id="unity-loading-bar">
+    <div id="unity-logo"></div>
+    <div id="unity-progress-bar-empty">
+      <div id="unity-progress-bar-full"></div>
+    </div>
+  </div>
+  <!--  <div id='unity-warning'></div>-->
+  <!--      <div id="unity-footer">-->
+  <!--        <div id="unity-webgl-logo"></div>-->
+  <!--        <div id="unity-fullscreen-button"></div>-->
+  <!--        <div id="unity-build-title">My project</div>-->
+  <!--      </div>-->
+</div>
+<script>
+  var container = document.querySelector('#unity-container')
+  var canvas = document.querySelector('#unity-canvas')
+  var loadingBar = document.querySelector('#unity-loading-bar')
+  var progressBarFull = document.querySelector('#unity-progress-bar-full')
+  var fullscreenButton = document.querySelector('#unity-fullscreen-button')
+  var warningBanner = document.querySelector('#unity-warning')
+
+  // Shows a temporary message banner/ribbon for a few seconds, or
+  // a permanent error message on top of the canvas if type=='error'.
+  // If type=='warning', a yellow highlight color is used.
+  // Modify or remove this function to customize the visually presented
+  // way that non-critical warnings and error messages are presented to the
+  // user.
+  function unityShowBanner(msg, type) {
+    function updateBannerVisibility() {
+      warningBanner.style.display = warningBanner.children.length ? 'block' : 'none'
+    }
+
+    var div = document.createElement('div')
+    div.innerHTML = msg
+    warningBanner.appendChild(div)
+    if (type == 'error') {
+      div.style = 'background: red; padding: 10px;'
+    } else {
+      if (type == 'warning') div.style = 'background: yellow; padding: 10px;'
+      setTimeout(function () {
+        warningBanner.removeChild(div)
+        updateBannerVisibility()
+      }, 5000)
+    }
+    updateBannerVisibility()
+  }
+
+  var buildUrl = 'Build'
+  var loaderUrl = buildUrl + '/wms.loader.js'
+  var config = {
+    dataUrl: buildUrl + '/wms.data.unityweb',
+    frameworkUrl: buildUrl + '/wms.framework.js.unityweb',
+    codeUrl: buildUrl + '/wms.wasm.unityweb',
+    streamingAssetsUrl: 'StreamingAssets',
+    companyName: 'DefaultCompany',
+    productName: 'My project',
+    productVersion: '0.1',
+    showBanner: unityShowBanner
+  }
+
+  // By default Unity keeps WebGL canvas render target size matched with
+  // the DOM size of the canvas element (scaled by window.devicePixelRatio)
+  // Set this to false if you want to decouple this synchronization from
+  // happening inside the engine, and you would instead like to size up
+  // the canvas DOM size and WebGL render target sizes yourself.
+  // config.matchWebGLToCanvasSize = false;
+
+  if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+    // Mobile device style: fill the whole browser client area with the game canvas:
+
+    var meta = document.createElement('meta')
+    meta.name = 'viewport'
+    meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes'
+    document.getElementsByTagName('head')[0].appendChild(meta)
+    container.className = 'unity-mobile'
+    canvas.className = 'unity-mobile'
+
+    // To lower canvas resolution on mobile devices to gain some
+    // performance, uncomment the following line:
+    // config.devicePixelRatio = 1;
+
+    unityShowBanner('WebGL builds are not supported on mobile devices.')
+  } else {
+    // Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
+
+    canvas.style.width = '100%'
+    canvas.style.height = '100%'
+  }
+
+  loadingBar.style.display = 'block'
+
+  var script = document.createElement('script')
+  script.src = loaderUrl
+  var WMSUnityInstance
+  script.onload = () => {
+    let timer = null;
+    createUnityInstance(canvas, config, (progress) => {
+      if (!timer) {
+        timer = setTimeout(() => {
+          LoadingProgress(progress)
+          timer = null;
+        }, 500);
+      }
+    })
+      .then((unityInstance) => {
+        loadingBar.style.display = 'none'
+        WMSUnityInstance = unityInstance
+        LoadSuccess()
+      })
+      .catch((message) => {
+        alert(message)
+      })
+  }
+  document.body.appendChild(script)
+
+  function LoadingProgress(progress) {
+    console.log(progress)
+    window.parent.postMessage({
+      guid: progress,
+      event: 'loadingProgress'
+    }, '*')
+  }
+
+  function LoadSuccess() {
+    window.parent.postMessage({
+      guid: 'loadSuccess',
+      event: 'loadSuccess'
+    }, '*')
+  }
+
+  function SendStart(s) {
+    window.parent.postMessage({
+      guid: s,
+      event: 'start'
+    },  '*')
+  }
+
+  function SendFinish(s) {
+    window.parent.postMessage({
+      guid: s,
+      event: 'finish'
+    }, '*')
+  }
+
+  function SendSelectBreak() {
+    window.parent.postMessage({
+      guid: 'selectBreak',
+      event: 'selectBreak'
+    }, '*')
+  }
+
+  function SendSelectFactory(s) {
+    window.parent.postMessage({
+      guid: s,
+      event: 'select'
+    }, '*')
+  }
+
+  window.parent.addEventListener('message', function (e) {
+    if (e.data.event === 'sendData') {
+      WMSUnityInstance.SendMessage('Init', 'CreateArea', e.data.guid)
+    }
+    if (e.data.event === 'selectShelfItem') {
+      WMSUnityInstance.SendMessage('Init', 'MoveToProduct', e.data.guid)
+    }
+    if (e.data.event === 'returnToUpper') {
+      WMSUnityInstance.SendMessage('Init', 'ReturnToUpper', e.data.guid)
+    }
+  })
+</script>
+</body>
+</html>

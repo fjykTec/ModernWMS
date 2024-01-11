@@ -26,6 +26,7 @@ export function menusToSideBar(): SideBarMenu[] {
     { icon: GetModuleAndIcon('homepage'), lable: i18n.global.t('router.sideBar.homepage'), routerPath: 'homepage', showDetail: false }
   ]
   const menuList: MenuItem[] = store.getters['user/menulist']
+
   for (const menu of menuList) {
     // Get the module index and check whether this group exists
     const moduleIndex = result.findIndex((item) => item.lable === i18n.global.t(`router.sideBar.${ menu.module }`))
@@ -63,6 +64,7 @@ export function menusToSideBar(): SideBarMenu[] {
       }
     }
   }
+  result.push({ icon: GetModuleAndIcon('homepage'), lable: i18n.global.t('router.sideBar.vwms'), routerPath: 'vwms', showDetail: false })
   return result
 }
 
@@ -91,6 +93,8 @@ function GetMenuNameAndModule(path: string): string {
       return i18n.global.t('router.sideBar.warehouseSetting')
     case 'customer':
       return i18n.global.t('router.sideBar.customer')
+    case 'print':
+      return i18n.global.t('router.sideBar.print')
     case 'supplier':
       return i18n.global.t('router.sideBar.supplier')
     case 'roleMenu':
@@ -111,6 +115,12 @@ function GetMenuNameAndModule(path: string): string {
       return i18n.global.t('router.sideBar.deliveryManagement')
     case 'stockAsn':
       return i18n.global.t('router.sideBar.stockAsn')
+    case 'saftyStock':
+      return i18n.global.t('router.sideBar.saftyStock')
+    case 'deliveryStatistic':
+      return i18n.global.t('router.sideBar.deliveryStatistic')
+    case 'asnStatistic':
+      return i18n.global.t('router.sideBar.asnStatistic')
     default:
       return ''
   }
@@ -124,10 +134,12 @@ function GetModuleAndIcon(name: string) {
     case 'stockManagement':
       return 'warehouse'
     case 'stockAsn':
+    case 'asnStatistic':
       return 'home-silo'
     case 'warehouseWorkingModule':
       return 'account-hard-hat-outline '
     case 'deliveryManagement':
+    case 'deliveryStatistic':
       return 'cube-send'
     case 'companySetting':
       return 'office-building'
@@ -157,10 +169,16 @@ function GetModuleAndIcon(name: string) {
       return 'image-auto-adjust'
     case 'warehouseTaking':
       return 'ballot-recount-outline'
-      case 'customer':
+    case 'customer':
       return 'account-box-outline'
+      case 'print':
+      return 'printer-outline'
     case 'supplier':
       return 'account-badge'
+    case 'statisticAnalysis':
+      return 'chart-pie'
+    case 'saftyStock':
+      return 'alarm-light'
     default:
       return ''
   }

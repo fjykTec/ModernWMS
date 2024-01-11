@@ -2,6 +2,7 @@
  * date：2022-12-22
  * developer：NoNo
  */
+
 using System;
 using System.ComponentModel.DataAnnotations;
 using ModernWMS.Core.Utility;
@@ -13,16 +14,17 @@ namespace ModernWMS.WMS.Entities.ViewModels
     /// </summary>
     public class DispatchlistViewModel
     {
-
         #region constructor
+
         /// <summary>
         /// constructor
         /// </summary>
         public DispatchlistViewModel()
         {
-
         }
-        #endregion
+
+        #endregion constructor
+
         #region Property
 
         /// <summary>
@@ -235,7 +237,6 @@ namespace ModernWMS.WMS.Entities.ViewModels
         [Display(Name = "tenant_id")]
         public long tenant_id { get; set; } = 0;
 
-
         /// <summary>
         /// spu_code
         /// </summary>
@@ -286,7 +287,11 @@ namespace ModernWMS.WMS.Entities.ViewModels
         /// </summary>
         public string unit { get; set; } = string.Empty;
 
-        #endregion
+        /// <summary>
+        /// is_todo
+        /// </summary>
+        public bool is_todo { get; set; } = false;
 
+        #endregion Property
     }
 }

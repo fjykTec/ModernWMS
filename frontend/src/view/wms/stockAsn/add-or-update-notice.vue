@@ -73,7 +73,11 @@
       </v-card>
     </template>
   </v-dialog>
-  <sku-select :show-dialog="data.showSkuDialogSelect" @close="method.closeDialogSelect('target')" @sureSelect="method.sureSelect" />
+  <sku-select
+    :show-dialog="data.showSkuDialogSelect"
+    @close="method.closeDialogSelect('target')"
+    @sureSelect="method.sureSelect"
+  />
 </template>
 
 <script lang="ts" setup>
@@ -115,22 +119,15 @@ const data = reactive({
     sku_code: '',
     sku_name: '',
     origin: '',
-    length_unit: 0,
-    volume_unit: 0,
-    weight_unit: 0,
     asn_qty: 0,
-    actual_qty: 0,
-    sorted_qty: 0,
-    shortage_qty: 0,
-    more_qty: 0,
-    damage_qty: 0,
     weight: 0,
     volume: 0,
     supplier_id: 0,
     supplier_name: '',
     goods_owner_id: 0,
     goods_owner_name: '',
-    is_valid: true
+    is_valid: true,
+    detailList: []
   }),
   rules: {
     supplier_name: [(val: string) => !!val || `${ i18n.global.t('system.checkText.mustInput') }${ i18n.global.t('wms.stockAsnInfo.supplier_name') }!`],

@@ -71,6 +71,7 @@
                   <vxe-column field="spu_name" :title="$t('base.commodityManagement.spu_name')"></vxe-column>
                   <vxe-column field="sku_code" :title="$t('base.commodityManagement.sku_code')"></vxe-column>
                   <vxe-column field="sku_name" :title="$t('base.commodityManagement.sku_name')"></vxe-column>
+                  <vxe-column field="series_number" :title="$t('wms.stockLocation.series_number')"></vxe-column>
                   <vxe-column field="qty_available" :title="$t('wms.stock.qty_available')"></vxe-column>
                 </vxe-table>
                 <custom-pager

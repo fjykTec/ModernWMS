@@ -1,8 +1,7 @@
 ﻿/*
- * date：2-23-01-05
- * developer：NoNo
+ * date：2022-12-21
+ * developer：AMo
  */
-
 using System.ComponentModel.DataAnnotations;
 using System.Xml.Linq;
 
@@ -67,13 +66,6 @@ namespace ModernWMS.WMS.Entities.ViewModels
         [Display(Name = "spu_description")]
         [MaxLength(1000, ErrorMessage = "MaxLength")]
         public string spu_description { get; set; } = string.Empty;
-
-        /// <summary>
-        /// bar_code
-        /// </summary>
-        [Display(Name = "bar_code")]
-        [MaxLength(64, ErrorMessage = "MaxLength")]
-        public string bar_code { get; set; } = string.Empty;
 
         /// <summary>
         /// supplier_id
@@ -141,6 +133,13 @@ namespace ModernWMS.WMS.Entities.ViewModels
         [Required(ErrorMessage = "Required")]
         [MaxLength(200, ErrorMessage = "MaxLength")]
         public string sku_name { get; set; } = string.Empty;
+
+        /// <summary>
+        /// bar_code
+        /// </summary>
+        [Display(Name = "bar_code")]
+        [MaxLength(64, ErrorMessage = "MaxLength")]
+        public string bar_code { get; set; } = string.Empty;
 
         /// <summary>
         /// weight

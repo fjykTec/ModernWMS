@@ -7,14 +7,17 @@
           <div class="operateArea">
             <v-row no-gutters>
               <!-- Operate Btn -->
-              <v-col cols="12" sm="3" class="col">
-                <tooltip-btn icon="mdi-plus" :tooltip-text="$t('system.page.add')" @click="method.add()"></tooltip-btn>
+              <v-col cols="12" sm="4" class="col">
+                <!-- <tooltip-btn icon="mdi-plus" :tooltip-text="$t('system.page.add')" @click="method.add()"></tooltip-btn>
                 <tooltip-btn icon="mdi-refresh" :tooltip-text="$t('system.page.refresh')" @click="method.refresh()"></tooltip-btn>
-                <tooltip-btn icon="mdi-export-variant" :tooltip-text="$t('system.page.export')" @click="method.exportTable"></tooltip-btn>
+                <tooltip-btn icon="mdi-export-variant" :tooltip-text="$t('system.page.export')" @click="method.exportTable"></tooltip-btn> -->
+
+                <!-- new version -->
+                <BtnGroup :authority-list="data.authorityList" :btn-list="data.btnList" />
               </v-col>
 
               <!-- Search Input -->
-              <v-col cols="12" sm="9">
+              <v-col cols="12" sm="8">
                 <!-- <v-row no-gutters @keyup.enter="method.sureSearch">
                   <v-col cols="12" sm="4">
                     <v-text-field
@@ -71,20 +74,27 @@
               <vxe-column type="seq" width="80"></vxe-column>
               <vxe-column field="category_name" align="left" :title="$t('base.commodityCategorySetting.category_name')" tree-node></vxe-column>
               <vxe-column field="creator" :title="$t('base.commodityCategorySetting.creator')"></vxe-column>
-              <vxe-column field="create_time" :title="$t('base.commodityCategorySetting.create_time')"></vxe-column>
+              <vxe-column
+                field="create_time"
+                width="170px"
+                :formatter="['formatDate', 'yyyy-MM-dd HH:mm']"
+                :title="$t('base.commodityCategorySetting.create_time')"
+              ></vxe-column>
               <vxe-column :title="$t('system.page.operate')" width="160" :resizable="false" show-overflow>
                 <template #default="{ row }">
                   <tooltip-btn
                     :flat="true"
                     icon="mdi-pencil-outline"
                     :tooltip-text="$t('system.page.edit')"
+                    :disabled="!data.authorityList.includes('save')"
                     @click="method.editRow(row)"
                   ></tooltip-btn>
                   <tooltip-btn
                     :flat="true"
                     icon="mdi-delete-outline"
                     :tooltip-text="$t('system.page.delete')"
-                    :icon-color="errorColor"
+                    :icon-color="!data.authorityList.includes('delete')?'':errorColor"
+                    :disabled="!data.authorityList.includes('delete')"
                     @click="method.deleteRow(row)"
                   ></tooltip-btn>
                 </template>
@@ -109,6 +119,8 @@ import { hookComponent } from '@/components/system'
 import addOrUpdateDialog from './add-or-update-category.vue'
 import i18n from '@/languages/i18n'
 import { exportData } from '@/utils/exportTable'
+import BtnGroup from '@/components/system/btnGroup.vue'
+import { getMenuAuthorityList } from '@/utils/common'
 
 const xTable = ref()
 
@@ -129,7 +141,10 @@ const data: DataProps = reactive({
   dialogForm: {
     id: 0,
     category_name: ''
-  }
+  },
+  btnList: [],
+  // Menu operation permissions
+  authorityList: getMenuAuthorityList()
 })
 
 const method = reactive({
@@ -209,7 +224,7 @@ const method = reactive({
       table: $table,
       filename: i18n.global.t('router.sideBar.commodityCategorySetting'),
       columnFilterMethod({ column }: any) {
-        return !['checkbox'].includes(column?.type)
+        return !['checkbox'].includes(column?.type) && !['operate'].includes(column?.field)
       }
     })
   }
@@ -217,6 +232,27 @@ const method = reactive({
 
 onMounted(async () => {
   await method.getCommodityCategorySetting()
+
+  data.btnList = [
+    {
+      name: i18n.global.t('system.page.add'),
+      icon: 'mdi-plus',
+      code: 'save',
+      click: method.add
+    },
+    {
+      name: i18n.global.t('system.page.refresh'),
+      icon: 'mdi-refresh',
+      code: '',
+      click: method.refresh
+    },
+    {
+      name: i18n.global.t('system.page.export'),
+      icon: 'mdi-export-variant',
+      code: 'export',
+      click: method.exportTable
+    }
+  ]
 })
 
 const cardHeight = computed(() => computedCardHeight({ hasTab: false }))

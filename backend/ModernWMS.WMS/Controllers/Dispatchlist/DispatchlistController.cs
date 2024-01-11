@@ -2,68 +2,68 @@
  * date：2022-12-27
  * developer：NoNo
  */
- using Microsoft.AspNetCore.Mvc;
- using ModernWMS.Core.Controller;
- using ModernWMS.Core.Models;
- using ModernWMS.WMS.Entities.ViewModels;
- using ModernWMS.WMS.IServices;
- using Microsoft.Extensions.Localization;
+using Microsoft.AspNetCore.Mvc;
+using ModernWMS.Core.Controller;
+using ModernWMS.Core.Models;
+using ModernWMS.WMS.Entities.ViewModels;
+using ModernWMS.WMS.IServices;
+using Microsoft.Extensions.Localization;
 namespace ModernWMS.WMS.Controllers
 {
     /// <summary>
     /// dispatchlist controller
     /// </summary>
-     [Route("dispatchlist")]
-     [ApiController]
-     [ApiExplorerSettings(GroupName = "WMS")]
-     public class DispatchlistController : BaseController
-     {
-         #region Args
- 
-         /// <summary>
-         /// dispatchlist Service
-         /// </summary>
-         private readonly IDispatchlistService _dispatchlistService;
- 
-         /// <summary>
-         /// Localizer Service
-         /// </summary>
-         private readonly IStringLocalizer<ModernWMS.Core.MultiLanguage> _stringLocalizer;
-         #endregion
- 
-         #region constructor
-         /// <summary>
-         /// constructor
-         /// </summary>
-         /// <param name="dispatchlistService">dispatchlist Service</param>
+    [Route("dispatchlist")]
+    [ApiController]
+    [ApiExplorerSettings(GroupName = "WMS")]
+    public class DispatchlistController : BaseController
+    {
+        #region Args
+
+        /// <summary>
+        /// dispatchlist Service
+        /// </summary>
+        private readonly IDispatchlistService _dispatchlistService;
+
+        /// <summary>
+        /// Localizer Service
+        /// </summary>
+        private readonly IStringLocalizer<ModernWMS.Core.MultiLanguage> _stringLocalizer;
+        #endregion
+
+        #region constructor
+        /// <summary>
+        /// constructor
+        /// </summary>
+        /// <param name="dispatchlistService">dispatchlist Service</param>
         /// <param name="stringLocalizer">Localizer</param>
-         public DispatchlistController(
-             IDispatchlistService dispatchlistService
-           , IStringLocalizer<ModernWMS.Core.MultiLanguage> stringLocalizer
-             )
-         {
-             this._dispatchlistService = dispatchlistService;
-            this._stringLocalizer= stringLocalizer;
-         }
-         #endregion
- 
-         #region Api
-         /// <summary>
-         /// page search
-         /// </summary>
-         /// <param name="pageSearch">args</param>
-         /// <returns></returns>
-         [HttpPost("list")]
-         public async Task<ResultModel<PageData<DispatchlistViewModel>>> PageAsync(PageSearch pageSearch)
-         {
-             var (data, totals) = await _dispatchlistService.PageAsync(pageSearch, CurrentUser);
-              
-             return ResultModel<PageData<DispatchlistViewModel>>.Success(new PageData<DispatchlistViewModel>
-             {
-                 Rows = data,
-                 Totals = totals
-             });
-         }
+        public DispatchlistController(
+            IDispatchlistService dispatchlistService
+          , IStringLocalizer<ModernWMS.Core.MultiLanguage> stringLocalizer
+            )
+        {
+            this._dispatchlistService = dispatchlistService;
+            this._stringLocalizer = stringLocalizer;
+        }
+        #endregion
+
+        #region Api
+        /// <summary>
+        /// page search
+        /// </summary>
+        /// <param name="pageSearch">args</param>
+        /// <returns></returns>
+        [HttpPost("list")]
+        public async Task<ResultModel<PageData<DispatchlistViewModel>>> PageAsync(PageSearch pageSearch)
+        {
+            var (data, totals) = await _dispatchlistService.PageAsync(pageSearch, CurrentUser);
+
+            return ResultModel<PageData<DispatchlistViewModel>>.Success(new PageData<DispatchlistViewModel>
+            {
+                Rows = data,
+                Totals = totals
+            });
+        }
         /// <summary>
         /// advanced dispatch order page search
         /// </summary>
@@ -86,18 +86,18 @@ namespace ModernWMS.WMS.Controllers
         /// <param name="viewModel">args</param>
         /// <returns></returns>
         [HttpPost]
-         public async Task<ResultModel<string>> AddAsync(List<DispatchlistAddViewModel> viewModel)
-         {
-             var (flag, msg) = await _dispatchlistService.AddAsync(viewModel,CurrentUser);
-             if (flag)
-             {
-                 return ResultModel<string>.Success(msg);
-             }
-             else
-             {
-                 return ResultModel<string>.Error(msg);
-             }
-         }
+        public async Task<ResultModel<string>> AddAsync(List<DispatchlistAddViewModel> viewModel)
+        {
+            var (flag, msg) = await _dispatchlistService.AddAsync(viewModel, CurrentUser);
+            if (flag)
+            {
+                return ResultModel<string>.Success(msg);
+            }
+            else
+            {
+                return ResultModel<string>.Error(msg);
+            }
+        }
         /// <summary>
         /// update dispatchlist with same dispatch_no
         /// </summary>
@@ -135,7 +135,7 @@ namespace ModernWMS.WMS.Controllers
         [HttpGet("confirm-check")]
         public async Task<ResultModel<List<DispatchlistConfirmDetailViewModel>>> ConfirmOrderCheck(string dispatch_no)
         {
-            var datas  = await _dispatchlistService.ConfirmOrderCheck(dispatch_no, CurrentUser);
+            var datas = await _dispatchlistService.ConfirmOrderCheck(dispatch_no, CurrentUser);
             return ResultModel<List<DispatchlistConfirmDetailViewModel>>.Success(datas);
         }
 
@@ -156,25 +156,25 @@ namespace ModernWMS.WMS.Controllers
         /// <param name="dispatch_no">dispatch_no</param>
         /// <returns></returns>
         [HttpDelete]
-         public async Task<ResultModel<string>> DeleteAsync(string dispatch_no)
-         {
-             var (flag, msg) = await _dispatchlistService.DeleteAsync(dispatch_no,CurrentUser);
-             if (flag)
-             {
-                 return ResultModel<string>.Success(msg);
-             }
-             else
-             {
-                 return ResultModel<string>.Error(msg);
-             }
-         }
+        public async Task<ResultModel<string>> DeleteAsync(string dispatch_no)
+        {
+            var (flag, msg) = await _dispatchlistService.DeleteAsync(dispatch_no, CurrentUser);
+            if (flag)
+            {
+                return ResultModel<string>.Success(msg);
+            }
+            else
+            {
+                return ResultModel<string>.Error(msg);
+            }
+        }
         /// <summary>
         ///  Confirm orders and create  dispatchpicklist
         /// </summary>
         /// <param name="viewModels">viewModels</param>
         /// <returns></returns>
         [HttpPost("confirm-order")]
-        public async Task<ResultModel<string >> ConfirmOrder(List<DispatchlistConfirmDetailViewModel> viewModels)
+        public async Task<ResultModel<string>> ConfirmOrder(List<DispatchlistConfirmDetailViewModel> viewModels)
         {
             var (flag, msg) = await _dispatchlistService.ConfirmOrder(viewModels, CurrentUser);
             if (flag)
@@ -307,7 +307,7 @@ namespace ModernWMS.WMS.Controllers
         [HttpPost("cancel-order")]
         public async Task<ResultModel<string>> CancelOrderOpration(CancelOrderOprationViewModel viewModel)
         {
-            var (flag, msg) = await _dispatchlistService.CancelOrderOpration(viewModel,CurrentUser);
+            var (flag, msg) = await _dispatchlistService.CancelOrderOpration(viewModel, CurrentUser);
             if (flag)
             {
                 return ResultModel<string>.Success(msg);
@@ -336,8 +336,27 @@ namespace ModernWMS.WMS.Controllers
             }
         }
 
+
+        /// <summary>
+        /// Excel Import
+        /// </summary>
+        /// <param name="viewModels">viewModels</param>
+        /// <returns></returns>
+        [HttpPost("import")]
+        public async Task<ResultModel<string>> Import(List<DispatchlistImportViewModel> viewModels)
+        {
+            var (flag, msg) = await _dispatchlistService.Import(viewModels, CurrentUser);
+            if (flag)
+            {
+                return ResultModel<string>.Success(msg);
+            }
+            else
+            {
+                return ResultModel<string>.Error(msg);
+            }
+        }
         #endregion
 
     }
- }
- 
+}
+

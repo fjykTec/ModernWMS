@@ -4,7 +4,6 @@
       <div class="sideBarTitle">
         <Logo :height="50" :top="15" :left="5" />
       </div>
-      <!-- 测试数据 -->
       <div class="sideBarMenus">
         <div v-for="(item, index) in data.menuList" :key="index">
           <div class="menuItems" :class="method.getItemClass(item)" @click="method.openMenu(item)">

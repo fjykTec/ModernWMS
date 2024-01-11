@@ -3,9 +3,11 @@
     <v-row no-gutters>
       <!-- Operate Btn -->
       <v-col cols="3" class="col">
-        <tooltip-btn icon="mdi-plus" :tooltip-text="$t('system.page.add')" @click="method.add()"></tooltip-btn>
+        <!-- <tooltip-btn icon="mdi-plus" :tooltip-text="$t('system.page.add')" @click="method.add()"></tooltip-btn>
         <tooltip-btn icon="mdi-refresh" :tooltip-text="$t('system.page.refresh')" @click="method.refresh"></tooltip-btn>
-        <tooltip-btn icon="mdi-export-variant" :tooltip-text="$t('system.page.export')" @click="method.exportTable"> </tooltip-btn>
+        <tooltip-btn icon="mdi-export-variant" :tooltip-text="$t('system.page.export')" @click="method.exportTable"> </tooltip-btn> -->
+
+        <BtnGroup :authority-list="data.authorityList" :btn-list="data.btnList" />
       </v-col>
 
       <!-- Search Input -->
@@ -65,8 +67,8 @@
       <template #empty>
         {{ i18n.global.t('system.page.noData') }}
       </template>
+      <vxe-column type="checkbox" width="50" fixed="left"></vxe-column>
       <vxe-column type="seq" width="60"></vxe-column>
-      <!-- <vxe-column type="checkbox" width="50"></vxe-column> -->
       <vxe-column field="dispatch_no" width="120" :title="$t('wms.deliveryManagement.dispatch_no')"></vxe-column>
       <vxe-column field="dispatch_status" :title="$t('wms.deliveryManagement.dispatch_status')">
         <template #default="{ row }">
@@ -86,38 +88,49 @@
       </vxe-column>
       <vxe-column field="customer_name" :title="$t('wms.deliveryManagement.customer_name')"></vxe-column>
       <vxe-column field="creator" :title="$t('wms.deliveryManagement.creator')"></vxe-column>
-      <!-- <vxe-column field="create_time" width="170px" :title="$t('wms.deliveryManagement.create_time')"></vxe-column> -->
-      <vxe-column field="operate" :title="$t('system.page.operate')" width="290" :resizable="false" show-overflow>
+      <!-- <vxe-column
+        field="create_time"
+        width="120px"
+        :formatter="['formatDate', 'yyyy-MM-dd']"
+        :title="$t('wms.deliveryManagement.create_time')"
+      ></vxe-column> -->
+      <vxe-column field="operate" :title="$t('system.page.operate')" width="300px" :resizable="false" show-overflow>
         <template #default="{ row }">
           <div style="width: 100%; display: flex; justify-content: center">
             <tooltip-btn :flat="true" icon="mdi-eye-outline" :tooltip-text="$t('system.page.view')" @click="method.viewRow(row)"></tooltip-btn>
             <tooltip-btn
-              :disabled="row.dispatch_status !== 0 && row.dispatch_status !== 1"
+              :disabled="!data.authorityList.includes('invoice-confirm') || (row.dispatch_status !== 0 && row.dispatch_status !== 1)"
               :flat="true"
               icon="mdi-clipboard-check-outline"
               :tooltip-text="$t('wms.deliveryManagement.confirmOrder')"
               @click="method.confirmOrder(row)"
             ></tooltip-btn>
             <tooltip-btn
-              :disabled="row.dispatch_status !== 2"
+              :disabled="!data.authorityList.includes('picked-confirm') || row.dispatch_status !== 2"
               :flat="true"
               icon="mdi-cart-arrow-down"
               :tooltip-text="$t('wms.deliveryManagement.confirmPicking')"
               @click="method.confirmPicking(row)"
             ></tooltip-btn>
             <tooltip-btn
-              :disabled="row.dispatch_status !== 2 && row.dispatch_status !== 3"
+              :disabled="
+                (row.dispatch_status === 2 && !data.authorityList.includes('invoice-revoke')) ||
+                  (row.dispatch_status === 3 && !data.authorityList.includes('picked-revoke')) ||
+                  (row.dispatch_status !== 2 && row.dispatch_status !== 3)
+              "
               :flat="true"
               icon="mdi-arrow-u-left-top"
               :tooltip-text="$t('wms.deliveryManagement.backToThePreviousStep')"
               @click="method.backToThePreviousStep(row)"
             ></tooltip-btn>
             <tooltip-btn
-              :disabled="row.dispatch_status !== 0 && row.dispatch_status !== 1"
+              :disabled="!data.authorityList.includes('invoice-delete') || (row.dispatch_status !== 0 && row.dispatch_status !== 1)"
               :flat="true"
               icon="mdi-delete-outline"
               :tooltip-text="$t('system.page.delete')"
-              :icon-color="errorColor"
+              :icon-color="
+                !data.authorityList.includes('invoice-delete') || (row.dispatch_status !== 0 && row.dispatch_status !== 1) ? '' : errorColor
+              "
               @click="method.deleteRow(row)"
             ></tooltip-btn>
           </div>
@@ -149,11 +162,19 @@
       :show-dialog="data.showDeliveredMainDetail"
       @close="method.closeDeliveredDetail"
     />
+
+    <!-- Print QR code -->
+
+    <qr-code-dialog ref="qrCodeDialogRef" :menu="'deliveryManagement-shipment'">
+      <template #left="{ slotData }">
+        <p>{{ $t('wms.deliveryManagement.dispatch_no') }}:{{ slotData.dispatch_no }}</p> &nbsp;
+      </template>
+    </qr-code-dialog>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, reactive, watch } from 'vue'
+import { computed, ref, reactive, watch, onMounted } from 'vue'
 import { VxePagerEvents } from 'vxe-table'
 import { computedCardHeight, computedTableHeight, errorColor } from '@/constant/style'
 import { DeliveryManagementVO } from '@/types/DeliveryManagement/DeliveryManagement'
@@ -167,13 +188,17 @@ import { getShipmentState } from './shipmentFun'
 import ConfirmOrder from './confirm-order.vue'
 import { GetUnit } from '@/constant/commodityManagement'
 import customPager from '@/components/custom-pager.vue'
-import { setSearchObject } from '@/utils/common'
-import { TablePage } from '@/types/System/Form'
+import { setSearchObject, getMenuAuthorityList } from '@/utils/common'
+import { TablePage, btnGroupItem } from '@/types/System/Form'
 import { exportData } from '@/utils/exportTable'
 import { DEBOUNCE_TIME } from '@/constant/system'
 import SearchDeliveredMainDetail from './search-delivered-main-detail.vue'
+import BtnGroup from '@/components/system/btnGroup.vue'
+import QrCodeDialog from '@/components/codeDialog/qrCodeDialog.vue'
+import { httpCodeJudge } from '@/utils/http/httpCodeJudge'
 
 const xTable = ref()
+const qrCodeDialogRef = ref()
 
 const data = reactive({
   showDeliveredMainDetailNo: '',
@@ -237,10 +262,40 @@ const data = reactive({
         value: '7'
       }
     ]
-  }
+  },
+  btnList: [] as btnGroupItem[],
+  // Menu operation permissions
+  authorityList: getMenuAuthorityList(),
+  selectRowData: []
 })
 
 const method = reactive({
+  // Print QR code
+  printQrCode: () => {
+    const records = xTable.value.getCheckboxRecords()
+
+    // data.selectRowData.length === 0 ? data.selectRowData = [row] : ''
+    // const records:any[] = data.selectRowData
+    if (records.length > 0) {
+      for (const item of records) {
+        item.id = item.dispatch_no
+        item.type = 'delivery'
+      }
+      qrCodeDialogRef.value.openDialog(records)
+    } else {
+      hookComponent.$message({
+        type: 'error',
+        content: i18n.global.t('base.userManagement.checkboxIsNull')
+      })
+    }
+  },
+  selectAllEvent({ checked }) {
+    const records = xTable.value.getCheckboxRecords()
+    checked ? (data.selectRowData = records) : (data.selectRowData = [])
+  },
+  selectChangeEvent() {
+    data.selectRowData = xTable.value.getCheckboxRecords()
+  },
   viewRow: (row: DeliveryManagementVO) => {
     if (row.dispatch_no) {
       data.showDeliveredMainDetailNo = row.dispatch_no
@@ -258,6 +313,13 @@ const method = reactive({
         if (row.dispatch_no) {
           const { data: res } = await confirmPicking(row.dispatch_no)
           if (!res.isSuccess) {
+            // 2023-12-06 Add automatic refresh of expired data
+            if (httpCodeJudge(res.errorMessage)) {
+              method.refresh()
+
+              return
+            }
+
             hookComponent.$message({
               type: 'error',
               content: res.errorMessage
@@ -283,6 +345,13 @@ const method = reactive({
           dispatch_status: row.dispatch_status
         })
         if (!res.isSuccess) {
+          // 2023-12-06 Add automatic refresh of expired data
+          if (httpCodeJudge(res.errorMessage)) {
+            method.refresh()
+
+            return
+          }
+
           hookComponent.$message({
             type: 'error',
             content: res.errorMessage
@@ -348,6 +417,13 @@ const method = reactive({
         if (row.dispatch_no) {
           const { data: res } = await delShipment(row.dispatch_no)
           if (!res.isSuccess) {
+            // 2023-12-06 Add automatic refresh of expired data
+            if (httpCodeJudge(res.errorMessage)) {
+              method.refresh()
+
+              return
+            }
+
             hookComponent.$message({
               type: 'error',
               content: res.errorMessage
@@ -399,6 +475,35 @@ const method = reactive({
     data.tablePage.searchObjects = setSearchObject(data.searchForm, ['dispatch_status'])
     method.getShipment()
   }
+})
+
+onMounted(() => {
+  data.btnList = [
+    {
+      name: i18n.global.t('system.page.add'),
+      icon: 'mdi-plus',
+      code: 'invoice-save',
+      click: method.add
+    },
+    {
+      name: i18n.global.t('system.page.refresh'),
+      icon: 'mdi-refresh',
+      code: '',
+      click: method.refresh
+    },
+    {
+      name: i18n.global.t('system.page.export'),
+      icon: 'mdi-export-variant',
+      code: 'invoice-export',
+      click: method.exportTable
+    },
+    {
+      name: i18n.global.t('base.commodityManagement.printQrCode'),
+      icon: 'mdi-qrcode',
+      code: 'invoice-printQrCode',
+      click: method.printQrCode
+    }
+  ]
 })
 
 const cardHeight = computed(() => computedCardHeight({}))

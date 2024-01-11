@@ -2,6 +2,7 @@
  * date：2022-12-22
  * developer：NoNo
  */
+
 using System;
 using System.ComponentModel.DataAnnotations;
 using ModernWMS.Core.Utility;
@@ -13,16 +14,17 @@ namespace ModernWMS.WMS.Entities.ViewModels
     /// </summary>
     public class StockViewModel
     {
-
         #region constructor
+
         /// <summary>
         /// constructor
         /// </summary>
         public StockViewModel()
         {
-
         }
-        #endregion
+
+        #endregion constructor
+
         #region Property
 
         /// <summary>
@@ -119,7 +121,14 @@ namespace ModernWMS.WMS.Entities.ViewModels
         /// goods owner name
         /// </summary>
         public string goods_owner_name { get; set; } = string.Empty;
-        #endregion
 
+        /// <summary>
+        /// series_number
+        /// </summary>
+        [Display(Name = "series_number")]
+        [MaxLength(64, ErrorMessage = "MaxLength")]
+        public string series_number { get; set; } = string.Empty;
+
+        #endregion Property
     }
 }

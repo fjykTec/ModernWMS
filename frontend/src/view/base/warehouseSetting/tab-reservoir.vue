@@ -3,9 +3,11 @@
     <v-row no-gutters>
       <!-- Operate Btn -->
       <v-col cols="3" class="col">
-        <tooltip-btn icon="mdi-plus" :tooltip-text="$t('system.page.add')" @click="method.add"></tooltip-btn>
+        <!-- <tooltip-btn icon="mdi-plus" :tooltip-text="$t('system.page.add')" @click="method.add"></tooltip-btn>
         <tooltip-btn icon="mdi-refresh" :tooltip-text="$t('system.page.refresh')" @click="method.refresh"></tooltip-btn>
-        <tooltip-btn icon="mdi-export-variant" :tooltip-text="$t('system.page.export')" @click="method.exportTable"> </tooltip-btn>
+        <tooltip-btn icon="mdi-export-variant" :tooltip-text="$t('system.page.export')" @click="method.exportTable"> </tooltip-btn> -->
+        <!-- new version -->
+        <BtnGroup :authority-list="data.authorityList" :btn-list="data.btnList" />
       </v-col>
 
       <!-- Search Input -->
@@ -65,12 +67,19 @@
       </vxe-column>
       <vxe-column field="operate" :title="$t('system.page.operate')" width="160" :resizable="false" show-overflow>
         <template #default="{ row }">
-          <tooltip-btn :flat="true" icon="mdi-pencil-outline" :tooltip-text="$t('system.page.edit')" @click="method.editRow(row)"></tooltip-btn>
+          <tooltip-btn
+            :flat="true"
+            icon="mdi-pencil-outline"
+            :tooltip-text="$t('system.page.edit')"
+            :disabled="!data.authorityList.includes('area-save')"
+            @click="method.editRow(row)"
+          ></tooltip-btn>
           <tooltip-btn
             :flat="true"
             icon="mdi-delete-outline"
             :tooltip-text="$t('system.page.delete')"
-            :icon-color="errorColor"
+            :icon-color="!data.authorityList.includes('area-delete')?'':errorColor"
+            :disabled="!data.authorityList.includes('area-delete')"
             @click="method.deleteRow(row)"
           ></tooltip-btn>
         </template>
@@ -91,7 +100,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, reactive, watch } from 'vue'
+import { computed, ref, reactive, watch, onMounted } from 'vue'
 import { VxePagerEvents } from 'vxe-table'
 import { computedCardHeight, computedTableHeight, errorColor } from '@/constant/style'
 import { WarehouseAreaVO, AreaProperty } from '@/types/Base/Warehouse'
@@ -104,10 +113,11 @@ import i18n from '@/languages/i18n'
 import { formatAreaProperty } from '@/utils/format/formatWarehouse'
 import { formatIsValid } from '@/utils/format/formatSystem'
 import customPager from '@/components/custom-pager.vue'
-import { setSearchObject } from '@/utils/common'
 import { DEBOUNCE_TIME } from '@/constant/system'
-import { SearchObject } from '@/types/System/Form'
+import { SearchObject, btnGroupItem } from '@/types/System/Form'
 import { exportData } from '@/utils/exportTable'
+import BtnGroup from '@/components/system/btnGroup.vue'
+import { setSearchObject, getMenuAuthorityList } from '@/utils/common'
 
 const xTableWarehouseArea = ref()
 
@@ -133,7 +143,10 @@ const data = reactive({
     pageSize: DEFAULT_PAGE_SIZE,
     searchObjects: ref<Array<SearchObject>>([])
   }),
-  timer: ref<any>(null)
+  timer: ref<any>(null),
+  btnList: [] as btnGroupItem[],
+  // Menu operation permissions
+  authorityList: getMenuAuthorityList() as string[]
 })
 
 const method = reactive({
@@ -221,6 +234,29 @@ const method = reactive({
     data.tablePage.searchObjects = setSearchObject(data.searchForm)
     method.getWarehouseAreaList()
   }
+})
+
+onMounted(() => {
+  data.btnList = [
+    {
+      name: i18n.global.t('system.page.add'),
+      icon: 'mdi-plus',
+      code: 'area-save',
+      click: method.add
+    },
+    {
+      name: i18n.global.t('system.page.refresh'),
+      icon: 'mdi-refresh',
+      code: '',
+      click: method.refresh
+    },
+    {
+      name: i18n.global.t('system.page.export'),
+      icon: 'mdi-export-variant',
+      code: 'area-export',
+      click: method.exportTable
+    }
+  ]
 })
 
 const cardHeight = computed(() => computedCardHeight({}))

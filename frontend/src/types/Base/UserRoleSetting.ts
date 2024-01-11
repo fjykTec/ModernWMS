@@ -1,4 +1,4 @@
-import { UniformFileNaming } from '../System/Form'
+import { UniformFileNaming, btnGroupItem } from '../System/Form'
 
 export interface UserRoleVO extends UniformFileNaming {
   id: number
@@ -10,4 +10,6 @@ export interface DataProps {
   tableData: UserRoleVO[]
   showDialog: boolean
   dialogForm: UserRoleVO
+  btnList: btnGroupItem[]
+  authorityList: string[]
 }

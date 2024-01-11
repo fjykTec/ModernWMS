@@ -32,6 +32,11 @@ namespace ModernWMS.WMS.Entities.ViewModels
         public int asn_id { get; set; } = 0;
 
         /// <summary>
+        /// series_number
+        /// </summary>
+        public string series_number { get; set; } = string.Empty;
+
+        /// <summary>
         /// sorted_qty
         /// </summary>
         [Display(Name = "sorted_qty")]

@@ -14,6 +14,9 @@
       <div class="gitSrc mr-4">
         <img src="@/assets/img/github.png" alt="Gitee" @click="method.toGit('github')" />
       </div>
+      <div class="gitSrc mr-4">
+        <img src="@/assets/img/apifox.png" alt="API" @click="method.toGit('apifox')" />
+      </div>
       <LanguagesSwitch />
       <v-menu>
         <template #activator="{ props }">
@@ -24,12 +27,14 @@
         </template>
         <v-list>
           <v-list-item v-for="(item, index) in data.userOperationMenu" :key="index" :value="index" @click="method.operation(item.value)">
-            <v-list-item-title>{{ item.title }}</v-list-item-title>
+            <v-list-item-title :title="item.title">{{ item.title }}</v-list-item-title>
           </v-list-item>
         </v-list>
       </v-menu>
     </div>
     <ChangePwd ref="ChangePwdRef" />
+
+    <ViewLogDialog ref="ViewLogDialogRef" />
   </div>
 </template>
 
@@ -43,9 +48,11 @@ import { router } from '@/router'
 import { store } from '@/store'
 import { DataProps } from '@/types/Home/HomeHeader'
 import ChangePwd from '@/components/system/change-pwd.vue'
+import ViewLogDialog from '@/components/system/view-log-dialog.vue'
 
 const routerInfo = useRouter()
 const ChangePwdRef = ref()
+const ViewLogDialogRef = ref()
 
 const data: DataProps = reactive({
   breadcrumbItems: [],
@@ -54,6 +61,10 @@ const data: DataProps = reactive({
     {
       title: i18n.global.t('system.homeHeader.changePwd'),
       value: 'changePwd'
+    },
+    {
+      title: i18n.global.t('system.homeHeader.log'),
+      value: 'viewLog'
     },
     {
       title: i18n.global.t('system.homeHeader.logout'),
@@ -96,6 +107,8 @@ const method = reactive({
       router.push('/login')
     } else if (value === 'changePwd') {
       ChangePwdRef.value.open()
+    } else if (value === 'viewLog') {
+      ViewLogDialogRef.value.openDialog()
     }
   },
   toGit: (type: string) => {
@@ -103,6 +116,8 @@ const method = reactive({
       window.open('https://gitee.com/modernwms/ModernWMS', '_blank')
     } else if (type === 'github') {
       window.open('https://github.com/fjykTec/ModernWMS', '_blank')
+    } else if (type === 'apifox') {
+      window.open('https://apifox.com/apidoc/shared-c34f3f10-1982-4d24-8214-a8c2490fd02e', '_blank')
     }
   }
 })

@@ -46,7 +46,7 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, computed, defineEmits, watch } from 'vue'
+import { reactive, computed, watch } from 'vue'
 import { hookComponent } from '@/components/system/index'
 import i18n from '@/languages/i18n'
 import freightSelect from '@/components/select/freight-select.vue'

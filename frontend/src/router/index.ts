@@ -24,8 +24,17 @@ const routes: RouteRecordRaw[] = [
     path: '/home',
     redirect: 'homepage',
     component: () => import('@/view/home/home.vue'),
-    children: []
-  }
+    children: [
+      {
+        name: 'vwms',
+        path: '/vwms',
+        component: () => import('@/view/vwms/VWms.vue'),
+        meta: {
+          menuPath: 'vwms'
+        }
+      }
+    ]
+  },
 ]
 
 // create router
@@ -45,13 +54,24 @@ const modules = import.meta.glob('../view/*/*/*.vue')
 // load router function
 function loadRouter() {
   dynamicRouter = menusToRouter(store.getters['user/menulist'])
-  dynamicRouter.push({
-    name: 'homepage',
-    path: '/homepage',
-    directory: 'home/homepage',
-    redirect: '',
-    component: null
-  })
+  dynamicRouter.push(
+    {
+      name: 'homepage',
+      path: '/homepage',
+      directory: 'home/homepage',
+      redirect: '',
+      component: null
+    }
+  )
+  // dynamicRouter.push(
+  //   {
+  //     name: 'test',
+  //     path: '/test',
+  //     directory: 'test/test',
+  //     redirect: '',
+  //     component: null
+  //   }
+  // )
   // Clear the loaded routes before creating them, mainly for logged out users
   for (const item of loadedRouter) {
     router.removeRoute(item)
@@ -76,7 +96,9 @@ router.beforeEach((to, from, next) => {
     dynamicRouter = []
     return next()
   }
-
+  if (to.path === '/vwms') {
+    next()
+  }
   // dont have token, back login
   if (!store.getters['user/token']) {
     return next('/login')

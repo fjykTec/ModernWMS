@@ -1,13 +1,13 @@
 import http from '@/utils/http/request'
 import { PageConfigProps } from '@/types/System/Form'
-import { CommodityVO } from '@/types/Base/CommodityManagement'
+import { CommodityVO, UpdateSaftyStockReqBodyVO } from '@/types/Base/CommodityManagement'
 
 // Find Data by Pagination
 export const getSpuList = (data: PageConfigProps) => http({
-  url: '/spu/list',
-  method: 'post',
-  data
-})
+    url: '/spu/list',
+    method: 'post',
+    data
+  })
 
 // Add a new form
 export const addSpu = (data: CommodityVO) => http({
@@ -30,4 +30,11 @@ export const deleteSpu = (id: number) => http({
     params: {
       id
     }
+  })
+
+// Update safety stock
+export const updateSaftyStock = (data: { sku_id: number; detailList: UpdateSaftyStockReqBodyVO[] }) => http({
+    url: '/spu/sku-safety-stock',
+    method: 'put',
+    data
   })

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,17 +10,20 @@ namespace ModernWMS.WMS.Entities.ViewModels
     public class DispatchlistConfirmPickDetailViewModel
     {
         #region constructor
+
         /// <summary>
         /// constructor
         /// </summary>
         public DispatchlistConfirmPickDetailViewModel()
         {
-
         }
-        #endregion
+
+        #endregion constructor
+
         #region Property
+
         /// <summary>
-        /// stock_id        
+        /// stock_id
         /// </summary>
         public int stock_id { get; set; } = 0;
 
@@ -58,7 +62,6 @@ namespace ModernWMS.WMS.Entities.ViewModels
         /// </summary>
         public string warehouse_area_name { get; set; } = string.Empty;
 
-
         /// <summary>
         /// quantity available
         /// </summary>
@@ -69,6 +72,13 @@ namespace ModernWMS.WMS.Entities.ViewModels
         /// </summary>
         public int pick_qty { get; set; } = 0;
 
-        #endregion
+        /// <summary>
+        /// series_number
+        /// </summary>
+        [Display(Name = "series_number")]
+        [MaxLength(64, ErrorMessage = "MaxLength")]
+        public string series_number { get; set; } = string.Empty;
+
+        #endregion Property
     }
 }

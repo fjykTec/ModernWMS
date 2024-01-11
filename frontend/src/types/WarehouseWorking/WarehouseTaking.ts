@@ -13,6 +13,7 @@ export interface WarehouseTakingVO extends UniformFileNaming {
   spu_code: string
   spu_name: string
   sku_code: string
+  series_number: string
   warehouse_name: string
   location_name: string
   adjust_status: boolean

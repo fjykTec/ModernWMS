@@ -1,32 +1,53 @@
 import { UniformFileNaming } from '../System/Form'
 
 export interface StockAsnVO extends UniformFileNaming {
-  id: number
-  asn_no: string
-  asn_status: number
-  spu_id: number
-  spu_code: string
-  spu_name: string
-  sku_id: number
-  sku_code: string
-  sku_name: string
-  origin: string
-  length_unit: number
-  volume_unit: number
-  weight_unit: number
-  asn_qty: number
-  actual_qty: number
-  sorted_qty: number
-  shortage_qty: number
-  more_qty: number
-  damage_qty: number
-  weight: number
-  volume: number
-  supplier_id: number
-  supplier_name: string
-  goods_owner_id: number
-  goods_owner_name: string
-  is_valid: boolean
+  id?: number
+  asn_no?: string
+  spu_id?: number
+  supplier_name?: string
+  supplier_id?: number
+  is_valid?: boolean
+  spu_code?: string
+  spu_name?: string
+  sku_code?: string
+  sku_name?: string
+  origin?: string
+  sku_id?: number
+  asn_qty?: number
+  asn_batch?: string
+  estimated_arrival_time?: string
+  asn_status?: number
+  weight?: number
+  volume?: number
+  goods_owner_id?: number
+  goods_owner_name?: string
+  creator?: string
+  create_time?: string
+  last_update_time?: string
+  detailList: StockAsnDetailVO[]
+}
+
+export interface StockAsnDetailVO {
+  id?: number
+  asnmaster_id?: number
+  asn_status?: number
+  spu_id?: number
+  spu_code?: string
+  spu_name?: string
+  sku_id?: number
+  sku_code?: string
+  sku_name?: string
+  origin?: string
+  length_unit?: number
+  volume_unit?: number
+  weight_unit?: number
+  asn_qty?: number
+  actual_qty?: number
+  weight?: number
+  volume?: number
+  supplier_id?: number
+  supplier_name?: string
+  is_valid?: boolean
 }
 
 export interface PutawayVo {
@@ -67,4 +88,16 @@ export interface SkuInfoVo {
   unit: string
   cost: number
   price: number
+}
+
+export interface UpdateSortingVo {
+  id: number
+  asn_id: number
+  sorted_qty: number
+  series_number: string
+  creator: string
+  create_time: string
+  last_update_time: string
+  is_valid: boolean
+  tenant_id: number
 }

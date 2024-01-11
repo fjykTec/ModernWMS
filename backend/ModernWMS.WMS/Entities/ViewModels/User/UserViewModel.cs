@@ -11,11 +11,13 @@ namespace ModernWMS.WMS.Entities.ViewModels
     public class UserViewModel
     {
         #region constructor
+
         public UserViewModel()
         {
-
         }
-        #endregion
+
+        #endregion constructor
+
         #region property
 
         /// <summary>
@@ -26,10 +28,9 @@ namespace ModernWMS.WMS.Entities.ViewModels
         /// <summary>
         /// user's number
         /// </summary>
-        [Display(Name ="user_num")]
+        [Display(Name = "user_num")]
         [Required(ErrorMessage = "Required")]
         [MaxLength(128, ErrorMessage = "MaxLength")]
-
         public string user_num { get; set; } = string.Empty;
 
         /// <summary>
@@ -89,7 +90,7 @@ namespace ModernWMS.WMS.Entities.ViewModels
         [DataType(DataType.DateTime, ErrorMessage = "DataType_DateTime")]
         public DateTime create_time { get; set; } = UtilConvert.MinDate;
 
-        /// <summary>   
+        /// <summary>
         /// last update time
         /// </summary>
         [Display(Name = "last_update_time")]
@@ -100,8 +101,8 @@ namespace ModernWMS.WMS.Entities.ViewModels
         /// tenant
         /// </summary>
         [Display(Name = "tenant")]
-        public long tenant_id { get; set; }  =  0;
+        public long tenant_id { get; set; } = 0;
 
-        #endregion
+        #endregion property
     }
 }

@@ -41,8 +41,10 @@
         <v-card-actions class="justify-end">
           <v-btn variant="text" @click="method.closeDialog">{{ $t('system.page.close') }}</v-btn>
           <v-btn color="primary" variant="text" @click="method.submit">{{ $t('system.page.submit') }}</v-btn>
+          <v-btn color="primary" variant="text" @click="method.print">{{ $t('system.page.print') }}</v-btn>
         </v-card-actions>
       </v-card>
+      <hprintDialog ref="hprintDialogRef" :form="data.form" :tab-page="'print_page_detail'" />
     </template>
   </v-dialog>
 </template>
@@ -53,8 +55,10 @@ import { CustomerVO } from '@/types/Base/Customer'
 import i18n from '@/languages/i18n'
 import { hookComponent } from '@/components/system/index'
 import { addCustomer, updateCustomer } from '@/api/base/customer'
+import hprintDialog from '@/components/hiprint/hiprintFast.vue'
 
 const formRef = ref()
+const hprintDialogRef = ref()
 const emit = defineEmits(['close', 'saveSuccess'])
 
 const props = defineProps<{
@@ -119,7 +123,11 @@ const method = reactive({
         content: i18n.global.t('system.checkText.checkFormFail')
       })
     }
-  }
+  },
+    print() {
+    const ref = hprintDialogRef.value
+    ref.method.handleOpen()
+  },
 })
 
 watch(

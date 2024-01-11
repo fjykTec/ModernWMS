@@ -3,9 +3,12 @@
     <v-row no-gutters>
       <!-- Operate Btn -->
       <v-col cols="3" class="col">
-        <tooltip-btn icon="mdi-plus" :tooltip-text="$t('system.page.add')" @click="method.add"></tooltip-btn>
+        <!-- <tooltip-btn icon="mdi-plus" :tooltip-text="$t('system.page.add')" @click="method.add"></tooltip-btn>
         <tooltip-btn icon="mdi-refresh" :tooltip-text="$t('system.page.refresh')" @click="method.refresh"></tooltip-btn>
-        <tooltip-btn icon="mdi-export-variant" :tooltip-text="$t('system.page.export')" @click="method.exportTable"> </tooltip-btn>
+        <tooltip-btn icon="mdi-export-variant" :tooltip-text="$t('system.page.export')" @click="method.exportTable"> </tooltip-btn> -->
+
+        <!-- new version -->
+        <BtnGroup :authority-list="data.authorityList" :btn-list="data.btnList" />
       </v-col>
 
       <!-- Search Input -->
@@ -48,34 +51,42 @@
       height: cardHeight
     }"
   >
-    <vxe-table ref="xTableStockLocation" :column-config="{ minWidth: '100px' }" :data="data.tableData" :height="tableHeight" align="center">
+    <vxe-table ref="xTable" :column-config="{ minWidth: '100px' }" :data="data.tableData" :height="tableHeight" align="center">
       <template #empty>
         {{ i18n.global.t('system.page.noData') }}
       </template>
+      <vxe-column type="checkbox" width="50" fixed="left"></vxe-column>
       <vxe-column type="seq" width="60"></vxe-column>
-      <vxe-column type="checkbox" width="50"></vxe-column>
       <vxe-column field="asn_no" :title="$t('wms.stockAsnInfo.asn_no')"></vxe-column>
-      <vxe-column field="spu_code" :title="$t('wms.stockAsnInfo.spu_code')"></vxe-column>
-      <vxe-column field="spu_name" :title="$t('wms.stockAsnInfo.spu_name')"></vxe-column>
-      <vxe-column field="sku_code" :title="$t('wms.stockAsnInfo.sku_code')">
-        <template #default="{ row }">
-          <div :class="'text-decoration-none'" @click="method.showSkuInfo(row)"> {{ row.sku_code }}</div>
-        </template>
-      </vxe-column>
-      <vxe-column field="sku_name" :title="$t('wms.stockAsnInfo.sku_name')"></vxe-column>
+      <vxe-column field="asn_batch" :title="$t('wms.stockAsnInfo.asn_batch')"></vxe-column>
+      <vxe-column
+        field="estimated_arrival_time"
+        :formatter="['formatDate', 'yyyy-MM-dd']"
+        :title="$t('wms.stockAsnInfo.estimated_arrival_time')"
+      ></vxe-column>
       <vxe-column field="goods_owner_name" :title="$t('wms.stockAsnInfo.goods_owner_name')"></vxe-column>
-      <vxe-column field="supplier_name" :title="$t('wms.stockAsnInfo.supplier_name')"></vxe-column>
-      <vxe-column field="asn_qty" :title="$t('wms.stockAsnInfo.asn_qty')"></vxe-column>
-      <vxe-column field="weight" :title="$t('wms.stockAsnInfo.weight')"></vxe-column>
-      <vxe-column field="volume" :title="$t('wms.stockAsnInfo.volume')"></vxe-column>
-      <vxe-column field="operate" :title="$t('system.page.operate')" width="160" :resizable="false" show-overflow>
+      <vxe-column field="operate" :title="$t('system.page.operate')" width="140px" :resizable="false" show-overflow>
         <template #default="{ row }">
-          <tooltip-btn :flat="true" icon="mdi-pencil-outline" :tooltip-text="$t('system.page.edit')" @click="method.editRow(row)"></tooltip-btn>
+          <!-- <tooltip-btn
+            :flat="true"
+            icon="mdi-qrcode"
+            :tooltip-text="$t('base.commodityManagement.printQrCode')"
+            :disabled="!data.authorityList.includes('notice-printQrCode')"
+            @click="method.printQrCode(row)"
+          ></tooltip-btn> -->
+          <tooltip-btn
+            :flat="true"
+            icon="mdi-pencil-outline"
+            :tooltip-text="$t('system.page.edit')"
+            :disabled="!data.authorityList.includes('notice-save')"
+            @click="method.editRow(row)"
+          ></tooltip-btn>
           <tooltip-btn
             :flat="true"
             icon="mdi-delete-outline"
             :tooltip-text="$t('system.page.delete')"
-            :icon-color="errorColor"
+            :icon-color="!data.authorityList.includes('notice-delete') ? '' : errorColor"
+            :disabled="!data.authorityList.includes('notice-delete')"
             @click="method.deleteRow(row)"
           ></tooltip-btn>
         </template>
@@ -94,27 +105,39 @@
   </div>
   <addOrUpdateNotice :show-dialog="data.showDialog" :form="data.dialogForm" @close="method.closeDialog" @saveSuccess="method.saveSuccess" />
   <skuInfo :show-dialog="data.showDialogShowInfo" :form="data.dialogForm" @close="method.closeDialogShowInfo" />
+
+  <!-- Print QR code -->
+  <qr-code-dialog ref="qrCodeDialogRef" :menu="'stockAsnInfo-notice'">
+    <template #left="{ slotData }">
+      <p>{{ $t('wms.stockAsnInfo.num') }}:{{ slotData.asn_no }}</p> &nbsp;
+      <p>{{ $t('wms.stockAsnInfo.asn_batch') }}:{{ slotData.asn_batch }}</p> &nbsp;
+    </template>
+  </qr-code-dialog>
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, reactive, watch } from 'vue'
+import { computed, ref, reactive, watch, onMounted } from 'vue'
 import { VxePagerEvents } from 'vxe-table'
 import { computedCardHeight, computedTableHeight, errorColor } from '@/constant/style'
 import { StockAsnVO } from '@/types/WMS/StockAsn'
 import { PAGE_SIZE, PAGE_LAYOUT, DEFAULT_PAGE_SIZE } from '@/constant/vxeTable'
 import { hookComponent } from '@/components/system'
 import { DEBOUNCE_TIME } from '@/constant/system'
-import { setSearchObject } from '@/utils/common'
-import { SearchObject } from '@/types/System/Form'
-import { getStockAsnList, deleteAsn } from '@/api/wms/stockAsn'
+import { setSearchObject, getMenuAuthorityList } from '@/utils/common'
+import { SearchObject, btnGroupItem } from '@/types/System/Form'
+import { listNew as getStockAsnList, deleteAsn } from '@/api/wms/stockAsn'
 import tooltipBtn from '@/components/tooltip-btn.vue'
 import i18n from '@/languages/i18n'
-import addOrUpdateNotice from './add-or-update-notice.vue'
+import addOrUpdateNotice from './new-add-or-update-notice.vue'
 import customPager from '@/components/custom-pager.vue'
 import skuInfo from './sku-info.vue'
 import { exportData } from '@/utils/exportTable'
+import BtnGroup from '@/components/system/btnGroup.vue'
+import QrCodeDialog from '@/components/codeDialog/qrCodeDialog.vue'
+import { httpCodeJudge } from '@/utils/http/httpCodeJudge'
 
-const xTableStockLocation = ref()
+const xTable = ref()
+const qrCodeDialogRef = ref()
 
 const data = reactive({
   showDialog: false,
@@ -126,30 +149,17 @@ const data = reactive({
   dialogForm: ref<StockAsnVO>({
     id: 0,
     asn_no: '',
-    asn_status: 0,
-    spu_id: 0,
-    spu_code: '',
-    spu_name: '',
-    sku_id: 0,
-    sku_code: '',
-    sku_name: '',
-    origin: '',
-    length_unit: 0,
-    volume_unit: 0,
-    weight_unit: 0,
-    asn_qty: 0,
-    actual_qty: 0,
-    sorted_qty: 0,
-    shortage_qty: 0,
-    more_qty: 0,
-    damage_qty: 0,
-    weight: 0,
-    volume: 0,
-    supplier_id: 0,
-    supplier_name: '',
-    goods_owner_id: 0,
-    goods_owner_name: '',
-    is_valid: true
+    asn_batch: '',
+    estimated_arrival_time: '',
+    // asn_status: 0,
+    // weight: 0,
+    // volume: 0,
+    // goods_owner_id: 0,
+    // goods_owner_name: '',
+    // creator: '',
+    // create_time: '',
+    // last_update_time: '',
+    detailList: []
   }),
   activeTab: null,
   tableData: ref<StockAsnVO[]>([]),
@@ -160,10 +170,39 @@ const data = reactive({
     pageSize: DEFAULT_PAGE_SIZE,
     searchObjects: ref<Array<SearchObject>>([])
   }),
-  timer: ref<any>(null)
+  timer: ref<any>(null),
+  btnList: [] as btnGroupItem[],
+  // Menu operation permissions
+  authorityList: getMenuAuthorityList(),
+  selectRowData: []
 })
 
 const method = reactive({
+  // Print QR code
+  printQrCode: () => {
+    const records = xTable.value.getCheckboxRecords()
+
+    // data.selectRowData.length === 0 ? data.selectRowData = [row] : ''
+    // const records:any[] = data.selectRowData
+    if (records.length > 0) {
+      for (const item of records) {
+        item.type = 'asn'
+      }
+      qrCodeDialogRef.value.openDialog(records)
+    } else {
+      hookComponent.$message({
+        type: 'error',
+        content: i18n.global.t('base.userManagement.checkboxIsNull')
+      })
+    }
+  },
+  selectAllEvent({ checked }) {
+    const records = xTable.value.getCheckboxRecords()
+    checked ? (data.selectRowData = records) : (data.selectRowData = [])
+  },
+  selectChangeEvent() {
+    data.selectRowData = xTable.value.getCheckboxRecords()
+  },
   closeDialogShowInfo: () => {
     data.showDialogShowInfo = false
   },
@@ -176,30 +215,17 @@ const method = reactive({
     data.dialogForm = {
       id: 0,
       asn_no: '',
-      asn_status: 0,
-      spu_id: 0,
-      spu_code: '',
-      spu_name: '',
-      sku_id: 0,
-      sku_code: '',
-      sku_name: '',
-      origin: '',
-      length_unit: 0,
-      volume_unit: 0,
-      weight_unit: 0,
-      asn_qty: 0,
-      actual_qty: 0,
-      sorted_qty: 0,
-      shortage_qty: 0,
-      more_qty: 0,
-      damage_qty: 0,
-      weight: 0,
-      volume: 0,
-      supplier_id: 0,
-      supplier_name: '',
-      goods_owner_id: 0,
-      goods_owner_name: '',
-      is_valid: true
+      asn_batch: '',
+      estimated_arrival_time: '',
+      // asn_status: 0,
+      // weight: 0,
+      // volume: 0,
+      // goods_owner_id: 0,
+      // goods_owner_name: '',
+      // creator: '',
+      // create_time: '',
+      // last_update_time: '',
+      detailList: []
     }
     data.showDialog = true
   },
@@ -214,6 +240,13 @@ const method = reactive({
         if (row.id) {
           const { data: res } = await deleteAsn(row.id)
           if (!res.isSuccess) {
+            // 2023-12-06 Add automatic refresh of expired data
+            if (httpCodeJudge(res.errorMessage)) {
+              method.refresh()
+
+              return
+            }
+
             hookComponent.$message({
               type: 'error',
               content: res.errorMessage
@@ -261,7 +294,7 @@ const method = reactive({
     method.getStockAsnList()
   }),
   exportTable: () => {
-    const $table = xTableStockLocation.value
+    const $table = xTable.value
     exportData({
       table: $table,
       filename: i18n.global.t('wms.stockAsn.tabNotice'),
@@ -274,6 +307,35 @@ const method = reactive({
     data.tablePage.searchObjects = setSearchObject(data.searchForm)
     method.getStockAsnList()
   }
+})
+
+onMounted(() => {
+  data.btnList = [
+    {
+      name: i18n.global.t('system.page.add'),
+      icon: 'mdi-plus',
+      code: 'notice-save',
+      click: method.add
+    },
+    {
+      name: i18n.global.t('system.page.refresh'),
+      icon: 'mdi-refresh',
+      code: '',
+      click: method.refresh
+    },
+    {
+      name: i18n.global.t('system.page.export'),
+      icon: 'mdi-export-variant',
+      code: 'notice-export',
+      click: method.exportTable
+    },
+    {
+      name: i18n.global.t('base.commodityManagement.printQrCode'),
+      icon: 'mdi-qrcode',
+      code: 'notice-printQrCode',
+      click: method.printQrCode
+    }
+  ]
 })
 
 const cardHeight = computed(() => computedCardHeight({}))

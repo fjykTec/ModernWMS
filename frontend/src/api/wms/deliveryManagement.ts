@@ -1,6 +1,15 @@
 import http from '@/utils/http/request'
 import { PageConfigProps } from '@/types/System/Form'
-import { addRequestVO, ConfirmOrderVO, PackageVO, WeighVO, DeliveryVO, SignInVO, CancleOrderVO, SetCarrierVO } from '@/types/DeliveryManagement/DeliveryManagement'
+import {
+  addRequestVO,
+  ConfirmOrderVO,
+  PackageVO,
+  WeighVO,
+  DeliveryVO,
+  SignInVO,
+  CancleOrderVO,
+  SetCarrierVO
+} from '@/types/DeliveryManagement/DeliveryManagement'
 
 // Get Pre shipment
 export const getShipment = (data: PageConfigProps) => http({
@@ -65,7 +74,8 @@ export const getPackaged = (data: PageConfigProps) => http({
     method: 'post',
     data: {
       ...data,
-      sqlTitle: 'dispatch_status=4'
+      // sqlTitle: 'dispatch_status=4'
+      sqlTitle: 'package'
     }
   })
 
@@ -85,7 +95,8 @@ export const getWeighed = (data: PageConfigProps) => http({
     method: 'post',
     data: {
       ...data,
-      sqlTitle: 'dispatch_status=5'
+      // sqlTitle: 'dispatch_status=5'
+      sqlTitle: 'weight'
     }
   })
 
@@ -105,7 +116,7 @@ export const getDelivery = (data: PageConfigProps) => http({
     method: 'post',
     data: {
       ...data,
-      sqlTitle: 'dispatch_status=6'
+      sqlTitle: 'delivery'
     }
   })
 

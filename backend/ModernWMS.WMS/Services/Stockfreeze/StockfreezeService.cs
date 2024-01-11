@@ -2,6 +2,7 @@
  * date：2022-12-26
  * developer：NoNo
  */
+
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using ModernWMS.Core.DBContext;
@@ -25,6 +26,7 @@ namespace ModernWMS.WMS.Services
     public class StockfreezeService : BaseService<StockfreezeEntity>, IStockfreezeService
     {
         #region Args
+
         /// <summary>
         /// The DBContext
         /// </summary>
@@ -34,9 +36,11 @@ namespace ModernWMS.WMS.Services
         /// Localizer Service
         /// </summary>
         private readonly IStringLocalizer<ModernWMS.Core.MultiLanguage> _stringLocalizer;
-        #endregion
+
+        #endregion Args
 
         #region constructor
+
         /// <summary>
         ///Stockfreeze  constructor
         /// </summary>
@@ -50,9 +54,11 @@ namespace ModernWMS.WMS.Services
             this._dBContext = dBContext;
             this._stringLocalizer = stringLocalizer;
         }
-        #endregion
+
+        #endregion constructor
 
         #region Api
+
         /// <summary>
         /// page search
         /// </summary>
@@ -91,7 +97,8 @@ namespace ModernWMS.WMS.Services
                             spu_code = spu.spu_code,
                             spu_name = spu.spu_name,
                             location_name = location.location_name,
-                            warehouse_name = location.warehouse_name
+                            warehouse_name = location.warehouse_name,
+                            series_number = m.series_number,
                         };
             query = query
                 .Where(t => t.tenant_id.Equals(currentUser.tenant_id))
@@ -143,7 +150,8 @@ namespace ModernWMS.WMS.Services
                                   spu_code = spu.spu_code,
                                   spu_name = spu.spu_name,
                                   location_name = location.location_name,
-                                  warehouse_name = location.warehouse_name
+                                  warehouse_name = location.warehouse_name,
+                                  series_number = m.series_number,
                               }).FirstOrDefaultAsync();
             if (data == null)
             {
@@ -151,6 +159,7 @@ namespace ModernWMS.WMS.Services
             }
             return data;
         }
+
         /// <summary>
         /// add a new record
         /// </summary>
@@ -168,7 +177,7 @@ namespace ModernWMS.WMS.Services
             entity.tenant_id = currentUser.tenant_id;
             entity.job_code = await GetOrderCode(currentUser);
             var stock_DBSet = _dBContext.GetDbSet<StockEntity>();
-            var stocks = await stock_DBSet.Where(t => t.goods_location_id == entity.goods_location_id&& t.goods_owner_id == entity.goods_owner_id && t.sku_id == entity.sku_id).ToListAsync();
+            var stocks = await stock_DBSet.Where(t => t.goods_location_id == entity.goods_location_id && t.goods_owner_id == entity.goods_owner_id && t.sku_id == entity.sku_id).ToListAsync();
             foreach (var stock in stocks)
             {
                 if (entity.job_type == true)
@@ -177,7 +186,7 @@ namespace ModernWMS.WMS.Services
                     stock.is_freeze = false;
             }
             await DbSet.AddAsync(entity);
-            if( await (_dBContext.GetDbSet<StockprocessdetailEntity>().AnyAsync(t => t.goods_location_id == entity.goods_location_id && t.goods_owner_id == entity.goods_owner_id && t.sku_id == entity.sku_id && t.is_update_stock == false)))
+            if (await (_dBContext.GetDbSet<StockprocessdetailEntity>().AnyAsync(t => t.goods_location_id == entity.goods_location_id && t.goods_owner_id == entity.goods_owner_id && t.sku_id == entity.sku_id && t.is_update_stock == false)))
             {
                 return (0, _stringLocalizer["process_not_comfirm"]);
             }
@@ -185,7 +194,7 @@ namespace ModernWMS.WMS.Services
             {
                 return (0, _stringLocalizer["dispatch_not_comfirm"]);
             }
-            else if (await (_dBContext.GetDbSet<StockmoveEntity>().AnyAsync(t =>( t.orig_goods_location_id == entity.goods_location_id  || t.dest_googs_location_id == entity.goods_location_id)&& t.sku_id == entity.sku_id && t.move_status == 0)))
+            else if (await (_dBContext.GetDbSet<StockmoveEntity>().AnyAsync(t => (t.orig_goods_location_id == entity.goods_location_id || t.dest_googs_location_id == entity.goods_location_id) && t.sku_id == entity.sku_id && t.move_status == 0)))
             {
                 return (0, _stringLocalizer["move_not_comfirm"]);
             }
@@ -202,6 +211,7 @@ namespace ModernWMS.WMS.Services
                 return (0, _stringLocalizer["save_failed"]);
             }
         }
+
         /// <summary>
         /// update a record
         /// </summary>
@@ -224,6 +234,7 @@ namespace ModernWMS.WMS.Services
             entity.handler = viewModel.handler;
             entity.handle_time = viewModel.handle_time;
             entity.last_update_time = DateTime.Now;
+            entity.series_number = viewModel.series_number;
             var qty = await _dBContext.SaveChangesAsync();
             if (qty > 0)
             {
@@ -234,6 +245,7 @@ namespace ModernWMS.WMS.Services
                 return (false, _stringLocalizer["save_failed"]);
             }
         }
+
         /// <summary>
         /// delete a record
         /// </summary>
@@ -260,7 +272,7 @@ namespace ModernWMS.WMS.Services
         {
             string code;
             string date = DateTime.Now.ToString("yyyy" + "MM" + "dd");
-            string maxNo = await _dBContext.GetDbSet<StockfreezeEntity>().AsNoTracking().Where(t=> t.tenant_id == currentUser.tenant_id).MaxAsync(t => t.job_code);
+            string maxNo = await _dBContext.GetDbSet<StockfreezeEntity>().AsNoTracking().Where(t => t.tenant_id == currentUser.tenant_id).MaxAsync(t => t.job_code);
             if (maxNo == null)
             {
                 code = date + "-0001";
@@ -282,7 +294,7 @@ namespace ModernWMS.WMS.Services
             }
             return code;
         }
-        #endregion
+
+        #endregion Api
     }
 }
-

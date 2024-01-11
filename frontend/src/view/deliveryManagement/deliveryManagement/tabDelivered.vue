@@ -3,10 +3,12 @@
     <v-row no-gutters>
       <!-- Operate Btn -->
       <v-col cols="3" class="col">
-        <tooltip-btn icon="mdi-refresh" :tooltip-text="$t('system.page.refresh')" @click="method.refresh"></tooltip-btn>
+        <!-- <tooltip-btn icon="mdi-refresh" :tooltip-text="$t('system.page.refresh')" @click="method.refresh"></tooltip-btn>
         <tooltip-btn icon="mdi-export-variant" :tooltip-text="$t('system.page.export')" @click="method.exportTable"> </tooltip-btn>
         <tooltip-btn icon="mdi-car-cog" :tooltip-text="$t('wms.deliveryManagement.setFreight')" @click="method.setFreight"> </tooltip-btn>
-        <tooltip-btn icon="mdi-email-check" :tooltip-text="$t('wms.deliveryManagement.signIn')" @click="method.handleSignIn"></tooltip-btn>
+        <tooltip-btn icon="mdi-email-check" :tooltip-text="$t('wms.deliveryManagement.signIn')" @click="method.handleSignIn"></tooltip-btn> -->
+
+        <BtnGroup :authority-list="data.authorityList" :btn-list="data.btnList" />
       </v-col>
 
       <!-- Search Input -->
@@ -66,9 +68,14 @@
       </template>
       <vxe-column type="seq" width="60"></vxe-column>
       <vxe-column type="checkbox" width="50"></vxe-column>
+      <vxe-column :title="$t('wms.deliveryManagement.state')">
+        <template #default="{ row }">
+          <span>{{ `${row.is_todo ? $t('wms.deliveryManagement.deliveryTodo') : $t('wms.deliveryManagement.deliveryReady')}` }}</span>
+        </template>
+      </vxe-column>
       <vxe-column field="dispatch_no" :title="$t('wms.deliveryManagement.dispatch_no')"></vxe-column>
       <vxe-column field="spu_code" :title="$t('wms.deliveryManagement.spu_code')"></vxe-column>
-      <vxe-column field="spu_description" :title="$t('wms.deliveryManagement.spu_description')"></vxe-column>
+      <vxe-column field="spu_description" width="200px" :title="$t('wms.deliveryManagement.spu_description')"></vxe-column>
       <vxe-column field="spu_name" :title="$t('wms.deliveryManagement.spu_name')"></vxe-column>
       <vxe-column field="sku_code" :title="$t('wms.deliveryManagement.sku_code')"></vxe-column>
       <vxe-column field="bar_code" :title="$t('wms.deliveryManagement.bar_code')"></vxe-column>
@@ -92,7 +99,12 @@
       <vxe-column field="weighing_no" :title="$t('wms.deliveryManagement.weighing_no')"></vxe-column>
       <vxe-column field="customer_name" :title="$t('wms.deliveryManagement.customer_name')"></vxe-column>
       <vxe-column field="creator" :title="$t('wms.deliveryManagement.creator')"></vxe-column>
-      <vxe-column field="create_time" width="170px" :title="$t('wms.deliveryManagement.create_time')"></vxe-column>
+      <vxe-column
+        field="create_time"
+        width="170px"
+        :formatter="['formatDate', 'yyyy-MM-dd HH:mm']"
+        :title="$t('wms.deliveryManagement.create_time')"
+      ></vxe-column>
       <vxe-column field="operate" :title="$t('system.page.operate')" width="140" :resizable="false" show-overflow>
         <template #default="{ row }">
           <div style="width: 100%; display: flex; justify-content: center">
@@ -124,12 +136,10 @@
       @submit="method.dialogSubmit"
     /> -->
     <SignInConfirm
+      ref="SignInConfirmRef"
       :dialog-title="$t('wms.deliveryManagement.signIn')"
-      :show-dialog="data.showDialog"
       :is-weight="false"
       :is-sign-in="true"
-      :data-list="data.confirmList"
-      @close="method.dialogClose"
       @submit="method.dialogSubmit"
     />
     <SearchDeliveredDetail :id="data.showDeliveredDetailID" :show-dialog="data.showDeliveredDetail" @close="method.closeDeliveredDetail" />
@@ -138,13 +148,13 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, reactive, watch } from 'vue'
+import { computed, ref, reactive, watch, onMounted } from 'vue'
 import { VxePagerEvents } from 'vxe-table'
 import { computedCardHeight, computedTableHeight } from '@/constant/style'
 import { DeliveryManagementDetailVO, SetCarrierVO, ConfirmItem } from '@/types/DeliveryManagement/DeliveryManagement'
 import { PAGE_SIZE, PAGE_LAYOUT, DEFAULT_PAGE_SIZE } from '@/constant/vxeTable'
 import { hookComponent } from '@/components/system'
-import { getDelivery, handleSignIn, setCarrier } from '@/api/wms/deliveryManagement'
+import { getDelivery, handleSignIn, setCarrier, handleDelivery } from '@/api/wms/deliveryManagement'
 import tooltipBtn from '@/components/tooltip-btn.vue'
 import i18n from '@/languages/i18n'
 // import ToBeSignInConfirm from './to-be-sign-in-confirm.vue'
@@ -152,19 +162,21 @@ import SignInConfirm from './package-confirm.vue'
 import { GetUnit } from '@/constant/commodityManagement'
 import ToBeFreightfee from './to-be-freightfee.vue'
 import customPager from '@/components/custom-pager.vue'
-import { setSearchObject } from '@/utils/common'
-import { TablePage } from '@/types/System/Form'
+import { setSearchObject, getMenuAuthorityList } from '@/utils/common'
+import { TablePage, btnGroupItem } from '@/types/System/Form'
 import SearchDeliveredDetail from './search-delivered-detail.vue'
 import { exportData } from '@/utils/exportTable'
 import { DEBOUNCE_TIME } from '@/constant/system'
+import BtnGroup from '@/components/system/btnGroup.vue'
+import { httpCodeJudge } from '@/utils/http/httpCodeJudge'
 
 const xTable = ref()
+const SignInConfirmRef = ref()
 
 const data = reactive({
   showDeliveredDetailID: 0,
   showDeliveredDetail: false,
   showSetFreight: false,
-  showDialog: false,
   dialogDefaultQty: 0,
   packageRow: ref<DeliveryManagementDetailVO>(),
   searchForm: {
@@ -181,7 +193,10 @@ const data = reactive({
     pageSize: DEFAULT_PAGE_SIZE,
     searchObjects: []
   }),
-  confirmList: ref<ConfirmItem[]>([])
+  confirmList: ref<ConfirmItem[]>([]),
+  btnList: [] as btnGroupItem[],
+  // Menu operation permissions
+  authorityList: getMenuAuthorityList()
 })
 
 const method = reactive({
@@ -234,9 +249,6 @@ const method = reactive({
     method.freightfeeClose()
     method.refresh()
   },
-  dialogClose: () => {
-    data.showDialog = false
-  },
   // Callback after entering packaging value
   dialogSubmit: async (list: ConfirmItem[]) => {
     const SingInList = list.map((item) => ({
@@ -248,6 +260,15 @@ const method = reactive({
 
     const { data: res } = await handleSignIn(SingInList)
     if (!res.isSuccess) {
+      // 2023-12-06 Add automatic refresh of expired data
+      if (httpCodeJudge(res.errorMessage)) {
+        method.refresh()
+
+        SignInConfirmRef.value.closeDialog()
+
+        return
+      }
+
       hookComponent.$message({
         type: 'error',
         content: res.errorMessage
@@ -258,7 +279,7 @@ const method = reactive({
       type: 'success',
       content: res.data
     })
-    method.dialogClose()
+    SignInConfirmRef.value.closeDialog()
     method.refresh()
     // if (data.packageRow) {
     //   const { data: res } = await handleSignIn([
@@ -286,7 +307,9 @@ const method = reactive({
   },
   handleSignIn: async () => {
     const $table = xTable.value
-    const checkTableList = $table.getCheckboxRecords()
+    let checkTableList = $table.getCheckboxRecords()
+
+    checkTableList = checkTableList.filter((item: DeliveryManagementDetailVO) => !item.is_todo)
     const confirmList: ConfirmItem[] = []
     if (checkTableList.length > 0) {
       // Processing the data required by the window
@@ -302,12 +325,11 @@ const method = reactive({
           dispatch_status: item.dispatch_status
         })
       }
-      data.confirmList = confirmList
-      data.showDialog = true
+      SignInConfirmRef.value.openDialog(confirmList)
     } else {
       hookComponent.$message({
         type: 'error',
-        content: `${ i18n.global.t('base.userManagement.checkboxIsNull') }`
+        content: `${ i18n.global.t('wms.deliveryManagement.opeartionCheckboxIsNull') }`
       })
     }
     // data.packageRow = row
@@ -349,7 +371,87 @@ const method = reactive({
   sureSearch: () => {
     data.tablePage.searchObjects = setSearchObject(data.searchForm)
     method.getDelivery()
+  },
+  handleDeliver: async () => {
+    const $table = xTable.value
+    let checkTableList = $table.getCheckboxRecords()
+
+    checkTableList = checkTableList.filter((item: DeliveryManagementDetailVO) => item.is_todo)
+
+    if (checkTableList.length > 0) {
+      const deliveredList = checkTableList.map((row: DeliveryManagementDetailVO) => ({
+        id: row.id,
+        dispatch_no: row.dispatch_no,
+        dispatch_status: row.dispatch_status,
+        picked_qty: row.picked_qty
+      }))
+      hookComponent.$dialog({
+        content: `${ i18n.global.t('wms.deliveryManagement.irreversible') }, ${ i18n.global.t('wms.deliveryManagement.confirmDelivery') }?`,
+        handleConfirm: async () => {
+          const { data: res } = await handleDelivery(deliveredList)
+          if (!res.isSuccess) {
+            // 2023-12-06 Add automatic refresh of expired data
+            if (httpCodeJudge(res.errorMessage)) {
+              method.refresh()
+
+              return
+            }
+
+            hookComponent.$message({
+              type: 'error',
+              content: res.errorMessage
+            })
+            return
+          }
+          hookComponent.$message({
+            type: 'success',
+            content: res.data
+          })
+          method.refresh()
+        }
+      })
+    } else {
+      hookComponent.$message({
+        type: 'error',
+        content: `${ i18n.global.t('wms.deliveryManagement.opeartionCheckboxIsNull') }`
+      })
+    }
   }
+})
+
+onMounted(() => {
+  data.btnList = [
+    {
+      name: i18n.global.t('system.page.refresh'),
+      icon: 'mdi-refresh',
+      code: '',
+      click: method.refresh
+    },
+    {
+      name: i18n.global.t('system.page.export'),
+      icon: 'mdi-export-variant',
+      code: 'delivered-export',
+      click: method.exportTable
+    },
+    {
+      name: i18n.global.t('wms.deliveryManagement.delivery'),
+      icon: 'mdi-cube-send',
+      code: 'delivered-delivery',
+      click: method.handleDeliver
+    },
+    {
+      name: i18n.global.t('wms.deliveryManagement.setFreight'),
+      icon: 'mdi-car-cog',
+      code: 'delivered-setCarrier',
+      click: method.setFreight
+    },
+    {
+      name: i18n.global.t('wms.deliveryManagement.signIn'),
+      icon: 'mdi-email-check',
+      code: 'delivered-signIn',
+      click: method.handleSignIn
+    }
+  ]
 })
 
 const cardHeight = computed(() => computedCardHeight({}))

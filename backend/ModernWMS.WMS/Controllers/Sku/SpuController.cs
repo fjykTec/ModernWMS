@@ -101,6 +101,30 @@ namespace ModernWMS.WMS.Controllers
                 return ResultModel<SkuDetailViewModel>.Error(_stringLocalizer["not_exists_entity"]);
             }
         }
+
+        /// <summary>
+        /// get sku info by bar_code
+        /// </summary>
+        /// <param name="bar_code">bar_code</param>
+        /// <returns></returns>
+        [HttpGet("sku-bar-code")]
+        public async Task<ResultModel<SkuDetailViewModel>> GetSkuByBarCodeAsync(string bar_code)
+        {
+            if (string.IsNullOrEmpty(bar_code))
+            {
+                return ResultModel<SkuDetailViewModel>.Error(string.Format(_stringLocalizer["Required"], _stringLocalizer["bar_code"]));
+            }
+            var data = await _spuService.GetSkuByBarCodeAsync(bar_code);
+            if (data != null && data.sku_id > 0)
+            {
+                return ResultModel<SkuDetailViewModel>.Success(data);
+            }
+            else
+            {
+                return ResultModel<SkuDetailViewModel>.Error(_stringLocalizer["not_exists_entity"]);
+            }
+        }
+
         /// <summary>
         /// add a new record
         /// </summary>
@@ -159,6 +183,26 @@ namespace ModernWMS.WMS.Controllers
         }
         #endregion
 
+        #region add or update sku_safety_stock
+        /// <summary>
+        /// add or update sku_safety_stock
+        /// </summary>
+        /// <param name="viewModel">args</param>
+        /// <returns></returns>
+        [HttpPut("sku-safety-stock")]
+        public async Task<ResultModel<string>> InsertOrUpdateSkuSafetyStockAsync(SkuSafetyStockPutViewModel viewModel)
+        {
+            var (flag, msg) = await _spuService.InsertOrUpdateSkuSafetyStockAsync(viewModel);
+            if (flag)
+            {
+                return ResultModel<string>.Success(msg);
+            }
+            else
+            {
+                return ResultModel<string>.Error(msg);
+            }
+        }
+        #endregion
     }
 }
  

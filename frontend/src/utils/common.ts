@@ -1,5 +1,7 @@
 import XEUtils from 'xe-utils'
+import { useRoute } from 'vue-router'
 import { SearchObject, SearchOperator } from '@/types/System/Form'
+import { store } from '@/store'
 
 export const setSearchObject = (searchForm: any, preciseSearchCols: string[] = []) => {
   const searchObjects: Array<SearchObject> = []
@@ -54,4 +56,63 @@ export const removeObjectNull = (obj: any) => {
     }
   })
   return copy
+}
+
+// Obtain menu operation permissions
+export const getMenuAuthorityList = () => {
+  let AuthorityList: string[] = []
+
+  const route = useRoute()
+
+  const menu_name = route.path.substring(1)
+
+  const menu_list: any[] = store.getters['user/menulist']
+
+  const filter = menu_list.filter((item: any) => item.menu_name === menu_name)
+
+  // Obtain permission list based on route
+  if (filter.length > 0) {
+    AuthorityList = filter[0].menu_actions
+  } else {
+    AuthorityList = []
+  }
+
+  return AuthorityList
+}
+
+// Retrieve data from cache in browser
+export const getStorage = (key: string) => {
+  // printCommidity...
+  const value = localStorage.getItem(key)
+  if (value) {
+    return JSON.parse(value)
+  }
+  return null
+}
+
+// Store data in the browser's cache
+export const setStorage = (key: string, value: any) => {
+  localStorage.setItem(key, JSON.stringify(value))
+}
+
+// 获取菜单的查询条件设置
+export const getMenuSearchSetting = (menu_name: string) => {
+  const allSetting = getStorage('menu_search_setting')
+
+  if (allSetting && allSetting[menu_name]) {
+    return allSetting[menu_name]
+  }
+
+  return []
+}
+
+// 生成uuid方法
+export const generateUUID = (): string => {
+  let d = new Date().getTime()
+  const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (d + Math.random() * 16) % 16 | 0
+    d = Math.floor(d / 16)
+    return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16)
+  })
+  return uuid
 }

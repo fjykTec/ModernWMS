@@ -99,7 +99,21 @@ const method = reactive({
         })
         return
       }
-      store.commit('user/setUserMenuList', authorityRes.data)
+
+      const authorityList = authorityRes.data
+
+      // test
+      // authorityList.push({
+      //   id: 112999,
+      //   menu_name: 'test',
+      //   module: 'baseModule',
+      //   vue_path: 'test',
+      //   vue_path_detail: '',
+      //   vue_directory: 'test/test',
+      //   sort: 2
+      // })
+
+      store.commit('user/setUserMenuList', authorityList)
 
       hookComponent.$message({
         type: 'success',

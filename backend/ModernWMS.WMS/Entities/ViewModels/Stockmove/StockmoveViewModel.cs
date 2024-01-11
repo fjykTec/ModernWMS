@@ -2,6 +2,7 @@
  * date：2022-12-27
  * developer：NoNo
  */
+
 using System;
 using System.ComponentModel.DataAnnotations;
 using ModernWMS.Core.Utility;
@@ -13,16 +14,17 @@ namespace ModernWMS.WMS.Entities.ViewModels
     /// </summary>
     public class StockmoveViewModel
     {
-
         #region constructor
+
         /// <summary>
         /// constructor
         /// </summary>
         public StockmoveViewModel()
         {
-
         }
-        #endregion
+
+        #endregion constructor
+
         #region Property
 
         /// <summary>
@@ -154,7 +156,14 @@ namespace ModernWMS.WMS.Entities.ViewModels
         /// sku_name
         /// </summary>
         public string sku_name { get; set; } = string.Empty;
-        #endregion
 
+        /// <summary>
+        /// series_number
+        /// </summary>
+        [Display(Name = "series_number")]
+        [MaxLength(64, ErrorMessage = "MaxLength")]
+        public string series_number { get; set; } = string.Empty;
+
+        #endregion Property
     }
 }

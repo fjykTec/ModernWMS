@@ -33,11 +33,26 @@ namespace ModernWMS.WMS.Entities.ViewModels
         public int id { get; set; } = 0;
 
         /// <summary>
+        /// asnmaster_id
+        /// </summary>
+        public int asnmaster_id { get; set; } = 0;
+
+        /// <summary>
         /// asn_no
         /// </summary>
         [Display(Name = "asn_no")]
         [MaxLength(32, ErrorMessage = "MaxLength")]
         public string asn_no { get; set; } = string.Empty;
+
+        /// <summary>
+        /// asn_batch
+        /// </summary>
+        public string asn_batch { get; set; } = string.Empty;
+
+        /// <summary>
+        /// estimated_arrival_time
+        /// </summary>
+        public DateTime estimated_arrival_time { get; set; } = Core.Utility.UtilConvert.MinDate;
 
         /// <summary>
         /// asn_status
@@ -124,6 +139,26 @@ namespace ModernWMS.WMS.Entities.ViewModels
         /// </summary>
         [Display(Name = "actual_qty")]
         public int actual_qty { get; set; } = 0;
+
+        /// <summary>
+        /// arrival_time
+        /// </summary>
+        public DateTime arrival_time { get; set; } = Core.Utility.UtilConvert.MinDate;
+
+        /// <summary>
+        /// unload_time
+        /// </summary>
+        public DateTime unload_time { get; set; } = Core.Utility.UtilConvert.MinDate;
+
+        /// <summary>
+        /// unload_person_id
+        /// </summary>
+        public int unload_person_id { get; set; } = 0;
+
+        /// <summary>
+        /// unload_person
+        /// </summary>
+        public string unload_person { get; set; } = string.Empty;
 
         /// <summary>
         /// sorted_qty

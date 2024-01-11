@@ -38,6 +38,7 @@ export interface DeliveryManagementDetailVO extends DeliveryManagementVO {
   weight?: number
   volume?: number
   weight_unit?: number
+  is_todo: boolean
 }
 
 export interface addRequestVO {
@@ -118,4 +119,12 @@ export interface ConfirmItem {
   picked_qty?: number
   weight?: number
   weight_unit?: string
+}
+
+export interface DeliveryBatchAllocationVO {
+  id: number
+  dateFrom: string
+  dateTo: string
+  allocationRule: string
+  is_valid: boolean
 }

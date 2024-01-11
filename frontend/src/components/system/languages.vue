@@ -2,8 +2,8 @@
   <div class="languageIcon">
     <v-menu>
       <template #activator="{ props }">
-        <v-icon icon="mdi-translate" color="#666666" v-bind="props"></v-icon>
-        <!-- <v-icon icon="mdi-web" color="#666666" v-bind="props"></v-icon> -->
+        <!-- <v-icon icon="mdi-translate" color="#666666" v-bind="props"></v-icon> -->
+        <v-icon icon="mdi-web" color="#666666" v-bind="props"></v-icon>
       </template>
       <v-list>
         <v-list-item v-for="(item, index) in data.languageList" :key="index" :value="index" @click="method.changeLanguage(item.value)">
@@ -18,7 +18,7 @@
 import { reactive } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useLocale } from 'vuetify'
-import { getSelcectedLang } from '@/languages/method/index'
+import { getSelectedLang } from '@/languages/method/index'
 import { getSelcectedLangForVuetify } from '@/plugins/vuetify/method/index'
 import { store } from '@/store'
 import { router } from '@/router'
@@ -30,6 +30,7 @@ const data = reactive({
   showLanguage: false,
   languageList: [
     { title: '简体中文', value: 'zh' },
+    { title: '繁體中文', value: 'tw' },
     { title: 'English', value: 'en' }
   ]
 })
@@ -41,7 +42,7 @@ const method = reactive({
     }
     localStorage.setItem('language', lang)
     store.commit('system/setLanguage', lang) // set store
-    locale.value = getSelcectedLang(lang) // global
+    locale.value = getSelectedLang(lang) // global
     current.value = getSelcectedLangForVuetify(lang) // vuetify
 
     if (!['/', '/login'].includes(router.currentRoute.value.path)) {

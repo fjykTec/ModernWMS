@@ -23,7 +23,7 @@ import { reactive, onMounted } from 'vue'
 import LoginForm from '@/components/login/login-form.vue'
 import LanguagesSwitch from '@/components/system/languages.vue'
 import Logo from '@/components/system/logo.vue'
-import { emitter } from '@/utils/bus.js'
+import { emitter } from '@/utils/bus'
 
 const method = reactive({
   toICP: () => {
@@ -31,7 +31,7 @@ const method = reactive({
   }
 })
 
-// 回到登录界面清除状态
+// Return to the login interface to clear the status
 onMounted(() => {
   emitter.emit('closeLoading')
 })
@@ -48,6 +48,7 @@ onMounted(() => {
   height: 100%;
   display: flex;
   background-color: #fff;
+  // position: relative;
   .loginLeft {
     width: 70%;
     display: flex;

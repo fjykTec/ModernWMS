@@ -27,6 +27,14 @@ import i18n from '@/languages/i18n'
   position: relative;
   align-items: center;
 }
+.VWMS{
+  position: absolute;
+  top: 0;
+  display: flex;
+  align-items: center;
+  width: 40%;
+  z-index: 999999999;
+}
 
 .content {
   width: 60%;

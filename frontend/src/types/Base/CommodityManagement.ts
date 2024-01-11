@@ -1,5 +1,5 @@
 import { VxeTablePropTypes } from 'vxe-table'
-import { UniformFileNaming, TablePage } from '../System/Form'
+import { UniformFileNaming, TablePage, btnGroupItem } from '../System/Form'
 
 export interface CommodityVO extends UniformFileNaming {
   id: number
@@ -8,7 +8,6 @@ export interface CommodityVO extends UniformFileNaming {
   category_id?: number
   category_name?: string
   spu_description: string
-  bar_code: string
   supplier_id?: number
   supplier_name?: string
   brand: string
@@ -31,6 +30,7 @@ export interface CommodityDetailVO {
   width?: number
   height?: number
   volume?: number
+  detailList: UpdateSaftyStockReqBodyVO[]
 }
 
 export interface CommodityDetailJoinMainVO {
@@ -57,6 +57,17 @@ export interface DataProps {
     spu_code: string
     spu_name: string
     category_name: string
-  },
+  }
   timer: any
+  btnList: btnGroupItem[]
+  authorityList: string[]
+  selectRowData: any[]
+}
+
+export interface UpdateSaftyStockReqBodyVO {
+  id?: number
+  sku_id?: number
+  warehouse_id?: number
+  warehouse_name: string
+  safety_stock_qty: number
 }

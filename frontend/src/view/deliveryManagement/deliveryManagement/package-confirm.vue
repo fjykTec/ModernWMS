@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="isShow" :width="'70%'" transition="dialog-top-transition" :persistent="true">
+  <v-dialog v-model="data.showDialog" :width="'70%'" transition="dialog-top-transition" :persistent="true">
     <template #default>
       <v-card class="formCard">
         <v-toolbar color="white" :title="dialogTitle"></v-toolbar>
@@ -46,7 +46,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, computed, defineEmits, watch } from 'vue'
+import { ref, reactive } from 'vue'
 import { hookComponent } from '@/components/system/index'
 import i18n from '@/languages/i18n'
 import { IsInteger, IsDecimal } from '@/utils/dataVerification/formRule'
@@ -55,39 +55,50 @@ import { ConfirmItem } from '@/types/DeliveryManagement/DeliveryManagement'
 const emit = defineEmits(['close', 'submit'])
 
 const props = defineProps<{
-  showDialog: boolean
-  dataList: ConfirmItem[]
+  // showDialog: boolean
+  // dataList: ConfirmItem[]
   isWeight: boolean
   isSignIn?: boolean
   dialogTitle: string
 }>()
 
-const isShow = computed(() => props.showDialog)
+// const isShow = computed(() => props.showDialog)
 
 const data = reactive({
+  showDialog: false as boolean,
   list: ref<ConfirmItem[]>([]),
   rules: {
-    qty: [
-      (val: number) => !!val || `${ i18n.global.t('system.checkText.mustInput') }${ i18n.global.t('wms.deliveryManagement.detailQty') }!`,
-      (val: number) => IsInteger(val, 'greaterThanZero') === '' || IsInteger(val, 'greaterThanZero')
-    ],
+    qty: [],
     weight: [
       (val: number) => !!val || `${ i18n.global.t('system.checkText.mustInput') }${ i18n.global.t('wms.deliveryManagement.detailQty') }!`,
       (val: number) => IsDecimal(val, 'nonNegative', 15, 3) === '' || IsDecimal(val, 'nonNegative', 15, 3)
     ]
-  }
+  } as any
 })
 
 const method = reactive({
+  openDialog: (dataList: ConfirmItem[] = []) => {
+    data.list = dataList
+
+    if (!props.isSignIn) {
+      data.rules.qty = [
+        (val: number) => !!val || `${ i18n.global.t('system.checkText.mustInput') }${ i18n.global.t('wms.deliveryManagement.detailQty') }!`,
+        (val: number) => IsInteger(val, 'greaterThanZero') === '' || IsInteger(val, 'greaterThanZero')
+      ]
+    } else {
+      data.rules.qty = []
+    }
+
+    data.showDialog = true
+  },
   closeDialog: () => {
-    emit('close')
+    // emit('close')
+    data.showDialog = false
   },
   submit: () => {
     if (props.isSignIn) {
       const verificationFailedList = data.list.filter(
-        (item) => IsInteger(item.qty, 'nonNegative') !== ''
-          || Number(item.qty) < 0
-          || Number(item.qty) > item.maxQty
+        (item) => IsInteger(item.qty, 'nonNegative') !== '' || Number(item.qty) < 0 || Number(item.qty) > item.maxQty
       )
       if (verificationFailedList.length > 0) {
         const errMsgStrList = verificationFailedList.map(
@@ -99,11 +110,11 @@ const method = reactive({
         })
       } else {
         hookComponent.$dialog({
-        content: `${ i18n.global.t('wms.deliveryManagement.irreversible') }, ${ i18n.global.t('wms.deliveryManagement.confirmSignIn') }?`,
-        handleConfirm: async () => {
-          emit('submit', data.list)
-        }
-      })
+          content: `${ i18n.global.t('wms.deliveryManagement.irreversible') }, ${ i18n.global.t('wms.deliveryManagement.confirmSignIn') }?`,
+          handleConfirm: async () => {
+            emit('submit', data.list)
+          }
+        })
       }
     } else {
       const verificationFailedList = data.list.filter(
@@ -127,14 +138,19 @@ const method = reactive({
   }
 })
 
-watch(
-  () => isShow.value,
-  (val) => {
-    if (val) {
-      data.list = props.dataList
-    }
-  }
-)
+// watch(
+//   () => isShow.value,
+//   (val) => {
+//     if (val) {
+//       data.list = props.dataList
+//     }
+//   }
+// )
+
+defineExpose({
+  openDialog: method.openDialog,
+  closeDialog: method.closeDialog
+})
 </script>
 
 <style scoped lang="less"></style>

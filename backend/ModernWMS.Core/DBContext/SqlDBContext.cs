@@ -1,5 +1,4 @@
-﻿
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Logging;
 using System.ComponentModel;
@@ -8,6 +7,9 @@ using System.Data.Common;
 using System.Reflection;
 using ModernWMS.Core;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+using Microsoft.Data.SqlClient;
+using Mapster;
+using Microsoft.AspNetCore.JsonPatch.Internal;
 
 namespace ModernWMS.Core.DBContext
 {
@@ -27,19 +29,16 @@ namespace ModernWMS.Core.DBContext
         /// <returns></returns>
         public DatabaseFacade GetDatabase() => Database;
 
-
-
-
         /// <summary>
-        /// s
+        /// dbcontext
         /// </summary>
         /// <param name="options">options</param>
         public SqlDBContext(DbContextOptions options) : base(options)
         {
-           
         }
 
         #region overwrite
+
         /// <summary>
         /// Auto Mapping Entity
         /// </summary>
@@ -65,6 +64,7 @@ namespace ModernWMS.Core.DBContext
                 });
             }
         }
+
         /// <summary>
         /// overwrite OnModelCreating
         /// </summary>
@@ -72,22 +72,22 @@ namespace ModernWMS.Core.DBContext
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             MappingEntityTypes(modelBuilder);
-/*            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
-            {
-                if (typeof(Models.IHasTenant).IsAssignableFrom(entityType.ClrType))
-                {
-                    ConfigureGlobalFiltersMethodInfo
-                       .MakeGenericMethod(entityType.ClrType)
-                       .Invoke(this, new object[] { modelBuilder });
-                }
-            }*/
+            /*foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+               {
+                   if (typeof(Models.IHasTenant).IsAssignableFrom(entityType.ClrType))
+                   {
+                       ConfigureGlobalFiltersMethodInfo
+                          .MakeGenericMethod(entityType.ClrType)
+                          .Invoke(this, new object[] { modelBuilder });
+                   }
+               }*/
             base.OnModelCreating(modelBuilder);
         }
 
         /// <summary>
-        /// create DbSet 
+        /// create DbSet
         /// </summary>
-        /// <typeparam name="T">实体</typeparam>
+        /// <typeparam name="T">Entity</typeparam>
         /// <returns></returns>
         public virtual DbSet<T> GetDbSet<T>() where T : class
         {
@@ -100,6 +100,7 @@ namespace ModernWMS.Core.DBContext
                 throw new Exception($"type {typeof(T).Name} is not add into DbContext ");
             }
         }
+
         /// <summary>
         /// over write  EnsureCreated
         /// </summary>
@@ -108,6 +109,7 @@ namespace ModernWMS.Core.DBContext
         {
             return Database.EnsureCreated();
         }
+
         /// <summary>
         /// over write OnConfiguring
         /// </summary>
@@ -117,12 +119,105 @@ namespace ModernWMS.Core.DBContext
             base.OnConfiguring(optionsBuilder);
         }
 
-    
-        #endregion
+        /// <summary>
+        /// exec sql and get the first list
+        /// </summary>
+        /// <param name="sql">sql</param>
+        /// <param name="parameters">parameters</param>
+        /// <returns></returns>
+        public virtual List<T> SqlQueryDynamic<T>(string sql, Dictionary<string, object> parameters) where T : new()
+        {
+            DbProviderFactory dbProvider = DbProviderFactories.GetFactory(GetDatabase().GetDbConnection());
+            using (DbConnection connection = dbProvider.CreateConnection())
+            using (DbDataAdapter adapter = dbProvider.CreateDataAdapter())
+            using (DbCommand cmd = dbProvider.CreateCommand())
+            {
+                connection.ConnectionString = this.Database.GetConnectionString();
+                if (connection.State != ConnectionState.Open)
+                {
+                    connection.Open();
+                }
+                cmd.CommandTimeout = 600;
+                cmd.Connection = connection;
+                cmd.CommandType = CommandType.Text;
+                cmd.CommandText = sql;
+                adapter.SelectCommand = cmd;
 
-       
+                if (parameters != null)
+                {
+                    foreach (var item in parameters)
+                    {
+                        DbParameter dbParameter = cmd.CreateParameter();
+                        dbParameter.ParameterName = item.Key;
+                        dbParameter.Value = item.Value;
+                        dbParameter.Direction = ParameterDirection.Input;
+                        cmd.Parameters.Add(dbParameter);
+                    }
+                }
 
+                DataTable dataTable = new DataTable("Table");
+                adapter.Fill(dataTable);
+                if (dataTable.Rows.Count > 0)
+                {
+                    return DataTableToIList<T>(dataTable);
+                }
+                else
+                {
+                    return default(List<T>);
+                }
+            }
+        }
 
-        
+        /// <summary>
+        /// convert DataTable type data to List type data
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="dt"></param>
+        /// <returns></returns>
+        public static List<T> DataTableToIList<T>(DataTable dt)
+        {
+            if (dt == null)
+                return null;
+
+            DataTable property_data = dt;
+            List<T> result = new List<T>();
+            for (int j = 0; j < property_data.Rows.Count; j++)
+            {
+                T new_data = (T)Activator.CreateInstance(typeof(T));
+                PropertyInfo[] propertys = new_data.GetType().GetProperties();
+                foreach (PropertyInfo pi in propertys)
+                {
+                    for (int i = 0; i < property_data.Columns.Count; i++)
+                    {
+                        if (pi.Name.Equals(property_data.Columns[i].ColumnName))
+                        {
+                            if (property_data.Rows[j][i] != DBNull.Value)
+                            {
+                                //special handling
+                                if (pi.PropertyType.FullName == "System.Boolean")
+                                {
+                                    var val = property_data.Rows[j][i].ToString() == "1" ? true : false;
+                                    pi.SetValue(new_data, val, null);
+                                }
+                                else
+                                {
+                                    pi.SetValue(new_data, property_data.Rows[j][i], null);
+                                }
+                            }
+                            else
+                            {
+                                pi.SetValue(new_data, null, null);
+                            }
+
+                            break;
+                        }
+                    }
+                }
+                result.Add(new_data);
+            }
+            return result;
+        }
+
+        #endregion overwrite
     }
 }

@@ -22,5 +22,9 @@ export default defineConfig({
         javascriptEnabled: true
       }
     }
+  },
+  // ...其他配置项
+  optimizeDeps: {
+    include: ['jquery']
   }
 })

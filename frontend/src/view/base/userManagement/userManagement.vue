@@ -7,17 +7,13 @@
           <div class="operateArea">
             <v-row no-gutters>
               <!-- Operate Btn -->
-              <v-col cols="12" sm="3" class="col">
-                <tooltip-btn icon="mdi-plus" :tooltip-text="$t('system.page.add')" @click="method.add()"></tooltip-btn>
-                <tooltip-btn icon="mdi-refresh" :tooltip-text="$t('system.page.refresh')" @click="method.refresh()"></tooltip-btn>
-                <tooltip-btn icon="mdi-database-import-outline" :tooltip-text="$t('system.page.import')" @click="method.openDialogImport">
-                </tooltip-btn>
-                <tooltip-btn icon="mdi-export-variant" :tooltip-text="$t('system.page.export')" @click="method.exportTable"></tooltip-btn>
-                <tooltip-btn icon="mdi-lock-reset" :tooltip-text="$t('base.userManagement.restPwd')" @click="method.restPwd"></tooltip-btn>
+              <v-col cols="12" sm="4" class="col">
+                <!-- new version -->
+                <BtnGroup :authority-list="data.authorityList" :btn-list="data.btnList" />
               </v-col>
 
               <!-- Search Input -->
-              <v-col cols="12" sm="9">
+              <v-col cols="12" sm="8">
                 <v-row no-gutters @keyup.enter="method.sureSearch">
                   <v-col cols="4">
                     <v-text-field
@@ -93,13 +89,15 @@
                     :flat="true"
                     icon="mdi-pencil-outline"
                     :tooltip-text="$t('system.page.edit')"
+                    :disabled="!data.authorityList.includes('save')"
                     @click="method.editRow(row)"
                   ></tooltip-btn>
                   <tooltip-btn
                     :flat="true"
                     icon="mdi-delete-outline"
                     :tooltip-text="$t('system.page.delete')"
-                    :icon-color="errorColor"
+                    :icon-color="!data.authorityList.includes('delete')?'':errorColor"
+                    :disabled="!data.authorityList.includes('delete')"
                     @click="method.deleteRow(row)"
                   ></tooltip-btn>
                 </template>
@@ -149,10 +147,11 @@ import addOrUpdateDialog from './add-or-update-user.vue'
 import { PAGE_SIZE, PAGE_LAYOUT, DEFAULT_PAGE_SIZE } from '@/constant/vxeTable'
 import i18n from '@/languages/i18n'
 import customPager from '@/components/custom-pager.vue'
-import { setSearchObject } from '@/utils/common'
+import { setSearchObject, getMenuAuthorityList } from '@/utils/common'
 import importTable from './import-table.vue'
 import { exportData } from '@/utils/exportTable'
 import { DEBOUNCE_TIME } from '@/constant/system'
+import BtnGroup from '@/components/system/btnGroup.vue'
 
 const xTable = ref()
 
@@ -179,7 +178,9 @@ const data: DataProps = reactive({
     contact_tel: '',
     auth_string: '',
     is_valid: true
-  }
+  },
+  btnList: [],
+  authorityList: getMenuAuthorityList()
 })
 
 const method = reactive({
@@ -311,6 +312,39 @@ const method = reactive({
 
 onMounted(async () => {
   await method.getUserList()
+
+  data.btnList = [
+    {
+      name: i18n.global.t('system.page.add'),
+      icon: 'mdi-plus',
+      code: 'save',
+      click: method.add
+    },
+    {
+      name: i18n.global.t('system.page.refresh'),
+      icon: 'mdi-refresh',
+      code: '',
+      click: method.refresh
+    },
+    {
+      name: i18n.global.t('system.page.import'),
+      icon: 'mdi-database-import-outline',
+      code: 'import',
+      click: method.openDialogImport
+    },
+    {
+      name: i18n.global.t('system.page.export'),
+      icon: 'mdi-export-variant',
+      code: 'export',
+      click: method.exportTable
+    },
+    {
+      name: i18n.global.t('base.userManagement.restPwd'),
+      icon: 'mdi-lock-reset',
+      code: 'resetPwd',
+      click: method.restPwd
+    }
+  ]
 })
 
 const cardHeight = computed(() => computedCardHeight({ hasTab: false }))

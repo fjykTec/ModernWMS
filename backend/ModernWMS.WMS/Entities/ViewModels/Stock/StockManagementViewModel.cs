@@ -12,15 +12,18 @@ namespace ModernWMS.WMS.Entities.ViewModels
     public class StockManagementViewModel
     {
         #region constructor
+
         /// <summary>
         /// constructor
         /// </summary>
         public StockManagementViewModel()
         {
-
         }
-        #endregion
+
+        #endregion constructor
+
         #region Property
+
         /// <summary>
         /// spu_code
         /// </summary>
@@ -49,7 +52,7 @@ namespace ModernWMS.WMS.Entities.ViewModels
         /// <summary>
         /// quantity available
         /// </summary>
-        public int qty_available { get; set; } = 0;  
+        public int qty_available { get; set; } = 0;
 
         /// <summary>
         /// quantity locked
@@ -85,7 +88,7 @@ namespace ModernWMS.WMS.Entities.ViewModels
         /// shortage qty
         /// </summary>
         public int shortage_qty { get; set; } = 0;
-        #endregion
 
+        #endregion Property
     }
 }

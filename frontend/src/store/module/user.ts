@@ -5,15 +5,15 @@ export const user = {
   state: {
     userInfo: {},
     token: '',
-    // 用于刷新token用的串
+    // String used to refresh token
     refreshToken: '',
-    // token失效的时间
+    // The time when the token expires
     expirationTime: '',
-    // token有效期
+    // Token validity period
     effectiveMinutes: '',
-    // 当前是否正在refreshToken
+    // Is refreshToken currently in progress
     isRefreshingToken: false,
-    // 菜单权限
+    // Menu permissions
     menulist: [
       // {
       //   name: 'testmenu',

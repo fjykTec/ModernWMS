@@ -1,6 +1,6 @@
 <!-- Warehouse Move Operate Dialog -->
 <template>
-  <v-dialog v-model="isShow" :width="'30%'" transition="dialog-top-transition" :persistent="true">
+  <v-dialog v-model="isShow" :width="'60%'" transition="dialog-top-transition" :persistent="true">
     <template #default>
       <v-card>
         <v-toolbar color="white" :title="`${$t('router.sideBar.warehouseMove')}`">
@@ -8,74 +8,105 @@
         </v-toolbar>
         <v-card-text>
           <v-form ref="formRef">
-            <v-text-field
-              v-model="data.form.spu_code"
-              :label="$t('base.commodityManagement.spu_code')"
-              :rules="data.rules.spu_code"
-              variant="outlined"
-              readonly
-              clearable
-              @click="method.openCommoditySelect"
-              @click:clear="method.clearCommodity"
-            ></v-text-field>
-            <v-text-field
-              v-model="data.form.spu_name"
-              :label="$t('base.commodityManagement.spu_name')"
-              :rules="data.rules.spu_name"
-              variant="outlined"
-              disabled
-            ></v-text-field>
-            <v-text-field
-              v-model="data.form.sku_code"
-              :label="$t('base.commodityManagement.sku_code')"
-              :rules="data.rules.sku_code"
-              variant="outlined"
-              disabled
-            ></v-text-field>
-            <!-- <v-text-field
-              v-model="data.form.sku_name"
-              :label="$t('base.commodityManagement.sku_name')"
-              :rules="data.rules.sku_name"
-              variant="outlined"
-              disabled
-            ></v-text-field> -->
-            <v-text-field
-              v-model="data.form.orig_goods_warehouse"
-              :label="$t('wms.warehouseWorking.warehouseMove.orig_goods_warehouse')"
-              :rules="data.rules.orig_goods_warehouse"
-              variant="outlined"
-              disabled
-            ></v-text-field>
-            <v-text-field
-              v-model="data.form.orig_goods_location_name"
-              :label="$t('wms.warehouseWorking.warehouseMove.orig_goods_location_name')"
-              :rules="data.rules.orig_goods_location_name"
-              variant="outlined"
-              disabled
-            ></v-text-field>
-            <v-text-field
-              v-model="data.form.dest_googs_warehouse"
-              :label="$t('wms.warehouseWorking.warehouseMove.dest_googs_warehouse')"
-              :rules="data.rules.dest_googs_warehouse"
-              variant="outlined"
-              disabled
-            ></v-text-field>
-            <v-text-field
-              v-model="data.form.dest_googs_location_name"
-              :label="$t('wms.warehouseWorking.warehouseMove.dest_googs_location_name')"
-              :rules="data.rules.dest_googs_location_name"
-              variant="outlined"
-              readonly
-              clearable
-              @click="method.openLocationSelect"
-              @click:clear="method.clearLocation"
-            ></v-text-field>
-            <v-text-field
-              v-model="data.form.qty"
-              :label="$t('wms.warehouseWorking.warehouseMove.qty')"
-              :rules="data.rules.qty"
-              variant="outlined"
-            ></v-text-field>
+            <v-row>
+              <v-col :cols="6">
+                <v-text-field
+                  v-model="data.form.spu_code"
+                  :label="$t('base.commodityManagement.spu_code')"
+                  :rules="data.rules.spu_code"
+                  variant="outlined"
+                  readonly
+                  clearable
+                  @click="method.openCommoditySelect"
+                  @click:clear="method.clearCommodity"
+                ></v-text-field>
+              </v-col>
+              <v-col :cols="6">
+                <v-text-field
+                  v-model="data.form.spu_name"
+                  :label="$t('base.commodityManagement.spu_name')"
+                  :rules="data.rules.spu_name"
+                  variant="outlined"
+                  disabled
+                ></v-text-field>
+              </v-col>
+            </v-row>
+
+            <v-row>
+              <v-col :cols="6">
+                <v-text-field
+                  v-model="data.form.sku_code"
+                  :label="$t('base.commodityManagement.sku_code')"
+                  :rules="data.rules.sku_code"
+                  variant="outlined"
+                  disabled
+                ></v-text-field>
+              </v-col>
+              <v-col :cols="6">
+                <v-text-field
+                  v-model="data.form.series_number"
+                  :label="$t('wms.stockLocation.series_number')"
+                  variant="outlined"
+                  disabled
+                ></v-text-field>
+              </v-col>
+            </v-row>
+
+            <v-row>
+              <v-col :cols="6">
+                <v-text-field
+                  v-model="data.form.orig_goods_warehouse"
+                  :label="$t('wms.warehouseWorking.warehouseMove.orig_goods_warehouse')"
+                  :rules="data.rules.orig_goods_warehouse"
+                  variant="outlined"
+                  disabled
+                ></v-text-field>
+              </v-col>
+              <v-col :cols="6">
+                <v-text-field
+                  v-model="data.form.orig_goods_location_name"
+                  :label="$t('wms.warehouseWorking.warehouseMove.orig_goods_location_name')"
+                  :rules="data.rules.orig_goods_location_name"
+                  variant="outlined"
+                  disabled
+                ></v-text-field>
+              </v-col>
+            </v-row>
+
+            <v-row>
+              <v-col :cols="6">
+                <v-text-field
+                  v-model="data.form.dest_googs_warehouse"
+                  :label="$t('wms.warehouseWorking.warehouseMove.dest_googs_warehouse')"
+                  :rules="data.rules.dest_googs_warehouse"
+                  variant="outlined"
+                  disabled
+                ></v-text-field>
+              </v-col>
+              <v-col :cols="6">
+                <v-text-field
+                  v-model="data.form.dest_googs_location_name"
+                  :label="$t('wms.warehouseWorking.warehouseMove.dest_googs_location_name')"
+                  :rules="data.rules.dest_googs_location_name"
+                  variant="outlined"
+                  readonly
+                  clearable
+                  @click="method.openLocationSelect"
+                  @click:clear="method.clearLocation"
+                ></v-text-field>
+              </v-col>
+            </v-row>
+
+            <v-row>
+              <v-col :cols="12">
+                <v-text-field
+                  v-model="data.form.qty"
+                  :label="$t('wms.warehouseWorking.warehouseMove.qty')"
+                  :rules="data.rules.qty"
+                  variant="outlined"
+                ></v-text-field>
+              </v-col>
+            </v-row>
           </v-form>
         </v-card-text>
         <v-card-actions class="justify-end">
@@ -111,7 +142,10 @@ const formRef = ref()
 const emit = defineEmits(['close', 'saveSuccess'])
 const isUpdate = computed(() => props.form.id && props.form.id > 0)
 const operateDisabled = computed(() => !!isUpdate.value)
-const qrCodeValue = computed(() => data.form.id.toString())
+const qrCodeValue = computed(() => JSON.stringify({
+    id: data.form.id.toString(),
+    type: 'warehouseMove'
+  }))
 
 const props = defineProps<{
   showDialog: boolean
@@ -146,6 +180,7 @@ const data = reactive({
     spu_name: '',
     sku_code: '',
     sku_name: '',
+    series_number: '',
     creator: '',
     create_time: ''
   }),
@@ -226,6 +261,7 @@ const method = reactive({
       data.form.spu_name = selectRecords[0].spu_name
       data.form.sku_code = selectRecords[0].sku_code
       data.form.sku_name = selectRecords[0].sku_name
+      data.form.series_number = selectRecords[0].series_number
 
       data.curAvailableQty = selectRecords[0].qty_available
     } catch (error) {
@@ -307,10 +343,4 @@ watch(
 )
 </script>
 
-<style scoped lang="less">
-.v-form {
-  div {
-    margin-bottom: 7px;
-  }
-}
-</style>
+<style scoped lang="less"></style>
