@@ -125,7 +125,7 @@ import { hookComponent } from '@/components/system'
 import { DEBOUNCE_TIME } from '@/constant/system'
 import { setSearchObject, getMenuAuthorityList } from '@/utils/common'
 import { SearchObject, btnGroupItem } from '@/types/System/Form'
-import { listNew as getStockAsnList, deleteAsn } from '@/api/wms/stockAsn'
+import { listNew as getStockAsnList, deleteAsnByID } from '@/api/wms/stockAsn'
 import tooltipBtn from '@/components/tooltip-btn.vue'
 import i18n from '@/languages/i18n'
 import addOrUpdateNotice from './new-add-or-update-notice.vue'
@@ -238,7 +238,7 @@ const method = reactive({
       content: i18n.global.t('system.tips.beforeDeleteMessage'),
       handleConfirm: async () => {
         if (row.id) {
-          const { data: res } = await deleteAsn(row.id)
+          const { data: res } = await deleteAsnByID(row.id)
           if (!res.isSuccess) {
             // 2023-12-06 Add automatic refresh of expired data
             if (httpCodeJudge(res.errorMessage)) {

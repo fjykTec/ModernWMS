@@ -124,6 +124,14 @@ export const deleteAsn = (id: number) => http({
     }
   })
 
+export const deleteAsnByID = (id: number) => http({
+    url: '/asn/asnmaster',
+    method: 'delete',
+    params: {
+      id
+    }
+  })
+
 export const confirmAsn = (id: number) => http({
     url: `/asn/confirm/${ id }`,
     method: 'put'

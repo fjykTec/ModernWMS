@@ -35,6 +35,7 @@ import i18n from '@/languages/i18n'
 import { hookComponent } from '@/components/system/index'
 import { addUserRole, updateUserRole } from '@/api/base/userRoleSetting'
 import { StringLength } from '@/utils/dataVerification/formRule'
+import { removeObjectNull } from '@/utils/common'
 
 const formRef = ref()
 const emit = defineEmits(['close', 'saveSuccess'])
@@ -75,7 +76,8 @@ const method = reactive({
   submit: async () => {
     const { valid } = await formRef.value.validate()
     if (valid) {
-      const { data: res } = dialogTitle.value === 'add' ? await addUserRole(data.form) : await updateUserRole(data.form)
+      const form = removeObjectNull(data.form)
+      const { data: res } = dialogTitle.value === 'add' ? await addUserRole(form) : await updateUserRole(form)
       if (!res.isSuccess) {
         hookComponent.$message({
           type: 'error',
