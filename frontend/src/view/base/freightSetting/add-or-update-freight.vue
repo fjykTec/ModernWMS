@@ -66,6 +66,7 @@ import { hookComponent } from '@/components/system/index'
 import { addFreight, updateFreight } from '@/api/base/freightSetting'
 import { FreightVO } from '@/types/Base/Freight'
 import { StringLength, IsDecimal } from '@/utils/dataVerification/formRule'
+import { removeObjectNull } from '@/utils/common'
 
 const formRef = ref()
 const emit = defineEmits(['close', 'saveSuccess'])
@@ -134,7 +135,8 @@ const method = reactive({
   submit: async () => {
     const { valid } = await formRef.value.validate()
     if (valid) {
-      const { data: res } = dialogTitle.value === 'add' ? await addFreight(data.form) : await updateFreight(data.form)
+      const form = removeObjectNull(data.form)
+      const { data: res } = dialogTitle.value === 'add' ? await addFreight(form) : await updateFreight(form)
       if (!res.isSuccess) {
         hookComponent.$message({
           type: 'error',

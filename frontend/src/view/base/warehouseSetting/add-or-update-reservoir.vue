@@ -58,6 +58,7 @@ import { hookComponent } from '@/components/system/index'
 import { addWarehouseArea, updateWarehouseArea, getWarehouseSelect } from '@/api/base/warehouseSetting'
 import { WarehouseAreaVO, AreaProperty } from '@/types/Base/Warehouse'
 import { StringLength } from '@/utils/dataVerification/formRule'
+import { removeObjectNull } from '@/utils/common'
 
 const formRef = ref()
 const emit = defineEmits(['close', 'saveSuccess'])
@@ -171,7 +172,8 @@ const method = reactive({
   submit: async () => {
     const { valid } = await formRef.value.validate()
     if (valid) {
-      const { data: res } = dialogTitle.value === 'add' ? await addWarehouseArea(data.form) : await updateWarehouseArea(data.form)
+      const form = removeObjectNull(data.form)
+      const { data: res } = dialogTitle.value === 'add' ? await addWarehouseArea(form) : await updateWarehouseArea(form)
       if (!res.isSuccess) {
         hookComponent.$message({
           type: 'error',

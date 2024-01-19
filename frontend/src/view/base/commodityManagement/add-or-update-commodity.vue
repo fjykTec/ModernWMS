@@ -242,7 +242,7 @@ import { CategoryVO } from '@/types/Base/CommodityCategorySetting'
 import { SupplierVO } from '@/types/Base/Supplier'
 import { computedSelectTableSearchHeight, SYSTEM_HEIGHT, errorColor } from '@/constant/style'
 import tooltipBtn from '@/components/tooltip-btn.vue'
-import { removeArrayNull } from '@/utils/common'
+import { removeArrayNull, removeObjectNull } from '@/utils/common'
 import { StringLength } from '@/utils/dataVerification/formRule'
 import { isDecimal } from '@/utils/dataVerification/tableRule'
 import { exportData } from '@/utils/exportTable'
@@ -562,7 +562,7 @@ const method = reactive({
         })
         return
       }
-      const form = { ...data.form }
+      let form = { ...data.form }
       const insertRecords = $table.getInsertRecords()
       form.detailList = []
       // Processing detailed data
@@ -577,6 +577,8 @@ const method = reactive({
           form.detailList.push(item)
         }
       }
+
+      form = removeObjectNull(form)
       form.detailList = removeArrayNull(form.detailList)
       const { data: res } = dialogTitle.value === 'add' ? await addSpu(form) : await updateSpu(form)
       if (!res.isSuccess) {

@@ -48,6 +48,7 @@ import i18n from '@/languages/i18n'
 import { hookComponent } from '@/components/system/index'
 import { addOwnerOfCargo, updateOwnerOfCargo } from '@/api/base/ownerOfCargo'
 import { StringLength } from '@/utils/dataVerification/formRule'
+import { removeObjectNull } from '@/utils/common'
 
 const formRef = ref()
 const emit = defineEmits(['close', 'saveSuccess'])
@@ -94,7 +95,8 @@ const method = reactive({
   submit: async () => {
     const { valid } = await formRef.value.validate()
     if (valid) {
-      const { data: res } = dialogTitle.value === 'add' ? await addOwnerOfCargo(data.form) : await updateOwnerOfCargo(data.form)
+      const form = removeObjectNull(data.form)
+      const { data: res } = dialogTitle.value === 'add' ? await addOwnerOfCargo(form) : await updateOwnerOfCargo(form)
       if (!res.isSuccess) {
         hookComponent.$message({
           type: 'error',

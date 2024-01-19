@@ -89,6 +89,7 @@ import { addAsn, updateAsn } from '@/api/wms/stockAsn'
 import { getSupplierAll } from '@/api/base/supplier'
 import { getOwnerOfCargoAll } from '@/api/base/ownerOfCargo'
 import skuSelect from '@/components/select/sku-select.vue'
+import { removeObjectNull } from '@/utils/common'
 
 const formRef = ref()
 const emit = defineEmits(['close', 'saveSuccess'])
@@ -204,7 +205,8 @@ const method = reactive({
   submit: async () => {
     const { valid } = await formRef.value.validate()
     if (valid) {
-      const { data: res } = dialogTitle.value === 'add' ? await addAsn(data.form) : await updateAsn(data.form)
+      const form = removeObjectNull(data.form)
+      const { data: res } = dialogTitle.value === 'add' ? await addAsn(form) : await updateAsn(form)
       if (!res.isSuccess) {
         hookComponent.$message({
           type: 'error',

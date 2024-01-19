@@ -165,6 +165,7 @@ import { getOwnerOfCargoAll } from '@/api/base/ownerOfCargo'
 import { checkDetailRepeatGetBool } from '@/utils/dataVerification/page'
 import { formatDate } from '@/utils/format/formatSystem'
 import customFilterSelect from '@/components/custom-filter-select.vue'
+import { removeObjectNull } from '@/utils/common'
 
 const formRef = ref()
 const emit = defineEmits(['close', 'saveSuccess'])
@@ -355,9 +356,10 @@ const method = reactive({
     }
     const { valid } = await formRef.value.validate()
     if (valid) {
-      const { data: res } = data.form.id && data.form.id > 0
-          ? await updateAsnNew({ ...data.form, detailList: [...data.form.detailList, ...data.removeDetailList] })
-          : await addAsnNew(data.form)
+      const form = removeObjectNull(data.form)
+      const { data: res } = form.id && form.id > 0
+          ? await updateAsnNew({ ...form, detailList: [...form.detailList, ...data.removeDetailList] })
+          : await addAsnNew(form)
       if (!res.isSuccess) {
         hookComponent.$message({
           type: 'error',

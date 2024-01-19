@@ -52,6 +52,7 @@ import { addRoleMenu, getMenus, updateRoleMenu } from '@/api/base/roleMenu'
 import { getUserRoleAll } from '@/api/base/userRoleSetting'
 import { MenuItem } from '@/types/System/Store'
 import { actionDict } from './actionList'
+import { removeObjectNull } from '@/utils/common'
 
 const formRef = ref()
 const emit = defineEmits(['close', 'saveSuccess'])
@@ -179,7 +180,7 @@ const method = reactive({
     }
     const { valid } = await formRef.value.validate()
     if (valid) {
-      const form = { ...data.form }
+      let form = { ...data.form }
 
       form.detailList = form.detailList.map((item: RoleMenuDetailVo) => {
         if (!item.id || item.id === 0) {
@@ -189,6 +190,8 @@ const method = reactive({
         }
         return item
       })
+
+      form = removeObjectNull(form)
 
       const { data: res } = data.dialogTitle === 'add'
         ? await addRoleMenu(form)

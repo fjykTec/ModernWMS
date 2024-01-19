@@ -118,6 +118,7 @@ import skuSelect from '@/components/select/sku-select.vue'
 import { CommodityDetailJoinMainVO } from '@/types/Base/CommodityManagement'
 import { IsInteger } from '@/utils/dataVerification/formRule'
 import customFilterSelect from '@/components/custom-filter-select.vue'
+import { removeObjectNull } from '@/utils/common'
 
 const formRef = ref()
 const emit = defineEmits(['close', 'saveSuccess'])
@@ -272,10 +273,11 @@ const method = reactive({
     const { valid } = await formRef.value.validate()
     if (valid) {
       const reqList: addRequestVO[] = []
-      for (const item of data.form.detailList) {
+      const form = removeObjectNull(data.form)
+      for (const item of form.detailList) {
         reqList.push({
-          customer_id: data.form.customer_id ? data.form.customer_id : 0,
-          customer_name: data.form.customer_name ? data.form.customer_name : '',
+          customer_id: form.customer_id ? form.customer_id : 0,
+          customer_name: form.customer_name ? form.customer_name : '',
           qty: item.qty,
           sku_id: item.sku_id ? item.sku_id : 0
         })

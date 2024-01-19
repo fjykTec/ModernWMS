@@ -56,6 +56,7 @@ import i18n from '@/languages/i18n'
 import { hookComponent } from '@/components/system/index'
 import { addCustomer, updateCustomer } from '@/api/base/customer'
 import hprintDialog from '@/components/hiprint/hiprintFast.vue'
+import { removeObjectNull } from '@/utils/common'
 
 const formRef = ref()
 const hprintDialogRef = ref()
@@ -104,7 +105,8 @@ const method = reactive({
   submit: async () => {
     const { valid } = await formRef.value.validate()
     if (valid) {
-      const { data: res } = dialogTitle.value === 'add' ? await addCustomer(data.form) : await updateCustomer(data.form)
+      const form = removeObjectNull(data.form)
+      const { data: res } = dialogTitle.value === 'add' ? await addCustomer(form) : await updateCustomer(form)
       if (!res.isSuccess) {
         hookComponent.$message({
           type: 'error',
