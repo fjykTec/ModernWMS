@@ -178,3 +178,9 @@ export const getSkuInfo = (id: number) => http({
       sku_id: id
     }
   })
+
+  export const getPrintAsnList = (data: number[]) => http({
+    url: '/asn/print-sn',
+    method: 'post',
+    data
+  })

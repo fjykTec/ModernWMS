@@ -19,7 +19,10 @@ export interface WarehouseMoveVO extends UniformFileNaming {
   spu_name: string
   sku_code: string
   sku_name: string
-  series_number: string
+  series_number: string,
+  price: number,
+  expiry_date: string,
+  putaway_date: string
 }
 
 export enum MoveStatus {

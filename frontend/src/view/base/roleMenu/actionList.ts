@@ -32,6 +32,7 @@ export const actionDict: any = {
     'notice-delete',
     'notice-export',
     'notice-printQrCode',
+    'putOnTheShelf-printQrCode',
     'delivered-confirm',
     'delivered-export',
     'unloaded-confirm',
@@ -51,6 +52,7 @@ export const actionDict: any = {
   saftyStock: ['export'],
   asnStatistic: ['export'],
   deliveryStatistic: ['export'],
+  stockageStatistic: ['export'],
 
   warehouseProcessing: ['split', 'group', 'confirmOpeartion', 'confirmAdjust', 'delete', 'export'],
   warehouseMove: ['save', 'delete', 'export', 'confirm'],

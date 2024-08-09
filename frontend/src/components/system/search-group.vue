@@ -15,6 +15,19 @@
         >
         </v-text-field>
       </template>
+      <template v-if="item.type === 'number'">
+        <v-text-field
+          v-model="searchForm[item.name]"
+          clearable
+          hide-details
+          density="comfortable"
+          class="searchInput ml-5 mt-1"
+          :label="$t(`${props.i18nPrefix}.${item.name}`)"
+          variant="solo"
+          type="input"
+        >
+        </v-text-field>
+      </template>
       <template v-else-if="item.type === 'datetime'">
         <v-datetime-picker v-model="searchForm[item.name]" :label="$t(`${props.i18nPrefix}.${item.name}`)" />
       </template>

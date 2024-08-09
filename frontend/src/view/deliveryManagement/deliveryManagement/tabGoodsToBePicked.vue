@@ -87,12 +87,12 @@
       </vxe-column>
       <vxe-column field="customer_name" :title="$t('wms.deliveryManagement.customer_name')"></vxe-column>
       <vxe-column field="creator" :title="$t('wms.deliveryManagement.creator')"></vxe-column>
-      <vxe-column
+      <vxe-date-column
         field="create_time"
         width="170px"
-        :formatter="['formatDate', 'yyyy-MM-dd HH:mm']"
+        format="yyyy-MM-dd HH:mm"
         :title="$t('wms.deliveryManagement.create_time')"
-      ></vxe-column>
+      ></vxe-date-column>
       <vxe-column field="operate" :title="$t('system.page.operate')" width="120" :resizable="false" show-overflow>
         <template #default="{ row }">
           <div style="width: 100%; display: flex; justify-content: center">
@@ -111,7 +111,7 @@
       @page-change="method.handlePageChange"
     >
     </custom-pager>
-    <SearchDeliveredDetail :id="data.showDeliveredDetailID" :show-dialog="data.showDeliveredDetail" @close="method.closeDeliveredDetail" />
+    <SearchDeliveredDetail :id="data.showDeliveredDetailID" :source-type="'picking'" :show-dialog="data.showDeliveredDetail" @close="method.closeDeliveredDetail" />
   </div>
 </template>
 

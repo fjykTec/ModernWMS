@@ -58,7 +58,7 @@
             <v-row v-for="(item, index) of data.form.detailList" :key="index" style="margin-top: 5px">
               <v-col :cols="11">
                 <v-row>
-                  <v-col :cols="3">
+                  <v-col :cols="2">
                     <v-text-field v-model="item.spu_name" :label="$t('wms.stockAsnInfo.spu_name')" variant="outlined" readonly></v-text-field>
                   </v-col>
                   <v-col :cols="2">
@@ -73,7 +73,7 @@
                   <v-col :cols="2">
                     <v-text-field v-model="item.sku_code" :label="$t('wms.stockAsnInfo.sku_code')" variant="outlined" readonly></v-text-field>
                   </v-col>
-                  <v-col :cols="3">
+                  <v-col :cols="2">
                     <!-- <v-select
                       v-model="item.supplier_name"
                       :items="data.combobox.supplier_name"
@@ -112,23 +112,34 @@
                       clearable
                     ></v-text-field>
                   </v-col>
+                  <v-col :cols="2">
+                    <v-text-field
+                      v-model="item.price"
+                      :rules="data.rules.price"
+                      :label="$t('wms.stockAsnInfo.price')"
+                      variant="outlined"
+                      clearable
+                    ></v-text-field>
+                  </v-col>
                 </v-row>
               </v-col>
               <v-col :cols="1">
-                <div class="detailBtnContainer">
-                  <tooltip-btn
-                    :flat="true"
-                    icon="mdi-delete-outline"
-                    :tooltip-text="$t('system.page.delete')"
-                    :icon-color="errorColor"
-                    @click="method.removeItem(index, item)"
-                  ></tooltip-btn>
+                <div class="detailComtainer">
+                  <div class="detailchbContainer">
+                    <v-checkbox v-model="item.is_check"></v-checkbox>
+                  </div>
+                  <div class="detailBtnContainer">
+                    <tooltip-btn
+                      :flat="true"
+                      icon="mdi-delete-outline"
+                      :tooltip-text="$t('system.page.delete')"
+                      :icon-color="errorColor"
+                      @click="method.removeItem(index, item)"
+                    ></tooltip-btn>
+                  </div>
                 </div>
               </v-col>
             </v-row>
-            <!-- <v-btn style="font-size: 20px; margin-bottom: 15px; margin-top: 10px; float: right" color="primary" :width="40" @click="method.AddDetail">
-              +
-            </v-btn> -->
             <v-btn
               style="font-size: 20px; margin-bottom: 15px; margin-top: 10px; float: right"
               color="primary"
@@ -140,11 +151,22 @@
           </v-form>
         </v-card-text>
         <v-card-actions class="justify-end">
+          <v-btn v-show="showQRPrint" color="primary" variant="text" @click="method.printQrCode">
+            {{ $t('base.commodityManagement.printQrCode') }}
+          </v-btn>
           <v-btn variant="text" @click="method.closeDialog">{{ $t('system.page.close') }}</v-btn>
           <v-btn color="primary" variant="text" @click="method.submit">{{ $t('system.page.submit') }}</v-btn>
         </v-card-actions>
       </v-card>
       <skuSelect :show-dialog="data.showSkuDialogSelect" @close="method.closeDialogSelect('target')" @sureSelect="method.sureSelect" />
+      <!-- Print QR code -->
+      <qr-code-dialog ref="qrCodeDialogRef" :menu="'stockAsnInfo-notice'">
+        <template #left="{ slotData }">
+          <p>{{ $t('wms.stockAsnInfo.num') }}:{{ slotData.asn_no }}</p>
+          <p>{{ $t('wms.stockAsnInfo.spu_name') }}:{{ slotData.spu_name }}</p>
+          <p>{{ $t('wms.stockAsnInfo.sku_code') }}:{{ slotData.sku_code }}</p>
+        </template>
+      </qr-code-dialog>
     </template>
   </v-dialog>
 </template>
@@ -158,7 +180,7 @@ import { addAsnNew, updateAsnNew } from '@/api/wms/stockAsn'
 import tooltipBtn from '@/components/tooltip-btn.vue'
 import skuSelect from '@/components/select/sku-select.vue'
 import { CommodityDetailJoinMainVO } from '@/types/Base/CommodityManagement'
-import { IsInteger, StringLength } from '@/utils/dataVerification/formRule'
+import { IsInteger, IsDecimal, StringLength } from '@/utils/dataVerification/formRule'
 import { StockAsnVO, StockAsnDetailVO } from '@/types/WMS/StockAsn'
 import { getSupplierAll } from '@/api/base/supplier'
 import { getOwnerOfCargoAll } from '@/api/base/ownerOfCargo'
@@ -166,8 +188,10 @@ import { checkDetailRepeatGetBool } from '@/utils/dataVerification/page'
 import { formatDate } from '@/utils/format/formatSystem'
 import customFilterSelect from '@/components/custom-filter-select.vue'
 import { removeObjectNull } from '@/utils/common'
+import QrCodeDialog from '@/components/codeDialog/qrCodeDialog.vue'
 
 const formRef = ref()
+const qrCodeDialogRef = ref()
 const emit = defineEmits(['close', 'saveSuccess'])
 
 const props = defineProps<{
@@ -176,6 +200,7 @@ const props = defineProps<{
 }>()
 
 const isShow = computed(() => props.showDialog)
+const showQRPrint = computed(() => data.form.detailList.length > 0 && (data.form?.id as number) > 0)
 
 const data = reactive({
   curSelectType: '',
@@ -219,6 +244,7 @@ const data = reactive({
       (val: number) => !!val || `${ i18n.global.t('system.checkText.mustInput') }${ i18n.global.t('wms.stockAsnInfo.asn_qty') }!`,
       (val: number) => IsInteger(val, 'greaterThanZero') === '' || IsInteger(val, 'greaterThanZero')
     ],
+    price: [(val: number) => IsDecimal(val, 'nonNegative', 10, 2) === '' || IsDecimal(val, 'nonNegative', 10, 2)],
     asn_batch: [
       // (val: string) => !!val || `${i18n.global.t('system.checkText.mustInput')}${i18n.global.t('wms.stockAsnInfo.asn_batch')}!`,
       (val: string) => StringLength(val, 0, 64) === '' || StringLength(val, 0, 64)
@@ -227,6 +253,41 @@ const data = reactive({
 })
 
 const method = reactive({
+  // Print QR code
+  printQrCode: async () => {
+    const records = data.form.detailList.filter((item: StockAsnDetailVO) => item.is_check) as any[]
+    // data.selectRowData.length === 0 ? data.selectRowData = [row] : ''
+    // const records:any[] = data.selectRowData
+
+    if (records.length > 0) {
+      // const list = records.map((item) => item.id)
+      // const { data: res } = await getPrintAsnList(list)
+      // if (!res.isSuccess) {
+      //   hookComponent.$message({
+      //     type: 'error',
+      //     content: res.errorMessage
+      //   })
+      //   return
+      // }
+      const printList = records.map((item) => ({
+        id: item.id,
+        asn_id: item.id,
+        asnmaster_id: item.asnmaster_id,
+        type: 'asn',
+        asn_no: data.form.asn_no,
+        spu_name: item.spu_name,
+        sku_code: item.sku_code,
+        sku_id: item.sku_id
+      }))
+      // const printList = res.data.map((item) => ({ id: item.asn_id, type: 'asn', ...item }))
+      qrCodeDialogRef.value.openDialog(printList)
+    } else {
+      hookComponent.$message({
+        type: 'error',
+        content: i18n.global.t('base.userManagement.checkboxIsNull')
+      })
+    }
+  },
   supplierNameChange: (dItem: StockAsnDetailVO) => {
     if (dItem.supplier_name) {
       dItem.supplier_id = data.combobox.supplier_name.filter((item) => item.label === dItem.supplier_name)[0].value
@@ -275,7 +336,8 @@ const method = reactive({
           // length_unit: '',
           // volume_unit: '',
           // weight_unit: '',
-          asn_qty: 0
+          asn_qty: 0,
+          price: 0
           // actual_qty: '',
           // weight: '',
           // volume: '',
@@ -357,9 +419,7 @@ const method = reactive({
     const { valid } = await formRef.value.validate()
     if (valid) {
       const form = removeObjectNull(data.form)
-      const { data: res } = form.id && form.id > 0
-          ? await updateAsnNew({ ...form, detailList: [...form.detailList, ...data.removeDetailList] })
-          : await addAsnNew(form)
+      const { data: res } = form.id && form.id > 0 ? await updateAsnNew({ ...form, detailList: [...form.detailList, ...data.removeDetailList] }) : await addAsnNew(form)
       if (!res.isSuccess) {
         hookComponent.$message({
           type: 'error',
@@ -416,13 +476,19 @@ watch(
 //     margin-bottom: 7px;
 //   }
 // }
+.detailComtainer {
+  margin-left: -10px;
+  width: 90px;
+  display: flex;
+  justify-content: space-between;
+}
+.detailchbContainer {
+  height: 40px;
+}
 .detailBtnContainer {
   height: 56px;
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
 }
-// .v-col {
-//   padding: 0 !important;
-// }
 </style>

@@ -20,18 +20,19 @@
               {{ i18n.global.t('system.page.noData') }}
             </template>
             <vxe-column type="seq" width="60"></vxe-column>
-            <vxe-column field="series_number" :title="$t('wms.stockAsnInfo.series_number')" :edit-render="{ autofocus: '.vxe-input--inner' }">
-              <template #edit="{ row }">
-                <vxe-input v-model="row.series_number" type="text"></vxe-input>
-              </template>
-            </vxe-column>
+            <vxe-column field="series_number" :title="$t('wms.stockAsnInfo.series_number')"> </vxe-column>
             <vxe-column field="sorted_qty" :title="$t('wms.stockAsnInfo.sorted_qty')" :edit-render="{ autofocus: '.vxe-input--inner' }">
               <template #edit="{ row }">
                 <vxe-input v-model="row.sorted_qty" type="text"></vxe-input>
               </template>
             </vxe-column>
+            <vxe-column field="expiry_date" :title="$t('wms.stockAsnInfo.expiry_date')" :edit-render="{ autofocus: '.vxe-input--inner' }">
+              <template #edit="{ row }">
+                <vxe-input v-model="row.expiry_date" type="date"></vxe-input>
+              </template>
+            </vxe-column>
             <vxe-column field="creator" :title="$t('wms.deliveryManagement.creator')"> </vxe-column>
-            <vxe-column field="create_time" :formatter="['formatDate', 'yyyy-MM-dd']" :title="$t('wms.deliveryManagement.create_time')"> </vxe-column>
+            <vxe-date-column field="create_time" :title="$t('wms.deliveryManagement.create_time')"> </vxe-date-column>
             <vxe-column field="operate" :title="$t('system.page.operate')" width="100" :resizable="false" show-overflow>
               <template #default="{ row }">
                 <tooltip-btn
@@ -63,6 +64,7 @@ import { getSorting } from '@/api/wms/stockAsn'
 import { UpdateSortingVo } from '@/types/WMS/StockAsn'
 import tooltipBtn from '@/components/tooltip-btn.vue'
 import { isInteger } from '@/utils/dataVerification/tableRule'
+import { formatDate } from '@/utils/format/formatSystem'
 
 const xTable = ref()
 
@@ -70,7 +72,7 @@ const emit = defineEmits(['sure'])
 
 const data = reactive({
   showDialog: false,
-  tableData: [],
+  tableData: [] as any[],
   validRules: {
     sorted_qty: [
       { required: true, message: `${ i18n.global.t('system.checkText.mustInput') }${ i18n.global.t('wms.stockAsnInfo.sorted_qty') }` },
@@ -121,6 +123,14 @@ const method = reactive({
       return
     }
     data.tableData = res.data
+
+    // 240507 刘福: 处理一下操作列的日期数据
+    if (data.tableData?.length > 0) {
+      data.tableData = data.tableData.map((item: any) => {
+        item.expiry_date = formatDate(item.expiry_date, 'yyyy-MM-dd')
+        return item
+      })
+    }
   },
 
   openDialog: async (id: number) => {

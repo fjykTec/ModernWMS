@@ -21,7 +21,7 @@ import { useLocale } from 'vuetify'
 import { getSelectedLang } from '@/languages/method/index'
 import { getSelcectedLangForVuetify } from '@/plugins/vuetify/method/index'
 import { store } from '@/store'
-import { router } from '@/router'
+// import { router } from '@/router'
 
 const { locale } = useI18n()
 const { current } = useLocale()
@@ -45,9 +45,9 @@ const method = reactive({
     locale.value = getSelectedLang(lang) // global
     current.value = getSelcectedLangForVuetify(lang) // vuetify
 
-    if (!['/', '/login'].includes(router.currentRoute.value.path)) {
-      store.commit('system/setRefreshFlag', true) // change language refresh page
-    }
+    // if (!['/', '/login'].includes(router.currentRoute.value.path)) {
+    store.commit('system/setRefreshFlag', true) // change language refresh page
+    // }
   }
 })
 </script>

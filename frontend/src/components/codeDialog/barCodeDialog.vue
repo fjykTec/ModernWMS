@@ -4,7 +4,7 @@
       <v-card :title="$t('system.page.preView')">
         <v-card-text>
           <div class="print-area-container">
-            <div class="print-area-scroll">
+            <div class="print-area-scroll" @click="method.resetIndex()">
               <div
                 id="printArea"
                 :style="{
@@ -14,7 +14,13 @@
                 }"
                 class="printArea"
               >
-                <div v-for="(item, index) in data.printData" :key="index" class="code-container">
+                <div
+                  v-for="(item, index) in data.printData"
+                  :key="index"
+                  class="code-container"
+                  :class="{ 'code-click': data.clickIndex === index }"
+                  @click.stop="method.setIndex(index)"
+                >
                   <svg :id="'printBarCode' + item.id"></svg>
                 </div>
               </div>
@@ -25,7 +31,7 @@
         <v-card-actions class="justify-space-between">
           <div class="row-number-input">
             <v-row no-gutters>
-              <v-col cols="6" class="col">
+              <v-col cols="4" class="col">
                 <div class="colText">
                   <v-text-field
                     v-model.number="data.rowsNumber"
@@ -35,7 +41,7 @@
                   ></v-text-field>
                 </div>
               </v-col>
-              <v-col cols="6" class="col">
+              <v-col cols="4" class="col">
                 <div class="colText">
                   <v-text-field
                     v-model.number="data.gridRowGap"
@@ -45,11 +51,22 @@
                   ></v-text-field>
                 </div>
               </v-col>
+              <v-col cols="4" class="col">
+                <div class="colText">
+                  <v-text-field
+                    v-model.number="data.count"
+                    hide-details="auto"
+                    :label="$t('system.page.count')"
+                    :disabled="data.clickIndex === -1"
+                    @keydown="method.handleKeyDown"
+                  ></v-text-field>
+                </div>
+              </v-col>
             </v-row>
           </div>
           <div class="padding-lr-16">
             <v-btn variant="text" @click="method.closeDialog">{{ $t('system.page.close') }}</v-btn>
-            <v-btn v-print="'#printArea'" color="primary" :disabled="isDisabled" variant="text">{{ $t('system.page.print') }}</v-btn>
+            <v-btn v-print="'#printArea'" color="primary" :disabled="isDisabled" variant="text" @click="method.resetIndex()">{{ $t('system.page.print') }}</v-btn>
           </div>
         </v-card-actions>
       </v-card>
@@ -71,10 +88,11 @@ const data = reactive({
   printData: [] as any,
   rowsNumber: 5,
   gridColumnGap: 15,
-  gridRowGap: 15
+  gridRowGap: 15,
+  clickIndex: -1,
+  count: 1
 })
 const isDisabled = computed(() => data.printData.length === 0)
-
 watch(
   () => data.printData,
   () => {
@@ -94,6 +112,24 @@ const method = reactive({
     }
 
     setStorage(`BarCode-${ props.menu }`, storage)
+  },
+  setIndex: (index: number) => {
+    data.clickIndex = index
+  },
+  resetIndex: () => {
+    data.clickIndex = -1
+  },
+  handleKeyDown: (event: any) => {
+    if (event.key === 'Enter') {
+      if (data.count > 1) {
+        const object = data.printData[data.clickIndex]
+        while (data.count > 1) {
+          data.printData.splice(data.clickIndex, 0, object)
+          data.count--
+        }
+        method.resetIndex()
+      }
+    }
   },
   openDialog: (row: any) => {
     try {
@@ -157,6 +193,9 @@ defineExpose({
     align-items: center;
     justify-content: center;
   }
+}
+.code-click {
+  border: 2px dashed #7ebdaa !important;
 }
 
 .row-number-input {

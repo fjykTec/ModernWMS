@@ -75,13 +75,12 @@
                   <vxe-column field="sku_code" width="150px" :title="$t('base.commodityManagement.sku_code')"></vxe-column>
                   <vxe-column field="series_number" width="150px" :title="$t('wms.stockLocation.series_number')"></vxe-column>
                   <vxe-column field="handler" width="150px" :title="$t('wms.warehouseWorking.warehouseFreeze.handler')"></vxe-column>
-                  <vxe-column
+                  <vxe-date-column
                     field="handle_time"
                     width="170px"
-                    :formatter="['formatDate', 'yyyy-MM-dd HH:mm']"
+                    format="yyyy-MM-dd HH:mm"
                     :title="$t('wms.warehouseWorking.warehouseFreeze.handle_time')"
-                  >
-                  </vxe-column>
+                  ></vxe-date-column>
                   <!-- <vxe-column field="creator" :title="$t('wms.warehouseWorking.warehouseFreeze.creator')"></vxe-column>
                   <vxe-column
                     field="create_time"

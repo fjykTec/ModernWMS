@@ -34,7 +34,8 @@
       "volume_unit": "體積單位",
       "weight": "商品重量",
       "weight_unit": "重量單位",
-      "width": "商品寬度"
+      "width": "商品寬度",
+      "checkboxIsNullByPrint": "未選中數據 或 選中的sku不具備商品條碼!"
     },
     "companySetting": {
       "address": "詳細地址",
@@ -246,6 +247,7 @@
       "customer": "客戶資訊",
       "deliveryManagement": "發貨管理",
       "deliveryStatistic": "發貨統計",
+      "stockageStatistic":"庫齡分析",
       "freightSetting": "運費設置",
       "homepage": "首頁",
       "menuBasicSettings": "功能基礎設置",
@@ -260,6 +262,7 @@
       "userManagement": "用戶管理",
       "userRoleSetting": "角色設置",
       "vwms": "視覺化倉庫",
+      "largeScreen":"大螢幕",
       "warehouseAdjust": "庫存調整",
       "warehouseFreeze": "庫存凍結",
       "warehouseMove": "庫存移動",
@@ -331,6 +334,7 @@
       "exportTemplate": "匯出範本",
       "gridColumnGap": "列間距(px)",
       "gridRowGap": "行間距(px)",
+      "count":"個數",
       "import": "匯入",
       "insertOneRow": "新增一行",
       "noData": "暫無數據",
@@ -347,7 +351,8 @@
       "view": "查看",
       "setSearch": "設定查詢準則",
       "chart": "圖表",
-      "table": "表格"
+      "table": "表格",
+      "fullScreen":"全屏"
     },
     "pager": {
       "goTo": "前往",
@@ -392,7 +397,7 @@
       "confirmBack": "確認撤回",
       "confirmDelivery": "確認出庫",
       "confirmOrder": "確認發貨單",
-      "confirmPicking": "確認揀貨",
+      "confirmPicking": "揀貨複核",
       "confirmSignIn": "確認簽收",
       "confirmSuccess": "確認發貨單成功!",
       "create_time": "創建時間",
@@ -430,6 +435,8 @@
       "packaged": "打包",
       "picked": "已揀貨",
       "picked_qty": "已揀貨數量",
+      "picker":"揀貨員",
+      "pick_checker":"揀貨複核員",
       "preShipment": "預發貨",
       "qty": "總數量",
       "qty_available": "可用數量",
@@ -505,6 +512,26 @@
       "spu_name": "商品名稱",
       "warehouse_name": "倉庫名稱"
     },
+    "stockageStatistic":{
+      "warehouse_name": "倉庫名稱",
+      "location_name": "庫位名稱",
+      "spu_code": "商品編碼",
+      "spu_name": "商品名稱",
+      "sku_id": "規格標識",
+      "sku_code": "規格編碼",
+      "sku_name": "規格名稱",
+      "qty": "數量",
+      "goods_owner_name": "貨主名稱",
+      "series_number": "SN號",
+      "expiry_date":"過期日期",
+      "price":"商品價格",
+      "putaway_date":"上架日期",
+      "stock_age": "庫齡",
+      "stock_age_from": "庫齡從",
+      "stock_age_to": "庫齡至",
+      "expiry_date_from": "過期日期從",
+      "expiry_date_to": "過期日期至"
+    },
     "skuInfo": {
       "bar_code": "商品條碼",
       "brand": "品牌",
@@ -554,6 +581,7 @@
       "asn_batch": "批次",
       "asn_no": "到貨通知書編號",
       "asn_qty": "到貨通知書數據",
+      "price":"商品價格",
       "asn_status": "到貨通知書狀態",
       "can_putaway_qty": "可上架數量",
       "confirmArrival": "確認到貨",
@@ -585,6 +613,8 @@
       "sku_id": "商品sku標識",
       "sku_name": "規格名稱",
       "sorted_qty": "分揀數量",
+      "expiry_date":"過期日期",
+      "putaway_date":"上架日期",
       "spu_code": "商品編碼",
       "spu_id": "商品spu標識",
       "spu_name": "商品名稱",
@@ -596,7 +626,8 @@
       "volume": "總體積",
       "volume_unit": "體積單位",
       "weight": "總重量",
-      "weight_unit": "重量單位"
+      "weight_unit": "重量單位",
+      "consecutive_number":"連續編號"
     },
     "stockList": {
       "qty": "數量",
@@ -708,7 +739,10 @@
         "target": "目標",
         "target_location": "目標儲位",
         "target_warehouse": "目標倉庫",
-        "unit": "商品單位"
+        "unit": "商品單位",
+        "price":"商品價格",
+        "expiry_date":"過期日期",
+        "putaway_date":"上架日期"
       },
       "warehouseTaking": {
         "addFromCommodity": "選擇商品",
@@ -729,7 +763,10 @@
         "job_status": "作業狀態",
         "location_name": "所在庫位",
         "unfinish": "待作業",
-        "warehouse": "所在倉庫"
+        "warehouse": "所在倉庫",
+        "price":"商品價格",
+        "expiry_date":"過期日期",
+        "putaway_date":"上架日期"
       }
     }
   }

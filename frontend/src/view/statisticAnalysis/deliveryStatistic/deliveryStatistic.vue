@@ -50,12 +50,15 @@
                   <vxe-column field="customer_name" :title="$t('wms.deliveryStatistic.customer_name')"></vxe-column>
                   <vxe-column field="series_number" :title="$t('wms.deliveryStatistic.series_number')"></vxe-column>
                   <vxe-column field="delivery_qty" :title="$t('wms.deliveryStatistic.delivery_qty')"></vxe-column>
-                  <vxe-column
+                  <vxe-date-column
                     field="delivery_date"
                     :title="$t('wms.deliveryStatistic.delivery_date')"
                     width="170px"
-                    :formatter="['formatDate', 'yyyy-MM-dd HH:mm']"
-                  ></vxe-column>
+                    format="yyyy-MM-dd HH:mm"
+                  ></vxe-date-column>
+                  <vxe-column field="price" :title="$t('wms.stockAsnInfo.price')"></vxe-column>
+                  <vxe-date-column field="expiry_date" :title="$t('wms.stockAsnInfo.expiry_date')"></vxe-date-column>
+                  <vxe-date-column field="putaway_date" :title="$t('wms.stockAsnInfo.putaway_date')"></vxe-date-column>                  
                 </vxe-table>
                 <custom-pager
                   :current-page="data.tablePage.pageIndex"

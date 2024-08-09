@@ -128,6 +128,7 @@
 
 <script lang="ts" setup>
 import { reactive, computed, ref, watch } from 'vue'
+import { log } from 'console'
 import i18n from '@/languages/i18n'
 import { hookComponent } from '@/components/system/index'
 import { addStockMove } from '@/api/wms/warehouseMove'
@@ -182,7 +183,10 @@ const data = reactive({
     sku_name: '',
     series_number: '',
     creator: '',
-    create_time: ''
+    create_time: '',
+    price: 0,
+    expiry_date: '',
+    putaway_date: ''
   }),
   rules: {
     qty: [
@@ -262,6 +266,9 @@ const method = reactive({
       data.form.sku_code = selectRecords[0].sku_code
       data.form.sku_name = selectRecords[0].sku_name
       data.form.series_number = selectRecords[0].series_number
+      data.form.price = selectRecords[0].price
+      data.form.expiry_date = selectRecords[0].expiry_date
+      data.form.putaway_date = selectRecords[0].putaway_date
 
       data.curAvailableQty = selectRecords[0].qty_available
     } catch (error) {
@@ -288,7 +295,6 @@ const method = reactive({
     data.form.spu_name = ''
     data.form.sku_code = ''
     data.form.sku_name = ''
-
     data.curAvailableQty = 0
   },
 

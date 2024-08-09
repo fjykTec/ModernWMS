@@ -68,6 +68,7 @@
       <vxe-column field="goods_owner_name" :title="$t('wms.stockAsnInfo.goods_owner_name')"></vxe-column>
       <vxe-column field="supplier_name" :title="$t('wms.stockAsnInfo.supplier_name')"></vxe-column>
       <vxe-column field="asn_qty" :title="$t('wms.stockAsnInfo.asn_qty')"></vxe-column>
+      <vxe-column field="price" :title="$t('wms.stockAsnInfo.price')"></vxe-column>
       <vxe-column field="weight" :title="$t('wms.stockAsnInfo.weight')"></vxe-column>
       <vxe-column field="volume" :title="$t('wms.stockAsnInfo.volume')"></vxe-column>
       <vxe-column field="sorted_qty" :title="$t('wms.stockAsnInfo.sorted_qty')"></vxe-column>
@@ -108,6 +109,15 @@
   <!-- Listing operation box -->
   <confirmGroudingDialog ref="confirmGroudingDialogRef" @sure="method.confirmGroudingSure" />
   <skuInfo :show-dialog="data.showDialogShowInfo" :form="data.dialogForm" @close="method.closeDialogShowInfo" />
+  <!-- Print QR code -->
+  <qr-code-dialog ref="qrCodeDialogRef" :menu="'stockAsnInfo-notice'">
+    <template #left="{ slotData }">
+      <p>{{ $t('wms.stockAsnInfo.num') }}:{{ slotData.asn_no }}</p>
+      <p>{{ $t('wms.stockAsnInfo.spu_name') }}:{{ slotData.spu_name }}</p>
+      <p>{{ $t('wms.stockAsnInfo.sku_code') }}:{{ slotData.sku_code }}</p>
+      <p>SN:{{ slotData.series_number }}</p>
+    </template>
+  </qr-code-dialog>
 </template>
 
 <script lang="ts" setup>
@@ -120,7 +130,7 @@ import { hookComponent } from '@/components/system'
 import { DEBOUNCE_TIME } from '@/constant/system'
 import { setSearchObject, getMenuAuthorityList } from '@/utils/common'
 import { SearchObject, btnGroupItem } from '@/types/System/Form'
-import { getStockAsnList, sortedAsnCancel, revokeSorting, confirmPutaway } from '@/api/wms/stockAsn'
+import { getStockAsnList, sortedAsnCancel, revokeSorting, confirmPutaway, getPrintAsnList } from '@/api/wms/stockAsn'
 import tooltipBtn from '@/components/tooltip-btn.vue'
 import i18n from '@/languages/i18n'
 import updateGrounding from './update-grounding.vue'
@@ -130,9 +140,11 @@ import { exportData } from '@/utils/exportTable'
 import BtnGroup from '@/components/system/btnGroup.vue'
 import confirmGroudingDialog from './confirm-grouding.vue'
 import { httpCodeJudge } from '@/utils/http/httpCodeJudge'
+import QrCodeDialog from '@/components/codeDialog/qrCodeDialog.vue'
 
 const xTableStockLocation = ref()
 const confirmGroudingDialogRef = ref()
+const qrCodeDialogRef = ref()
 
 const data = reactive({
   showDialog: false,
@@ -172,6 +184,31 @@ const data = reactive({
 })
 
 const method = reactive({
+  printQrCode: async () => {
+    const records = xTableStockLocation.value.getCheckboxRecords()
+
+    // data.selectRowData.length === 0 ? data.selectRowData = [row] : ''
+    // const records:any[] = data.selectRowData
+    if (records.length > 0) {
+      const list = records.map((item) => item.id)
+      const { data: res } = await getPrintAsnList(list)
+      if (!res.isSuccess) {
+        hookComponent.$message({
+          type: 'error',
+          content: res.errorMessage
+        })
+        return
+      }
+      const printList = res.data.map((item) => ({ id: item.asn_id, type: 'ground', ...item }))
+
+      qrCodeDialogRef.value.openDialog(printList)
+    } else {
+      hookComponent.$message({
+        type: 'error',
+        content: i18n.global.t('base.userManagement.checkboxIsNull')
+      })
+    }
+  },
   // Confirm listing data
   confirmGroudingSure: async (tableData: any) => {
     const { data: res } = await confirmPutaway(tableData)
@@ -336,6 +373,12 @@ onMounted(() => {
       icon: 'mdi-arrow-left-top',
       code: 'putOnTheShelf-delete',
       click: method.handleRevoke
+    },
+    {
+      name: i18n.global.t('base.commodityManagement.printQrCode'),
+      icon: 'mdi-qrcode',
+      code: 'putOnTheShelf-printQrCode',
+      click: method.printQrCode
     }
   ]
 })

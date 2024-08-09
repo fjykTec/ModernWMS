@@ -338,6 +338,10 @@ const method = reactive({
           }
         }
       }
+      records.forEach((item) => {
+        item.sku_id = item.id
+      })
+
       qrCodeDialogRef.value.openDialog(records)
     } else {
       hookComponent.$message({
@@ -358,7 +362,7 @@ const method = reactive({
     } else {
       hookComponent.$message({
         type: 'error',
-        content: i18n.global.t('base.userManagement.checkboxIsNull')
+        content: i18n.global.t('base.commodityManagement.checkboxIsNullByPrint')
       })
     }
   },

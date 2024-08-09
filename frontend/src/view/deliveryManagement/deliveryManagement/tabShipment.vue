@@ -88,12 +88,6 @@
       </vxe-column>
       <vxe-column field="customer_name" :title="$t('wms.deliveryManagement.customer_name')"></vxe-column>
       <vxe-column field="creator" :title="$t('wms.deliveryManagement.creator')"></vxe-column>
-      <!-- <vxe-column
-        field="create_time"
-        width="120px"
-        :formatter="['formatDate', 'yyyy-MM-dd']"
-        :title="$t('wms.deliveryManagement.create_time')"
-      ></vxe-column> -->
       <vxe-column field="operate" :title="$t('system.page.operate')" width="300px" :resizable="false" show-overflow>
         <template #default="{ row }">
           <div style="width: 100%; display: flex; justify-content: center">

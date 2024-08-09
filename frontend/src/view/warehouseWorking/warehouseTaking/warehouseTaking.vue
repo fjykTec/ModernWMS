@@ -69,20 +69,19 @@
                   <vxe-column field="counted_qty" width="150px" :title="$t('wms.warehouseWorking.warehouseTaking.counted_qty')"></vxe-column>
                   <vxe-column field="difference_qty" width="150px" :title="$t('wms.warehouseWorking.warehouseTaking.difference_qty')"></vxe-column>
                   <vxe-column field="handler" width="150px" :title="$t('wms.warehouseWorking.warehouseTaking.handler')"></vxe-column>
-                  <vxe-column
+                  <vxe-date-column
                     field="handle_time"
                     width="170px"
-                    :formatter="['formatDate', 'yyyy-MM-dd HH:mm']"
+                    format="yyyy-MM-dd HH:mm"
                     :title="$t('wms.warehouseWorking.warehouseTaking.handle_time')"
-                  >
-                  </vxe-column>
+                  ></vxe-date-column>
                   <vxe-column field="creator" :title="$t('wms.warehouseWorking.warehouseTaking.creator')"></vxe-column>
-                  <vxe-column
+                  <vxe-date-column
                     field="create_time"
                     width="170px"
-                    :formatter="['formatDate', 'yyyy-MM-dd HH:mm']"
+                    format="yyyy-MM-dd HH:mm"
                     :title="$t('wms.warehouseWorking.warehouseTaking.create_time')"
-                  ></vxe-column>
+                  ></vxe-date-column>
                   <vxe-column field="operate" :title="$t('system.page.operate')" width="250" :resizable="false" show-overflow>
                     <template #default="{ row }">
                       <tooltip-btn
@@ -109,7 +108,7 @@
                         :flat="true"
                         icon="mdi-delete-outline"
                         :tooltip-text="$t('system.page.delete')"
-                        :icon-color="!data.authorityList.includes('delete') || method.isConfirmTaking(row)?'':errorColor"
+                        :icon-color="!data.authorityList.includes('delete') || method.isConfirmTaking(row) ? '' : errorColor"
                         :disabled="!data.authorityList.includes('delete') || method.isConfirmTaking(row)"
                         @click="method.deleteRow(row)"
                       ></tooltip-btn>
@@ -189,6 +188,9 @@ const data = reactive({
     location_name: '',
     handler: '',
     handle_time: '',
+    price: 0,
+    expiry_date: '',
+    putaway_date: '',
     adjust_status: false,
     creator: '',
     create_time: ''
@@ -229,6 +231,9 @@ const method = reactive({
       handler: '',
       handle_time: '',
       adjust_status: false,
+      price: 0,
+      expiry_date: '',
+      putaway_date: '',
       creator: '',
       create_time: ''
     }

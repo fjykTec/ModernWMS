@@ -59,11 +59,7 @@
       <vxe-column type="seq" width="60"></vxe-column>
       <vxe-column field="asn_no" :title="$t('wms.stockAsnInfo.asn_no')"></vxe-column>
       <vxe-column field="asn_batch" :title="$t('wms.stockAsnInfo.asn_batch')"></vxe-column>
-      <vxe-column
-        field="estimated_arrival_time"
-        :formatter="['formatDate', 'yyyy-MM-dd']"
-        :title="$t('wms.stockAsnInfo.estimated_arrival_time')"
-      ></vxe-column>
+      <vxe-date-column field="estimated_arrival_time" :title="$t('wms.stockAsnInfo.estimated_arrival_time')"></vxe-date-column>
       <vxe-column field="goods_owner_name" :title="$t('wms.stockAsnInfo.goods_owner_name')"></vxe-column>
       <vxe-column field="operate" :title="$t('system.page.operate')" width="140px" :resizable="false" show-overflow>
         <template #default="{ row }">
@@ -328,13 +324,13 @@ onMounted(() => {
       icon: 'mdi-export-variant',
       code: 'notice-export',
       click: method.exportTable
-    },
-    {
-      name: i18n.global.t('base.commodityManagement.printQrCode'),
-      icon: 'mdi-qrcode',
-      code: 'notice-printQrCode',
-      click: method.printQrCode
     }
+    // {
+    //   name: i18n.global.t('base.commodityManagement.printQrCode'),
+    //   icon: 'mdi-qrcode',
+    //   code: 'notice-printQrCode',
+    //   click: method.printQrCode
+    // }
   ]
 })
 

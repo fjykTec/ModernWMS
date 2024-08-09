@@ -49,7 +49,6 @@
                   <vxe-column field="spu_code" :title="$t('wms.warehouseWorking.warehouseProcessing.spu_code')"></vxe-column>
                   <vxe-column field="spu_name" :title="$t('wms.warehouseWorking.warehouseProcessing.spu_name')"></vxe-column>
                   <vxe-column field="sku_code" :title="$t('wms.warehouseWorking.warehouseProcessing.sku_code')"></vxe-column>
-                  <vxe-column field="series_number" :title="$t('wms.stockLocation.series_number')"></vxe-column>
                   <vxe-column
                     field="qty"
                     :title="$t('wms.warehouseWorking.warehouseProcessing.qty')"
@@ -60,6 +59,10 @@
                     </template>
                   </vxe-column>
                   <vxe-column field="unit" :title="$t('wms.warehouseWorking.warehouseProcessing.unit')"></vxe-column>
+                  <vxe-column field="series_number" :title="$t('wms.stockLocation.series_number')"></vxe-column>
+                  <vxe-column field="price" :title="$t('wms.warehouseWorking.warehouseProcessing.price')"></vxe-column>
+                  <vxe-date-column field="expiry_date" :title="$t('wms.warehouseWorking.warehouseProcessing.expiry_date')"></vxe-date-column>
+                  <vxe-date-column field="putaway_date" :title="$t('wms.warehouseWorking.warehouseProcessing.putaway_date')"></vxe-date-column>
                 </vxe-table>
               </div>
             </v-col>
@@ -107,6 +110,24 @@
                   <vxe-column field="spu_name" :title="$t('wms.warehouseWorking.warehouseProcessing.spu_name')"></vxe-column>
                   <vxe-column field="sku_code" :title="$t('wms.warehouseWorking.warehouseProcessing.sku_code')"></vxe-column>
                   <vxe-column
+                    field="expiry_date"
+                    :title="$t('wms.warehouseWorking.warehouseProcessing.expiry_date')"
+                    :edit-render="{ autofocus: '.vxe-input--inner' }"
+                  >
+                    <template #edit="{ row }">
+                      <vxe-input v-model="row.expiry_date" type="date"></vxe-input>
+                    </template>
+                  </vxe-column>
+                  <!-- <vxe-column
+                    field="putaway_date"
+                    :title="$t('wms.warehouseWorking.warehouseProcessing.putaway_date')"
+                    :edit-render="{ autofocus: '.vxe-input--inner' }"
+                  >
+                    <template #edit="{ row }">
+                      <vxe-input v-model="row.putaway_date" type="date"></vxe-input>
+                    </template>
+                  </vxe-column> -->
+                  <vxe-column
                     field="qty"
                     :title="$t('wms.warehouseWorking.warehouseProcessing.qty')"
                     :edit-render="{ autofocus: '.vxe-input--inner' }"
@@ -115,6 +136,16 @@
                       <vxe-input v-model="row.qty" type="text"></vxe-input>
                     </template>
                   </vxe-column>
+                  <vxe-column
+                    field="price"
+                    :title="$t('wms.warehouseWorking.warehouseProcessing.price')"
+                    :edit-render="{ autofocus: '.vxe-input--inner' }"
+                  >
+                    <template #edit="{ row }">
+                      <vxe-input v-model="row.price" type="text"></vxe-input>
+                    </template>
+                  </vxe-column>
+
                   <vxe-column field="unit" width="60" :title="$t('wms.warehouseWorking.warehouseProcessing.unit')"></vxe-column>
                   <vxe-column field="location_name" :title="$t('wms.warehouseWorking.warehouseProcessing.target_location')" :edit-render="{}">
                     <template #edit="{ row }">
@@ -142,12 +173,13 @@
 <script lang="ts" setup>
 import { reactive, computed, ref, watch } from 'vue'
 import { VxeTablePropTypes } from 'vxe-table'
+import { privateDecrypt } from 'crypto'
 import { WarehouseProcessingVO, WarehouseProcessingDetailVO } from '@/types/WarehouseWorking/WarehouseProcessing'
 import i18n from '@/languages/i18n'
 import { hookComponent } from '@/components/system/index'
 import { addStockProcess } from '@/api/wms/warehouseProcessing'
 import { SYSTEM_HEIGHT, errorColor } from '@/constant/style'
-import { removeObjectNull } from '@/utils/common'
+import { removeObjectNull, removeArrayNull } from '@/utils/common'
 import { PROCESS_JOB_COMBINE, PROCESS_JOB_SPLIT } from '@/constant/warehouseWorking'
 import commoditySelect from '@/components/select/commodity-select.vue'
 import locationSelect from '@/components/select/location-select.vue'
@@ -155,7 +187,7 @@ import skuSelect from '@/components/select/sku-select.vue'
 import tooltipBtn from '@/components/tooltip-btn.vue'
 import customQrcode from '@/components/custom-qrcode.vue'
 import { exportData } from '@/utils/exportTable'
-import { isInteger } from '@/utils/dataVerification/tableRule'
+import { isInteger, isDecimal } from '@/utils/dataVerification/tableRule'
 
 const emit = defineEmits(['close', 'saveSuccess'])
 const xTableSource = ref()
@@ -268,7 +300,10 @@ const method = reactive({
             series_number: record.series_number,
             unit: record.unit,
             is_update_stock: false,
-            qty_available: record.qty_available
+            qty_available: record.qty_available,
+            price: record.price,
+            expiry_date: record.expiry_date,
+            putaway_date: record.putaway_date
           },
           -1
         )
@@ -294,7 +329,10 @@ const method = reactive({
           series_number: selectRecords[0].series_number,
           unit: selectRecords[0].unit,
           is_update_stock: false,
-          qty_available: selectRecords[0].qty_available
+          qty_available: selectRecords[0].qty_available,
+          price: selectRecords[0].price,
+          expiry_date: selectRecords[0].expiry_date,
+          putaway_date: selectRecords[0].putaway_date
         },
         -1
       )
@@ -323,7 +361,10 @@ const method = reactive({
           spu_name: selectRecords[0].spu_name,
           sku_code: selectRecords[0].sku_code,
           unit: selectRecords[0].unit,
-          is_update_stock: false
+          is_update_stock: false,
+          price: 0,
+          expiry_date: '',
+          putaway_date: ''
         },
         -1
       )
@@ -348,7 +389,10 @@ const method = reactive({
             spu_name: record.spu_name,
             sku_code: record.sku_code,
             unit: record.unit,
-            is_update_stock: false
+            is_update_stock: false,
+            price: 0,
+            expiry_date: '',
+            putaway_date: ''
           },
           -1
         )
@@ -371,6 +415,7 @@ const method = reactive({
   submit: async () => {
     const validSource = await method.validSourceTable()
     const validTarget = await method.validTargetTable()
+    
     if (!validSource || !validTarget) {
       return
     }
@@ -403,6 +448,7 @@ const method = reactive({
     let form = { ...data.form }
     form.detailList = [...tableSourceRecords, ...tableTargetRecords]
     form = removeObjectNull(form)
+    form.detailList = removeArrayNull(form.detailList)
 
     delete form.source_detail_list
     delete form.target_detail_list
@@ -424,7 +470,8 @@ const method = reactive({
     }
 
     // 2.The properties valid.
-    const errMap = await $table.validate()
+    const errMap = await $table.validate(true)
+    
     if (errMap) {
       hookComponent.$message({
         type: 'error',
@@ -450,7 +497,8 @@ const method = reactive({
     }
 
     // 2.The properties valid.
-    const errMap = await $table.validate()
+    const errMap = await $table.validate(true)
+    
     if (errMap) {
       hookComponent.$message({
         type: 'error',
@@ -548,14 +596,22 @@ const data = reactive({
       { required: true, message: `${ i18n.global.t('system.checkText.mustInput') }${ i18n.global.t('wms.warehouseWorking.warehouseProcessing.qty') }` },
       {
         validator: isInteger,
-        validNumerical: 'greaterThanZero',
-        trigger: 'change'
+        validNumerical: 'greaterThanZero'
       }
     ],
     location_name: [
       {
         required: true,
         message: `${ i18n.global.t('system.checkText.mustInput') }${ i18n.global.t('wms.warehouseWorking.warehouseProcessing.target_location') }`
+      }
+    ],
+    price: [
+      {
+        validator: isDecimal,
+        validNumerical: 'nonNegative',
+        length: 10,
+        decimalLength: 2,
+        trigger: 'change'
       }
     ]
   })

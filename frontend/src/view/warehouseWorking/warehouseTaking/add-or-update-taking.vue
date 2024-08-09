@@ -73,6 +73,27 @@
               @click:clear="method.clearLocation"
             ></v-text-field>
             <v-text-field
+              v-model="data.form.price"
+              :label="$t('wms.warehouseWorking.warehouseTaking.price')"
+              :rules="data.rules.price"
+              variant="outlined"
+              :disabled="isFromStock"
+            ></v-text-field>
+            <v-text-field
+              v-model="data.form.expiry_date"
+              :label="$t('wms.warehouseWorking.warehouseTaking.expiry_date')"
+              variant="outlined"
+              type="date"
+              :disabled="isFromStock"
+            ></v-text-field>
+            <v-text-field
+              v-model="data.form.putaway_date"
+              :label="$t('wms.warehouseWorking.warehouseTaking.putaway_date')"
+              variant="outlined"
+              type="date"
+              :disabled="isFromStock"
+            ></v-text-field>
+            <v-text-field
               v-model="data.form.book_qty"
               :label="$t('wms.warehouseWorking.warehouseTaking.book_qty')"
               :rules="data.rules.book_qty"
@@ -111,6 +132,8 @@ import tooltipBtn from '@/components/tooltip-btn.vue'
 import locationSelect from '@/components/select/location-select.vue'
 import skuSelect from '@/components/select/sku-select.vue'
 import customQrcode from '@/components/custom-qrcode.vue'
+import { IsDecimal } from '@/utils/dataVerification/formRule'
+import { formatDate } from '@/utils/format/formatSystem'
 
 const formRef = ref()
 const emit = defineEmits(['close', 'saveSuccess'])
@@ -157,7 +180,10 @@ const data = reactive({
     handle_time: '',
     adjust_status: false,
     creator: '',
-    create_time: ''
+    create_time: '',
+    price: 0,
+    expiry_date: '',
+    putaway_date: ''
   }),
   rules: {
     job_type: [],
@@ -168,6 +194,7 @@ const data = reactive({
     location_name: [
       (val: string) => !!val || `${ i18n.global.t('system.checkText.mustInput') }${ i18n.global.t('wms.warehouseWorking.warehouseTaking.location_name') }!`
     ],
+    price: [(val: number) => IsDecimal(val, 'nonNegative', 10, 2) === '' || IsDecimal(val, 'nonNegative', 10, 2)],
     spu_code: [(val: string) => !!val || `${ i18n.global.t('system.checkText.mustInput') }${ i18n.global.t('base.commodityManagement.spu_code') }!`],
     spu_name: [(val: string) => !!val || `${ i18n.global.t('system.checkText.mustInput') }${ i18n.global.t('base.commodityManagement.spu_name') }!`],
     sku_code: [(val: string) => !!val || `${ i18n.global.t('system.checkText.mustInput') }${ i18n.global.t('base.commodityManagement.sku_code') }!`],
@@ -182,6 +209,11 @@ const method = reactive({
 
   initForm: () => {
     data.form = props.form
+    data.curStockID = 0
+    if (data.form.expiry_date) {
+      data.form.expiry_date = formatDate(data.form.expiry_date, 'yyyy-MM-dd')
+      data.form.putaway_date = formatDate(data.form.putaway_date, 'yyyy-MM-dd')
+    }
   },
 
   openCommoditySelect: () => {
@@ -205,6 +237,15 @@ const method = reactive({
       data.form.sku_code = selectRecords[0].sku_code
       data.form.series_number = selectRecords[0].series_number
       data.form.book_qty = selectRecords[0].qty_available
+      data.form.price = selectRecords[0].price
+      data.form.expiry_date = selectRecords[0].expiry_date
+      data.form.putaway_date = selectRecords[0].putaway_date
+      if (data.form.expiry_date) {
+        data.form.expiry_date = formatDate(data.form.expiry_date, 'yyyy-MM-dd')
+      }
+      if (data.form.putaway_date) {
+        data.form.putaway_date = formatDate(data.form.putaway_date, 'yyyy-MM-dd')
+      }
     } catch (error) {
       // console.error(error)
     }

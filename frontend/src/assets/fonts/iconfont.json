@@ -1,0 +1,44 @@
+{
+  "id": "4535486",
+  "name": "wms",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "1727592",
+      "name": "407饼图",
+      "font_class": "chart-pie",
+      "unicode": "e902",
+      "unicode_decimal": 59650
+    },
+    {
+      "icon_id": "1526412",
+      "name": "图表_折线图",
+      "font_class": "chart-line",
+      "unicode": "e67e",
+      "unicode_decimal": 59006
+    },
+    {
+      "icon_id": "3014772",
+      "name": "库位设置",
+      "font_class": "chart-location",
+      "unicode": "e61a",
+      "unicode_decimal": 58906
+    },
+    {
+      "icon_id": "6844449",
+      "name": "库存",
+      "font_class": "chart-stock",
+      "unicode": "e63b",
+      "unicode_decimal": 58939
+    },
+    {
+      "icon_id": "20331107",
+      "name": "柱形图",
+      "font_class": "chart-bar",
+      "unicode": "e6c0",
+      "unicode_decimal": 59072
+    }
+  ]
+}

@@ -4,7 +4,7 @@
       <v-card :title="$t('system.page.preView')">
         <v-card-text>
           <div class="print-area-container">
-            <div class="print-area-scroll">
+            <div class="print-area-scroll" @click="method.resetIndex()">
               <div
                 id="printArea"
                 class="printArea"
@@ -14,7 +14,13 @@
                   columnGap: `${data.gridColumnGap}px`
                 }"
               >
-                <div v-for="(item, index) in data.printData" :key="index" class="code-container">
+                <div
+                  v-for="(item, index) in data.printData"
+                  :key="index"
+                  class="code-container"
+                  :class="{ 'code-click': data.clickIndex === index }"
+                  @click.stop="method.setIndex(index)"
+                >
                   <div>
                     <vue-qr :key="index" :size="150" :auto-color="true" :dot-scale="1" :text="method.formatPrintData(item)"></vue-qr>
                   </div>
@@ -30,7 +36,7 @@
         <v-card-actions class="justify-space-between">
           <div class="row-number-input">
             <v-row no-gutters>
-              <v-col cols="6" class="col">
+              <v-col cols="4" class="col">
                 <div class="colText">
                   <v-text-field
                     v-model.number="data.rowsNumber"
@@ -40,7 +46,7 @@
                   ></v-text-field>
                 </div>
               </v-col>
-              <v-col cols="6" class="col">
+              <v-col cols="4" class="col">
                 <div class="colText">
                   <v-text-field
                     v-model.number="data.gridRowGap"
@@ -50,11 +56,24 @@
                   ></v-text-field>
                 </div>
               </v-col>
+              <v-col cols="4" class="col">
+                <div class="colText">
+                  <v-text-field
+                    v-model.number="data.count"
+                    hide-details="auto"
+                    :label="$t('system.page.count')"
+                    :disabled="data.clickIndex === -1"
+                    @keydown="method.handleKeyDown"
+                  ></v-text-field>
+                </div>
+              </v-col>
             </v-row>
           </div>
           <div class="padding-lr-16">
             <v-btn variant="text" @click="method.closeDialog">{{ $t('system.page.close') }}</v-btn>
-            <v-btn v-print="'#printArea'" color="primary" :disabled="isDisabled" variant="text">{{ $t('system.page.print') }}</v-btn>
+            <v-btn v-print="'#printArea'" color="primary" :disabled="isDisabled" variant="text" @click="method.resetIndex()">
+              {{ $t('system.page.print') }}
+            </v-btn>
           </div>
         </v-card-actions>
       </v-card>
@@ -75,9 +94,11 @@ const data = reactive({
   showDialog: false,
   printData: [] as any,
   printText: '',
+  clickIndex: -1,
   rowsNumber: 5,
   gridColumnGap: 15,
-  gridRowGap: 15
+  gridRowGap: 15,
+  count: 1
 })
 
 const isDisabled = computed(() => data.printData.length === 0)
@@ -91,6 +112,24 @@ const method = reactive({
 
     setStorage(`QRCode-${ props.menu }`, storage)
   },
+  setIndex: (index: number) => {
+    data.clickIndex = index
+  },
+  resetIndex: () => {
+    data.clickIndex = -1
+  },
+  handleKeyDown: (event: any) => {
+    if (event.key === 'Enter') {
+      if (data.count > 1) {
+        const object = data.printData[data.clickIndex]
+        while (data.count > 1) {
+          data.printData.splice(data.clickIndex, 0, object)
+          data.count--
+        }
+        method.resetIndex()
+      }
+    }
+  },
   openDialog: (row: any) => {
     try {
       const storage: any = getStorage(`QRCode-${ props.menu }`)
@@ -103,14 +142,29 @@ const method = reactive({
       data.rowsNumber = 5
       data.gridRowGap = 15
     }
-
+    data.clickIndex = -1
     data.printData = row
     data.showDialog = true
   },
-  formatPrintData: (val: any) => JSON.stringify({
+  formatPrintData: (val: any) => {
+    const form = {
       id: val.id,
       type: val.type
-    }),
+    } as any
+    if (val.hasOwnProperty('sku_id')) {
+      form.sku_id = val.sku_id
+    }
+    if (val.hasOwnProperty('asn_id')) {
+      form.asn_id = val.asn_id
+    }
+    if (val.hasOwnProperty('asnmaster_id')) {
+      form.asnmaster_id = val.asnmaster_id
+    }
+    if (val.hasOwnProperty('series_number')) {
+      form.SN = val.series_number
+    }
+    return JSON.stringify(form)
+  },
   closeDialog: () => {
     data.showDialog = false
   }
@@ -155,8 +209,11 @@ defineExpose({
     justify-content: center;
   }
 }
+.code-click {
+  border: 2px dashed #7ebdaa !important;
+}
 .row-number-input {
-  width: 350px;
+  width: 450px;
   padding: 0 16px;
 }
 

@@ -46,19 +46,19 @@
                 {{ i18n.global.t('system.page.noData') }}
               </template>
               <vxe-column type="seq" width="60"></vxe-column>
-              <vxe-column field="dateFrom" :formatter="['formatDate', 'HH:mm:ss']" :title="$t('wms.deliveryBatchAllocation.dateFrom')"></vxe-column>
-              <vxe-column field="dateTo" :formatter="['formatDate', 'HH:mm:ss']" :title="$t('wms.deliveryBatchAllocation.dateTo')"></vxe-column>
+              <vxe-date-column field="dateFrom" format="HH:mm:ss" :title="$t('wms.deliveryBatchAllocation.dateFrom')"></vxe-date-column>
+              <vxe-date-column field="dateTo" format="HH:mm:ss" :title="$t('wms.deliveryBatchAllocation.dateTo')"></vxe-date-column>
               <vxe-column field="allocationRule" :title="$t('wms.deliveryBatchAllocation.allocationRule')"></vxe-column>
               <vxe-column field="creator" :title="$t('base.supplier.creator')"></vxe-column>
-              <vxe-column field="create_time" width="170px" :formatter="['formatDate', 'yyyy-MM-dd HH:mm']" :title="$t('base.supplier.create_time')">
-              </vxe-column>
-              <vxe-column
+              <vxe-date-column field="create_time" width="170px" format="yyyy-MM-dd HH:mm" :title="$t('base.supplier.create_time')">
+              </vxe-date-column>
+              <vxe-date-column
                 field="last_update_time"
                 width="170px"
-                :formatter="['formatDate', 'yyyy-MM-dd HH:mm']"
+                format="yyyy-MM-dd HH:mm" 
                 :title="$t('base.supplier.last_update_time')"
               >
-              </vxe-column>
+              </vxe-date-column>
               <vxe-column field="operate" :title="$t('system.page.operate')" width="160" :resizable="false" show-overflow>
                 <template #default="{ row }">
                   <tooltip-btn

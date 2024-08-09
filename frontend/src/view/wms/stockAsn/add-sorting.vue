@@ -11,6 +11,7 @@
               :rules="data.rules.sorted_qty"
               variant="outlined"
             ></v-text-field>
+            <v-text-field v-model="data.form.expiry_date" :label="$t('wms.stockAsnInfo.expiry_date')" variant="outlined" type="date"></v-text-field>
             <v-row v-for="(snNum, index) of data.SNList" :key="index" style="margin-top: 5px">
               <v-col :cols="10">
                 <v-text-field
@@ -35,17 +36,24 @@
                 </div>
               </v-col>
             </v-row>
-            <v-btn
+
+            <!-- <v-btn
               style="font-size: 20px; margin-bottom: 15px; margin-top: 10px; float: right"
               color="primary"
               :width="40"
               @click="method.insertSNData()"
             >
               +
-            </v-btn>
+            </v-btn> -->
           </v-form>
         </v-card-text>
         <v-card-actions class="justify-end">
+          <div>
+            <v-checkbox v-model="data.is_auto_num" :label="$t('wms.stockAsnInfo.consecutive_number')" hide-details></v-checkbox>
+          </div>
+          <!-- <div>
+            <v-switch v-model="data.is_auto_num" :label="$t('wms.stockAsnInfo.consecutive_number')" hide-details inset></v-switch>
+          </div> -->
           <v-btn variant="text" @click="method.closeDialog">{{ $t('system.page.close') }}</v-btn>
           <v-btn color="primary" variant="text" @click="method.submit">{{ $t('system.page.submit') }}</v-btn>
         </v-card-actions>
@@ -71,8 +79,10 @@ const data = reactive({
   staticDetailQty: 1,
   form: ref<SortingVo>({
     asn_id: 0,
+    expiry_date: '',
     sorted_qty: 0
   }),
+  is_auto_num: false,
   SNList: [] as { snNum: string }[],
   rules: {
     sorted_qty: [
@@ -102,6 +112,7 @@ const method = reactive({
   openDialog: async (id: number) => {
     data.form = {
       asn_id: id,
+      expiry_date: '',
       sorted_qty: 0
     }
 
@@ -127,8 +138,10 @@ const method = reactive({
       for (const item of data.SNList) {
         reqData.push({
           asn_id: data.form.asn_id,
+          expiry_date: data.form.expiry_date,
           series_number: item.snNum,
-          sorted_qty: 1
+          sorted_qty: 1,
+          is_auto_num: data.is_auto_num
         })
       }
 
@@ -137,8 +150,10 @@ const method = reactive({
         const margin = data.form.sorted_qty - data.SNList.length
         reqData.push({
           asn_id: data.form.asn_id,
+          expiry_date: data.form.expiry_date,
           series_number: '',
-          sorted_qty: margin
+          sorted_qty: margin,
+          is_auto_num: data.is_auto_num
         })
       }
 

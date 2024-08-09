@@ -71,15 +71,10 @@
               <vxe-column field="email" :title="$t('base.customer.email')"></vxe-column>
               <vxe-column field="contact_tel" :title="$t('base.customer.contact_tel')"></vxe-column>
               <vxe-column field="creator" :title="$t('base.customer.creator')"></vxe-column>
-              <vxe-column field="create_time" width="170px" :formatter="['formatDate', 'yyyy-MM-dd HH:mm']" :title="$t('base.customer.create_time')">
-              </vxe-column>
-              <vxe-column
-                field="last_update_time"
-                width="170px"
-                :formatter="['formatDate', 'yyyy-MM-dd HH:mm']"
-                :title="$t('base.customer.last_update_time')"
-              >
-              </vxe-column>
+              <vxe-date-column field="create_time" width="170px" format="yyyy-MM-dd HH:mm" :title="$t('base.customer.create_time')">
+              </vxe-date-column>
+              <vxe-date-column field="last_update_time" width="170px" format="yyyy-MM-dd HH:mm" :title="$t('base.customer.last_update_time')">
+              </vxe-date-column>
               <vxe-column field="operate" :title="$t('system.page.operate')" width="160" :resizable="false" show-overflow>
                 <template #default="{ row }">
                   <tooltip-btn

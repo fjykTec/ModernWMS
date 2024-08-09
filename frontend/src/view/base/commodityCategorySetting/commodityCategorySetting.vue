@@ -74,12 +74,12 @@
               <vxe-column type="seq" width="80"></vxe-column>
               <vxe-column field="category_name" align="left" :title="$t('base.commodityCategorySetting.category_name')" tree-node></vxe-column>
               <vxe-column field="creator" :title="$t('base.commodityCategorySetting.creator')"></vxe-column>
-              <vxe-column
+              <vxe-date-column
                 field="create_time"
                 width="170px"
-                :formatter="['formatDate', 'yyyy-MM-dd HH:mm']"
+                format="yyyy-MM-dd HH:mm"
                 :title="$t('base.commodityCategorySetting.create_time')"
-              ></vxe-column>
+              ></vxe-date-column>
               <vxe-column :title="$t('system.page.operate')" width="160" :resizable="false" show-overflow>
                 <template #default="{ row }">
                   <tooltip-btn

@@ -17,6 +17,7 @@
 import { reactive, nextTick, onMounted, ref, computed, watch } from 'vue'
 import { emitter } from './utils/bus'
 import { store } from './store'
+import { installNewLang } from '@/languages/method/index'
 
 const loadingFlag = ref(false)
 
@@ -27,6 +28,7 @@ const data = reactive({
 const method = reactive({
   refreshSystem: () => {
     data.isShow = false
+    installNewLang()
     nextTick(() => {
       data.isShow = true
       store.commit('system/setRefreshFlag', false)

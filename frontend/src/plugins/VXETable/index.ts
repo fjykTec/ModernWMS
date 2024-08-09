@@ -9,7 +9,7 @@ import 'vxe-table/lib/style.css'
  */
 VXETable.formats.add('formatDate', ({ cellValue }, format) => {
   const date = new Date(cellValue)
-  if (!cellValue || !date || XEUtils.toDateString(date, 'yyyy-MM-dd') === '1900-01-01') {
+  if (!cellValue || !date || XEUtils.toDateString(date, 'yyyy-MM-dd') === '1900-01-01' || XEUtils.toDateString(date, 'yyyy-MM-dd') === '1000-01-01') {
     return ''
   }
   return XEUtils.toDateString(date, format || 'yyyy-MM-dd HH:mm:ss')

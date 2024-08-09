@@ -29,6 +29,27 @@
             <vxe-column field="location_name" :title="$t('base.warehouseSetting.location_name')"></vxe-column>
             <!-- <vxe-column field="pick_qty" :title="$t('wms.deliveryManagement.unpicked_qty')"></vxe-column> -->
             <vxe-column field="picked_qty" :title="$t('wms.deliveryManagement.picked_qty')"></vxe-column>
+            <vxe-column field="picker" :title="$t('wms.deliveryManagement.picker')"></vxe-column>
+            <vxe-column
+              v-if="sourceType === 'picking'"
+              field="operate"
+              :title="$t('system.page.operate')"
+              width="120"
+              :resizable="false"
+              show-overflow
+            >
+              <template #default="{ row }">
+                <div style="width: 100%; display: flex; justify-content: center">
+                  <tooltip-btn
+                    :disabled="!data.authorityList.includes('picked-confirm') || row.picker_id > 0"
+                    :flat="true"
+                    icon="mdi-cart-arrow-down"
+                    :tooltip-text="$t('base.roleMenu.opeartionFunctionName.deliveryManagement.picked')"
+                    @click="method.pickRow(row)"
+                  ></tooltip-btn>
+                </div>
+              </template>
+            </vxe-column>
           </vxe-table>
         </v-card-text>
         <v-card-actions class="justify-end">
@@ -40,25 +61,55 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, computed, watch } from 'vue'
+import { reactive, computed, watch, withDefaults } from 'vue'
 import { hookComponent } from '@/components/system/index'
-import { viewInventoryDetails } from '@/api/wms/deliveryManagement'
+import { getMenuAuthorityList } from '@/utils/common'
+import { viewInventoryDetails, confirmPickingDetail } from '@/api/wms/deliveryManagement'
 import i18n from '@/languages/i18n'
+import tooltipBtn from '@/components/tooltip-btn.vue'
 
 const emit = defineEmits(['close', 'submit'])
 
-const props = defineProps<{
-  showDialog: boolean
-  id: number
-}>()
+const props = withDefaults(
+  defineProps<{
+    showDialog: boolean
+    id: number
+    sourceType: string
+  }>(),
+  {
+    sourceType: ''
+  }
+)
 
 const isShow = computed(() => props.showDialog)
 
 const data = reactive({
-  tableData: []
+  tableData: [],
+  // Menu operation permissions
+  authorityList: getMenuAuthorityList()
 })
 
 const method = reactive({
+  pickRow: async (row) => {
+    hookComponent.$dialog({
+      content: `${ i18n.global.t('base.roleMenu.opeartionFunctionName.deliveryManagement.picked') }?`,
+      handleConfirm: async () => {
+        const { data: res } = await confirmPickingDetail([row.id])
+        if (!res.isSuccess) {
+          hookComponent.$message({
+            type: 'error',
+            content: res.errorMessage
+          })
+          return
+        }
+        hookComponent.$message({
+          type: 'success',
+          content: res.data
+        })
+        method.getTableData()
+      }
+    })
+  },
   getTableData: async () => {
     const { data: res } = await viewInventoryDetails(props.id)
     if (!res.isSuccess) {

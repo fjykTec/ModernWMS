@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@claviska/jquery-minicolors": "2.3.6",
+    "@kjgl77/datav-vue3": "^1.7.2",
     "axios": "1.2.1",
     "canvg": "3.0.10",
     "echarts": "^5.4.3",

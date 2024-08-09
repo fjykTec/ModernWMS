@@ -1,3 +1,11 @@
+/*
+ * @Author: yanguoping 125722066@qq.com
+ * @Date: 2023-10-12 10:29:48
+ * @LastEditors: yanguoping 125722066@qq.com
+ * @LastEditTime: 2024-05-09 09:12:32
+ * @FilePath: \frontend\src\utils\dataVerification\tableRule.ts
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ */
 import i18n from '@/languages/i18n'
 
 // Judge whether it is integer
@@ -7,7 +15,7 @@ export function isInteger(rule: any, value: any) {
     rule = rule.rule
   }
   return new Promise((resolve, reject) => {
-    let validText = ''
+    let validText = ''    
     if (value === '' || value == null) {
       resolve(true)
     } else {

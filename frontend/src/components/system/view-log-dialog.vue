@@ -40,13 +40,8 @@
                 <vxe-column type="seq" width="60"></vxe-column>
                 <vxe-column field="user_name" width="140" :title="$t('system.viewLog.user_name')"></vxe-column>
                 <vxe-column field="action_content" :title="$t('system.viewLog.action_content')"></vxe-column>
-                <vxe-column
-                  field="action_time"
-                  width="170px"
-                  :formatter="['formatDate', 'yyyy-MM-dd HH:mm']"
-                  :title="$t('system.viewLog.action_time')"
-                >
-                </vxe-column>
+                <vxe-date-column field="action_time" :title="$t('system.viewLog.action_time')" format="yyyy-MM-dd HH:mm" width="170px">
+                </vxe-date-column>
               </vxe-table>
 
               <custom-pager
@@ -80,7 +75,6 @@ import { getActionLog } from '@/api/sys/system'
 import { DEFAULT_PAGE_SIZE, PAGE_SIZE, PAGE_LAYOUT } from '@/constant/vxeTable'
 import { hookComponent } from '.'
 import { PageConfigProps } from '@/types/System/Form'
-import { formatDate } from '@/utils/format/formatSystem'
 import customPager from '@/components/custom-pager.vue'
 import { actionDict } from '@/view/base/roleMenu/actionList'
 import NavListVue from '@/components/page/nav-list.vue'

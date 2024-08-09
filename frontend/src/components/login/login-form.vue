@@ -38,6 +38,19 @@ import { hookComponent } from '@/components/system'
 import { router } from '@/router/index'
 // import userRegisterForm from './user-register-form.vue'
 
+// 加解密算法
+function simpleEncrypt(text: string, key: string) {
+  let encrypted = ''
+  for (let i = 0; i < text.length; i++) {
+    encrypted += String.fromCharCode(text.charCodeAt(i) ^ key.charCodeAt(i % key.length))
+  }
+  return encrypted
+}
+
+function simpleDecrypt(encryptedText: string, key: string) {
+  return simpleEncrypt(encryptedText, key) // 因为异或运算具有对称性，加密和解密过程相同
+}
+
 // Get v-form ref
 const VFormRef = ref()
 
@@ -45,8 +58,8 @@ const data = reactive({
   showDialog: false,
   valid: true,
   showPassword: false,
-  userName: '',
-  password: '',
+  userName: 'admin', // 240507 刘福: 默认账号 admin 1
+  password: '1',
   remember: false,
   dialogForm: {
     id: 0,
@@ -58,7 +71,8 @@ const data = reactive({
     is_valid: true
   },
   userNameVaildRules: [(v: string) => !!v || `${ i18n.global.t('system.checkText.mustInput') }${ i18n.global.t('login.userName') }!`],
-  passwordVaildRules: [(v: string) => !!v || `${ i18n.global.t('system.checkText.mustInput') }${ i18n.global.t('login.password') }!`]
+  passwordVaildRules: [(v: string) => !!v || `${ i18n.global.t('system.checkText.mustInput') }${ i18n.global.t('login.password') }!`],
+  encryption: 'ModernWMS2024'
 })
 
 const method = reactive({
@@ -123,13 +137,14 @@ const method = reactive({
       // Remember user login info
       if (data.remember) {
         const rememberJSON = JSON.stringify({
-          userName: window.btoa(encodeURIComponent(data.userName)),
-          password: window.btoa(encodeURIComponent(data.password))
+          user_num: simpleEncrypt(data.userName, data.encryption),
+          password: simpleEncrypt(data.password, data.encryption)
         })
         localStorage.setItem('userLoginInfo', rememberJSON)
       } else {
         localStorage.setItem('userLoginInfo', '')
       }
+
       // Jump home
       store.commit('system/setCurrentRouterPath', 'homepage')
       router.push('home')
@@ -167,15 +182,30 @@ onMounted(() => {
   const rememberJSON = localStorage.getItem('userLoginInfo')
   if (rememberJSON) {
     const obj = JSON.parse(rememberJSON)
-    try {
-      data.userName = decodeURIComponent(window.atob(obj.userName))
-      data.password = decodeURIComponent(window.atob(obj.password))
-    } catch {
-      data.userName = window.atob(obj.userName)
-      data.password = window.atob(obj.password)
-    }
     data.remember = true
+
+    try {
+      data.userName = simpleDecrypt(obj.user_num, data.encryption)
+      data.password = simpleDecrypt(obj.password, data.encryption)
+    } catch {
+      // Compatible with old encrypted data
+      try {
+        data.userName = decodeURIComponent(window.atob(obj.userName))
+        data.password = decodeURIComponent(window.atob(obj.password))
+      } catch {
+        // Compatible with old encrypted data
+        try {
+          data.userName = window.atob(obj.userName)
+          data.password = window.atob(obj.password)
+        } catch {
+          data.userName = ''
+          data.password = ''
+          data.remember = false
+        }
+      }
+    }
   }
+  // 旧的加密数据
 })
 </script>
 

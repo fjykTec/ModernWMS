@@ -1,3 +1,11 @@
+/*
+ * @Author: yanguoping 125722066@qq.com
+ * @Date: 2024-03-27 10:59:36
+ * @LastEditors: yanguoping 125722066@qq.com
+ * @LastEditTime: 2024-05-08 17:20:34
+ * @FilePath: \frontend\src\types\WMS\StockAsn.ts
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ */
 import { UniformFileNaming } from '../System/Form'
 
 export interface StockAsnVO extends UniformFileNaming {
@@ -14,6 +22,7 @@ export interface StockAsnVO extends UniformFileNaming {
   origin?: string
   sku_id?: number
   asn_qty?: number
+  price?: number
   asn_batch?: string
   estimated_arrival_time?: string
   asn_status?: number
@@ -42,12 +51,14 @@ export interface StockAsnDetailVO {
   volume_unit?: number
   weight_unit?: number
   asn_qty?: number
+  price?: number
   actual_qty?: number
   weight?: number
   volume?: number
   supplier_id?: number
   supplier_name?: string
   is_valid?: boolean
+  is_check?; boolean
 }
 
 export interface PutawayVo {
@@ -59,7 +70,8 @@ export interface PutawayVo {
 
 export interface SortingVo {
   asn_id: number
-  sorted_qty: number
+  sorted_qty: number,
+  expiry_date: string,
 }
 
 export interface SkuInfoVo {

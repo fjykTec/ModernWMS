@@ -32,7 +32,16 @@ const routes: RouteRecordRaw[] = [
         meta: {
           menuPath: 'vwms'
         }
-      }
+      },
+      // {
+      //   name: 'largeScreen',
+      //   path: '/largeScreen',
+      //   component: () => import('@/view/largeScreen/largeScreen.vue'),
+      //   meta: {
+      //     menuPath: 'largeScreen'
+      //   }
+      // }
+      
     ]
   },
 ]

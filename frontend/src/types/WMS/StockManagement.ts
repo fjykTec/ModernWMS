@@ -1,5 +1,5 @@
 export interface StockLocationVO {
-    warehouse: string
+  warehouse_name: string
     location_name: string
     spu_code: string
     spu_name: string

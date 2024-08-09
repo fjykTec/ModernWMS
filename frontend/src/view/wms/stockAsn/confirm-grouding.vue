@@ -102,13 +102,15 @@ const data = reactive({
       { required: true, message: `${ i18n.global.t('system.checkText.mustInput') }${ i18n.global.t('wms.stockAsnInfo.putaway_qty') }` },
       {
         validator: isInteger,
-        validNumerical: 'nonNegative',
+        validNumerical: 'greaterThanZero',
         trigger: 'change'
       },
       { validator: validQty, trigger: 'change' }
     ],
     series_number: [],
-    location_name: [{ validator: validLocationName, trigger: 'change' }]
+    location_name: [
+    { required: true, message: `${ i18n.global.t('system.checkText.mustInput') }${ i18n.global.t('base.warehouseSetting.location_name') }` },
+    { validator: validLocationName, trigger: 'change' }]
   } as any
 })
 

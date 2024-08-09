@@ -85,12 +85,12 @@
                   <vxe-column field="price_per_volume" :title="$t('base.freightSetting.price_per_volume')"></vxe-column>
                   <vxe-column field="min_payment" :title="$t('base.freightSetting.min_payment')"></vxe-column>
                   <vxe-column field="creator" :title="$t('base.freightSetting.creator')"></vxe-column>
-                  <vxe-column
+                  <vxe-date-column
                     field="create_time"
                     width="170px"
-                    :formatter="['formatDate', 'yyyy-MM-dd HH:mm']"
+                    format="yyyy-MM-dd HH:mm" 
                     :title="$t('base.freightSetting.create_time')"
-                  ></vxe-column>
+                  ></vxe-date-column>
                   <vxe-column field="is_valid" :title="$t('base.freightSetting.is_valid')">
                     <template #default="{ row, column }">
                       <span>{{ row[column.property] ? $t('system.combobox.yesOrNo.yes') : $t('system.combobox.yesOrNo.no') }}</span>

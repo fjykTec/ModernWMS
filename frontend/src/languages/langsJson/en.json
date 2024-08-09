@@ -34,7 +34,8 @@
       "volume_unit": "Volume Unit",
       "weight": "Commodity Weight",
       "weight_unit": "Weight Unit",
-      "width": "Commodity Width"
+      "width": "Commodity Width",
+      "checkboxIsNullByPrint": "No data selected or the selected SKU does not have a product barcode."
     },
     "companySetting": {
       "address": "Detailed Address",
@@ -246,6 +247,7 @@
       "customer": "Customer Info",
       "deliveryManagement": "Delivery Management",
       "deliveryStatistic": "Shipment statistics",
+      "stockageStatistic":"Stock Age Analysis",
       "freightSetting": "Freight Setting",
       "homepage": "Home Page",
       "menuBasicSettings": "Menu",
@@ -260,6 +262,7 @@
       "userManagement": "User Management",
       "userRoleSetting": "User Role",
       "vwms": "Visual warehouse",
+      "largeScreen":"Large Screen",
       "warehouseAdjust": "Inventory Adjust",
       "warehouseFreeze": "Inventory freeze",
       "warehouseMove": "Inventory Move",
@@ -331,6 +334,7 @@
       "exportTemplate": "Export Template",
       "gridColumnGap": "Column spacing(px)",
       "gridRowGap": "Row spacing(px)",
+      "count":"Count",
       "import": "Import",
       "insertOneRow": "Insert One Row",
       "noData": "No data",
@@ -347,7 +351,8 @@
       "view": "View",
       "setSearch": "Set query criteria",
       "chart": "Chart",
-      "table": "Table"
+      "table": "Table",
+      "fullScreen":"FullScreen"
     },
     "pager": {
       "goTo": "Go to",
@@ -392,7 +397,7 @@
       "confirmBack": "Confirm withdrawal",
       "confirmDelivery": "Confirm Delivery",
       "confirmOrder": "Confirm Shipment Doc",
-      "confirmPicking": "Confirm Picking",
+      "confirmPicking": "Picking Audit",
       "confirmSignIn": "Confirm Signing",
       "confirmSuccess": "Confirm the shipment order successfully!",
       "create_time": "Creation Time",
@@ -430,6 +435,8 @@
       "packaged": "Packaged",
       "picked": "Picked",
       "picked_qty": "Picked Quantity",
+      "picker":"picker",
+      "pick_checker":"Picking Auditor",
       "preShipment": "Pre Shipment",
       "qty": "Total Quantity",
       "qty_available": "Available Quantity",
@@ -505,6 +512,26 @@
       "spu_name": "Commodity Name",
       "warehouse_name": "Warehouse name"
     },
+    "stockageStatistic":{
+      "warehouse_name": "Warehouse name",
+      "location_name": "Location Code",
+      "spu_code": "Commodity Code",
+      "spu_name": "Commodity Name",
+      "sku_id": "Identifying",
+      "sku_code": "Specification Code",
+      "sku_name": "Specification Name",
+      "qty": "Quantity",
+      "goods_owner_name": "Goods Owner Name",
+      "series_number": "Serial number",
+      "expiry_date":"Expiration Date",
+      "price":"Commodity Price",
+      "putaway_date":"Listing Date",
+      "stock_age": "Stock Age",
+      "stock_age_from": "Stock Age from",
+      "stock_age_to": "Stock Age to",
+      "expiry_date_from": "Expiration Date from",
+      "expiry_date_to": "Expiration Date to"
+    },
     "skuInfo": {
       "bar_code": "Specification Code",
       "brand": "Brand",
@@ -554,6 +581,7 @@
       "asn_batch": "Batch",
       "asn_no": "Asn No",
       "asn_qty": "Asn Quantity",
+      "price":"Commodity Price",
       "asn_status": "Asn Status",
       "can_putaway_qty": "Quantity available for listing",
       "confirmArrival": "Confirm arrival",
@@ -585,6 +613,8 @@
       "sku_id": "Sku Id",
       "sku_name": "Form Name",
       "sorted_qty": "Sorted Quantity",
+      "expiry_date":"Expiration Date",
+      "putaway_date":"Listing Date",
       "spu_code": "Commodity code",
       "spu_id": "Spu Id",
       "spu_name": "Trade name",
@@ -596,7 +626,8 @@
       "volume": "Volume",
       "volume_unit": "Volume Unit",
       "weight": "Weight",
-      "weight_unit": "Weight Unit"
+      "weight_unit": "Weight Unit",
+      "consecutive_number":"consecutive numbering"
     },
     "stockList": {
       "qty": "Quantity",
@@ -708,7 +739,10 @@
         "target": "Target",
         "target_location": "Target Location",
         "target_warehouse": "Target Warehouse",
-        "unit": "Unit"
+        "unit": "Unit",
+        "price":"Commodity Price",
+        "expiry_date":"Expiration Date",
+        "putaway_date":"Listing Date"
       },
       "warehouseTaking": {
         "addFromCommodity": "Choose From Commodity",
@@ -729,7 +763,10 @@
         "job_status": "Job Status",
         "location_name": "Location Code",
         "unfinish": "Unfinish",
-        "warehouse": "Warehouse"
+        "warehouse": "Warehouse",
+        "price":"Commodity Price",
+        "expiry_date":"Expiration Date",
+        "putaway_date":"Listing Date"
       }
     }
   }
