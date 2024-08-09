@@ -687,7 +687,7 @@ namespace ModernWMS.WMS.Services
             var dispatchpick_DBSet = _dBContext.GetDbSet<DispatchpicklistEntity>();
             var sku_DBSet = _dBContext.GetDbSet<SkuEntity>();
             var spu_DBSet = _dBContext.GetDbSet<SpuEntity>();
-            var location_DBSet = _dBContext.GetDbSet<GoodslocationEntity>();
+            var location_DBSet = _dBContext.GetDbSet<WarehouseareaEntity>();
             var warehouse_DBSet = _dBContext.GetDbSet<WarehouseEntity>();
             var owner_DbSet = _dBContext.GetDbSet<GoodsownerEntity>();
             if (input.delivery_date_from > UtilConvert.MinDate)
@@ -713,7 +713,7 @@ namespace ModernWMS.WMS.Services
                         {
                             dp.dispatch_no,
                             wh.warehouse_name,
-                            location.location_name,
+                            location_name = location.area_name,
                             spu.spu_name,
                             spu.spu_code,
                             sku.sku_name,
