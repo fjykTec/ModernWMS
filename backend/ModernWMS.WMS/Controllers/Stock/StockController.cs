@@ -169,6 +169,24 @@ namespace ModernWMS.WMS.Controllers
             });
         }
 
+
+
+        /// <summary>
+        /// stock age page search
+        /// </summary>
+        /// <param name="pageSearch">args</param>
+        /// <returns></returns>
+        [HttpPost("stock-age-list")]
+        public async Task<ResultModel<PageData<StockAgeViewModel>>> StockAgePageAsync(StockAgeSearchViewModel input)
+        {
+            var (data, totals) = await _stockService.StockAgePageAsync(input, CurrentUser);
+
+            return ResultModel<PageData<StockAgeViewModel>>.Success(new PageData<StockAgeViewModel>
+            {
+                Rows = data,
+                Totals = totals
+            });
+        }
         #endregion Api
     }
 }

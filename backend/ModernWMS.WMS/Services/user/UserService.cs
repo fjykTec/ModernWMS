@@ -502,6 +502,15 @@ namespace ModernWMS.WMS.Services
                         tenant_id = tenant_id
                     },new MenuEntity
                     {
+                        menu_name = "stockageStatistic",
+                        module = "statisticAnalysis ",
+                        vue_path = "stockageStatistic",
+                        vue_path_detail = "",
+                        vue_directory = "statisticAnalysis/stockageStatistic",
+                        sort = 7,
+                        tenant_id = tenant_id
+                    },new MenuEntity
+                    {
                         menu_name = "warehouseProcessing",
                         module = "warehouseWorkingModule",
                         vue_path = "warehouseProcessing",
@@ -562,6 +571,16 @@ namespace ModernWMS.WMS.Services
                         vue_path_detail = "",
                         vue_directory = "deliveryManagement/deliveryManagement",
                         sort = 5,
+                        tenant_id = tenant_id
+                    }
+                    ,new MenuEntity
+                    {
+                        menu_name = "largeScreen",
+                        module = "",
+                        vue_path = "largeScreen",
+                        vue_path_detail = "",
+                        vue_directory = "largeScreen/largeScreen",
+                        sort = 6,
                         tenant_id = tenant_id
                     }
                 };

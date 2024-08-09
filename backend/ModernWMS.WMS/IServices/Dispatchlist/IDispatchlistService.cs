@@ -88,6 +88,22 @@ namespace ModernWMS.WMS.IServices
         Task<(bool flag, string msg)> ConfirmPickByDispatchNo(string dispatch_no, CurrentUser currentUser);
 
         /// <summary>
+        /// confirm pick detail
+        /// </summary>
+        /// <param name="picklist_id">dispatch list pick detail id</param>
+        /// <param name="currentUser">current user</param>
+        /// <returns></returns>
+        Task<(bool flag, string msg)> ConfirmPickDetail(List<int> picklist_id, CurrentUser currentUser);
+
+        /// <summary>
+        /// cancel confirm pick detail
+        /// </summary>
+        /// <param name="picklist_id">dispatch list pick detail id</param>
+        /// <param name="currentUser">current user</param>
+        /// <returns></returns>
+        Task<(bool flag, string msg)> CancelConfirmPickDetail(List<int> picklist_id, CurrentUser currentUser);
+
+        /// <summary>
         ///  package
         /// </summary>
         /// <param name="viewModels">viewModels</param>

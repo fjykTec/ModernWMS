@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ModernWMS.Core.Utility;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -88,6 +89,12 @@ namespace ModernWMS.WMS.Entities.ViewModels
         /// shortage qty
         /// </summary>
         public int shortage_qty { get; set; } = 0;
+
+
+        /// <summary>
+        /// expiry_date
+        /// </summary>
+        public DateTime expiry_date { get; set; } = UtilConvert.MinDate;
 
         #endregion Property
     }

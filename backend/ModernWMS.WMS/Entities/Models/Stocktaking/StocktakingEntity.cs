@@ -46,6 +46,26 @@ namespace ModernWMS.WMS.Entities.Models
         public int goods_location_id { get; set; }  = 0;
 
         /// <summary>
+        /// series_number
+        /// </summary>
+        public string series_number { get; set; } = string.Empty;
+
+        /// <summary>
+        /// expiry_date
+        /// </summary>
+        public DateTime expiry_date { get; set; } = UtilConvert.MinDate;
+
+        /// <summary>
+        /// price
+        /// </summary>
+        public decimal price { get; set; } = 0;
+
+        /// <summary>
+        /// putaway_date
+        /// </summary>
+        public DateTime putaway_date { get; set; } = UtilConvert.MinDate;
+
+        /// <summary>
         /// book_qty
         /// </summary>
         public int book_qty { get; set; }  = 0;

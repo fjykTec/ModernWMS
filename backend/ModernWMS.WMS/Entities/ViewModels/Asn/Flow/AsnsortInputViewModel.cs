@@ -32,6 +32,11 @@ namespace ModernWMS.WMS.Entities.ViewModels
         public int asn_id { get; set; } = 0;
 
         /// <summary>
+        /// is automatically generate series number
+        /// </summary>
+        public bool is_auto_num { get; set; } = false;
+
+        /// <summary>
         /// series_number
         /// </summary>
         public string series_number { get; set; } = string.Empty;
@@ -41,6 +46,12 @@ namespace ModernWMS.WMS.Entities.ViewModels
         /// </summary>
         [Display(Name = "sorted_qty")]
         public int sorted_qty { get; set; } = 0;
+
+
+        /// <summary>
+        /// expiry_date
+        /// </summary>
+        public DateTime expiry_date { get; set; } = Core.Utility.UtilConvert.MinDate;
 
         #endregion
     }

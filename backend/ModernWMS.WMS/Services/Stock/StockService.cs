@@ -20,6 +20,9 @@ using System.Linq;
 using ModernWMS.WMS.Entities.ViewModels.Stock;
 using ModernWMS.Core.Utility;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using Pomelo.EntityFrameworkCore.MySql.Storage.Internal;
+using Pomelo.EntityFrameworkCore.MySql.Query.Internal;
+using Microsoft.Extensions.Configuration;
 
 namespace ModernWMS.WMS.Services
 {
@@ -40,6 +43,8 @@ namespace ModernWMS.WMS.Services
         /// </summary>
         private readonly IStringLocalizer<ModernWMS.Core.MultiLanguage> _stringLocalizer;
 
+        public IConfiguration Configuration { get; }
+
         #endregion Args
 
         #region constructor
@@ -52,10 +57,12 @@ namespace ModernWMS.WMS.Services
         public StockService(
             SqlDBContext dBContext
           , IStringLocalizer<ModernWMS.Core.MultiLanguage> stringLocalizer
+            , IConfiguration configuration
             )
         {
             this._dBContext = dBContext;
             this._stringLocalizer = stringLocalizer;
+            this.Configuration = configuration;
         }
 
         #endregion constructor
@@ -204,7 +211,7 @@ namespace ModernWMS.WMS.Services
                                     join gw in _dBContext.GetDbSet<GoodsownerEntity>().AsNoTracking() on stock.goods_owner_id equals gw.id into gw_left
                                     from gw in gw_left.DefaultIfEmpty()
                                     where stock.tenant_id == currentUser.tenant_id
-                                    group new { stock, gw } by new { stock.sku_id, stock.goods_location_id, stock.goods_owner_id, stock.series_number, gw.goods_owner_name } into sg
+                                    group new { stock, gw } by new { stock.sku_id, stock.goods_location_id, stock.goods_owner_id, stock.series_number, gw.goods_owner_name, stock.expiry_date, stock.price, stock.putaway_date } into sg
                                     select new
                                     {
                                         sku_id = sg.Key.sku_id,
@@ -212,6 +219,9 @@ namespace ModernWMS.WMS.Services
                                         goods_owner_id = sg.Key.goods_owner_id,
                                         goods_owner_name = sg.Key.goods_owner_name,
                                         series_number = sg.Key.series_number,
+                                        sg.Key.expiry_date,
+                                        sg.Key.price,
+                                        sg.Key.putaway_date,
                                         qty_frozen = sg.Where(t => t.stock.is_freeze == true).Sum(e => e.stock.qty),
                                         qty = sg.Sum(t => t.stock.qty)
                                     };
@@ -219,44 +229,53 @@ namespace ModernWMS.WMS.Services
             var dispatch_group_datas = from dp in dispatch_DBSet.AsNoTracking()
                                        join dpp in dispatchpick_DBSet.AsNoTracking() on dp.id equals dpp.dispatchlist_id
                                        where dp.dispatch_status > 1 && dp.dispatch_status < 6
-                                       group dpp by new { dpp.sku_id, dpp.goods_location_id, dpp.goods_owner_id, dpp.series_number } into dg
+                                       group dpp by new { dpp.sku_id, dpp.goods_location_id, dpp.goods_owner_id, dpp.series_number, dpp.expiry_date, dpp.price, dpp.putaway_date } into dg
                                        select new
                                        {
                                            sku_id = dg.Key.sku_id,
                                            goods_location_id = dg.Key.goods_location_id,
                                            goods_owner_id = dg.Key.goods_owner_id,
                                            series_number = dg.Key.series_number,
+                                           dg.Key.expiry_date,
+                                           dg.Key.price,
+                                           dg.Key.putaway_date,
                                            qty_locked = dg.Sum(t => t.pick_qty)
                                        };
             var process_locked_group_datas = from pd in processdetail_DBSet
                                              where pd.is_update_stock == false && pd.is_source == true
-                                             group pd by new { pd.sku_id, pd.goods_location_id, pd.goods_owner_id, pd.series_number } into pdg
+                                             group pd by new { pd.sku_id, pd.goods_location_id, pd.goods_owner_id, pd.series_number, pd.expiry_date, pd.price, pd.putaway_date } into pdg
                                              select new
                                              {
                                                  sku_id = pdg.Key.sku_id,
                                                  goods_location_id = pdg.Key.goods_location_id,
                                                  goods_owner_id = pdg.Key.goods_owner_id,
                                                  series_number = pdg.Key.series_number,
+                                                 pdg.Key.expiry_date,
+                                                 pdg.Key.price,
+                                                 pdg.Key.putaway_date,
                                                  qty_locked = pdg.Sum(t => t.qty)
                                              };
 
             var move_locked_group_datas = from m in move_DBSet.AsNoTracking()
                                           where m.move_status == 0
-                                          group m by new { m.sku_id, m.orig_goods_location_id, m.goods_owner_id, m.series_number } into mg
+                                          group m by new { m.sku_id, m.orig_goods_location_id, m.goods_owner_id, m.series_number, m.expiry_date, m.price, m.putaway_date } into mg
                                           select new
                                           {
                                               sku_id = mg.Key.sku_id,
                                               goods_location_id = mg.Key.orig_goods_location_id,
                                               goods_owner_id = mg.Key.goods_owner_id,
                                               series_number = mg.Key.series_number,
+                                              mg.Key.expiry_date,
+                                              mg.Key.price,
+                                              mg.Key.putaway_date,
                                               qty_locked = mg.Sum(t => t.qty)
                                           };
             var query = from sg in stock_group_datas
-                        join dp in dispatch_group_datas on new { sg.sku_id, sg.goods_location_id, sg.goods_owner_id, sg.series_number } equals new { dp.sku_id, dp.goods_location_id, dp.goods_owner_id, dp.series_number } into dp_left
+                        join dp in dispatch_group_datas on new { sg.sku_id, sg.goods_location_id, sg.goods_owner_id, sg.series_number, sg.expiry_date, sg.price, sg.putaway_date } equals new { dp.sku_id, dp.goods_location_id, dp.goods_owner_id, dp.series_number, dp.expiry_date, dp.price, dp.putaway_date } into dp_left
                         from dp in dp_left.DefaultIfEmpty()
-                        join pl in process_locked_group_datas on new { sg.sku_id, sg.goods_location_id, sg.goods_owner_id, sg.series_number } equals new { pl.sku_id, pl.goods_location_id, pl.goods_owner_id, pl.series_number } into pl_left
+                        join pl in process_locked_group_datas on new { sg.sku_id, sg.goods_location_id, sg.goods_owner_id, sg.series_number, sg.expiry_date, sg.price, sg.putaway_date } equals new { pl.sku_id, pl.goods_location_id, pl.goods_owner_id, pl.series_number, pl.expiry_date, pl.price, pl.putaway_date } into pl_left
                         from pl in pl_left.DefaultIfEmpty()
-                        join m in move_locked_group_datas on new { sg.sku_id, sg.goods_location_id, sg.goods_owner_id, sg.series_number } equals new { m.sku_id, m.goods_location_id, m.goods_owner_id, m.series_number } into m_left
+                        join m in move_locked_group_datas on new { sg.sku_id, sg.goods_location_id, sg.goods_owner_id, sg.series_number, sg.expiry_date, sg.price, sg.putaway_date } equals new { m.sku_id, m.goods_location_id, m.goods_owner_id, m.series_number, m.expiry_date, m.price, m.putaway_date } into m_left
                         from m in m_left.DefaultIfEmpty()
                         join sku in sku_DBSet on sg.sku_id equals sku.id
                         join spu in spu_DBSet on sku.spu_id equals spu.id
@@ -276,6 +295,9 @@ namespace ModernWMS.WMS.Services
                             location_name = gl.location_name,
                             warehouse_name = gl.warehouse_name,
                             series_number = sg.series_number,
+                            expiry_date = sg.expiry_date,
+                            price = sg.price,
+                            putaway_date = sg.putaway_date,
                         };
             query = query.Where(t => t.qty > 0).Where(queries.AsExpression<LocationStockManagementViewModel>());
             int totals = await query.CountAsync();
@@ -420,43 +442,52 @@ namespace ModernWMS.WMS.Services
             var dispatch_group_datas = from dp in dispatch_DBSet.AsNoTracking()
                                        join dpp in dispatchpick_DBSet.AsNoTracking() on dp.id equals dpp.dispatchlist_id
                                        where dp.dispatch_status > 1 && dp.dispatch_status < 6
-                                       group dpp by new { dpp.sku_id, dpp.goods_location_id, dpp.goods_owner_id, dpp.series_number } into dg
+                                       group dpp by new { dpp.sku_id, dpp.goods_location_id, dpp.goods_owner_id, dpp.series_number, dpp.expiry_date, dpp.price, dpp.putaway_date } into dg
                                        select new
                                        {
                                            goods_owner_id = dg.Key.goods_owner_id,
                                            sku_id = dg.Key.sku_id,
                                            goods_location_id = dg.Key.goods_location_id,
                                            series_number = dg.Key.series_number,
+                                           dg.Key.expiry_date,
+                                           dg.Key.price,
+                                           dg.Key.putaway_date,
                                            qty_locked = dg.Sum(t => t.pick_qty)
                                        };
             var process_locked_group_datas = from pd in processdetail_DBSet
                                              where pd.is_update_stock == false && pd.is_source == true
-                                             group pd by new { pd.sku_id, pd.goods_location_id, pd.goods_owner_id, pd.series_number } into pdg
+                                             group pd by new { pd.sku_id, pd.goods_location_id, pd.goods_owner_id, pd.series_number, pd.expiry_date, pd.price, pd.putaway_date } into pdg
                                              select new
                                              {
                                                  goods_owner_id = pdg.Key.goods_owner_id,
                                                  sku_id = pdg.Key.sku_id,
                                                  goods_location_id = pdg.Key.goods_location_id,
                                                  series_number = pdg.Key.series_number,
+                                                 pdg.Key.expiry_date,
+                                                 pdg.Key.price,
+                                                 pdg.Key.putaway_date,
                                                  qty_locked = pdg.Sum(t => t.qty)
                                              };
             var move_locked_group_datas = from m in move_DBSet.AsNoTracking()
                                           where m.move_status == 0
-                                          group m by new { m.sku_id, m.orig_goods_location_id, m.goods_owner_id, m.series_number } into mg
+                                          group m by new { m.sku_id, m.orig_goods_location_id, m.goods_owner_id, m.series_number, m.expiry_date, m.price, m.putaway_date } into mg
                                           select new
                                           {
                                               goods_owner_id = mg.Key.goods_owner_id,
                                               sku_id = mg.Key.sku_id,
                                               goods_location_id = mg.Key.orig_goods_location_id,
                                               series_number = mg.Key.series_number,
+                                              mg.Key.expiry_date,
+                                              mg.Key.price,
+                                              mg.Key.putaway_date,
                                               qty_locked = mg.Sum(t => t.qty)
                                           };
             var query = from sg in DbSet.AsNoTracking()
-                        join dp in dispatch_group_datas on new { sg.sku_id, sg.goods_location_id, sg.goods_owner_id, sg.series_number } equals new { dp.sku_id, dp.goods_location_id, dp.goods_owner_id, dp.series_number } into dp_left
+                        join dp in dispatch_group_datas on new { sg.sku_id, sg.goods_location_id, sg.goods_owner_id, sg.series_number, sg.expiry_date, sg.price, sg.putaway_date } equals new { dp.sku_id, dp.goods_location_id, dp.goods_owner_id, dp.series_number, dp.expiry_date, dp.price, dp.putaway_date } into dp_left
                         from dp in dp_left.DefaultIfEmpty()
-                        join pl in process_locked_group_datas on new { sg.sku_id, sg.goods_location_id, sg.goods_owner_id, sg.series_number } equals new { pl.sku_id, pl.goods_location_id, pl.goods_owner_id, pl.series_number } into pl_left
+                        join pl in process_locked_group_datas on new { sg.sku_id, sg.goods_location_id, sg.goods_owner_id, sg.series_number, sg.expiry_date, sg.price, sg.putaway_date } equals new { pl.sku_id, pl.goods_location_id, pl.goods_owner_id, pl.series_number, pl.expiry_date, pl.price, pl.putaway_date } into pl_left
                         from pl in pl_left.DefaultIfEmpty()
-                        join m in move_locked_group_datas on new { sg.sku_id, sg.goods_location_id, sg.goods_owner_id, sg.series_number } equals new { m.sku_id, m.goods_location_id, m.goods_owner_id, m.series_number } into m_left
+                        join m in move_locked_group_datas on new { sg.sku_id, sg.goods_location_id, sg.goods_owner_id, sg.series_number, sg.expiry_date, sg.price, sg.putaway_date } equals new { m.sku_id, m.goods_location_id, m.goods_owner_id, m.series_number, m.expiry_date, m.price, m.putaway_date } into m_left
                         from m in m_left.DefaultIfEmpty()
                         join sku in sku_DBSet on sg.sku_id equals sku.id
                         join spu in spu_DBSet on sku.spu_id equals spu.id
@@ -481,6 +512,9 @@ namespace ModernWMS.WMS.Services
                             sg.id,
                             sku.unit,
                             sg.series_number,
+                            sg.expiry_date,
+                            sg.price,
+                            sg.putaway_date,
                             sg.tenant_id
                         } into g
                         select new StockViewModel
@@ -497,6 +531,9 @@ namespace ModernWMS.WMS.Services
                             location_name = g.Key.location_name,
                             warehouse_name = g.Key.warehouse_name,
                             series_number = g.Key.series_number,
+                            expiry_date = g.Key.expiry_date,
+                            price = g.Key.price,
+                            putaway_date = g.Key.putaway_date,
                             is_freeze = g.Key.is_freeze,
                             id = g.Key.id,
                             tenant_id = g.Key.tenant_id,
@@ -595,7 +632,8 @@ namespace ModernWMS.WMS.Services
                                     && (input.warehouse_id == 0 || gl.warehouse_id == input.warehouse_id)
                                     && (input.spu_name == "" || spu.spu_name.Contains(input.spu_name))
                                     && (input.location_name == "" || gl.location_name.Contains(input.location_name))
-                                    group new { stock, gw } by new { stock.sku_id, stock.goods_location_id, stock.goods_owner_id, gw.goods_owner_name, stock.series_number } into sg
+                                    && (input.series_number == "" || stock.series_number == input.series_number)
+                                    group new { stock, gw } by new { stock.sku_id, stock.goods_location_id, stock.goods_owner_id, gw.goods_owner_name, stock.series_number, stock.expiry_date, stock.price, stock.putaway_date } into sg
                                     select new
                                     {
                                         sku_id = sg.Key.sku_id,
@@ -603,6 +641,9 @@ namespace ModernWMS.WMS.Services
                                         goods_owner_id = sg.Key.goods_owner_id,
                                         goods_owner_name = sg.Key.goods_owner_name,
                                         series_number = sg.Key.series_number,
+                                        sg.Key.expiry_date,
+                                        sg.Key.price,
+                                        sg.Key.putaway_date,
                                         qty_frozen = sg.Where(t => t.stock.is_freeze == true).Sum(e => e.stock.qty),
                                         qty = sg.Sum(t => t.stock.qty)
                                     };
@@ -610,44 +651,53 @@ namespace ModernWMS.WMS.Services
             var dispatch_group_datas = from dp in dispatch_DBSet.AsNoTracking()
                                        join dpp in dispatchpick_DBSet.AsNoTracking() on dp.id equals dpp.dispatchlist_id
                                        where dp.dispatch_status > 1 && dp.dispatch_status < 6
-                                       group dpp by new { dpp.sku_id, dpp.goods_location_id, dpp.goods_owner_id, dpp.series_number } into dg
+                                       group dpp by new { dpp.sku_id, dpp.goods_location_id, dpp.goods_owner_id, dpp.series_number, dpp.expiry_date, dpp.price, dpp.putaway_date } into dg
                                        select new
                                        {
                                            sku_id = dg.Key.sku_id,
                                            goods_location_id = dg.Key.goods_location_id,
                                            goods_owner_id = dg.Key.goods_owner_id,
                                            series_number = dg.Key.series_number,
+                                           dg.Key.expiry_date,
+                                           dg.Key.price,
+                                           dg.Key.putaway_date,
                                            qty_locked = dg.Sum(t => t.pick_qty)
                                        };
             var process_locked_group_datas = from pd in processdetail_DBSet
                                              where pd.is_update_stock == false && pd.is_source == true
-                                             group pd by new { pd.sku_id, pd.goods_location_id, pd.goods_owner_id, pd.series_number } into pdg
+                                             group pd by new { pd.sku_id, pd.goods_location_id, pd.goods_owner_id, pd.series_number, pd.expiry_date, pd.price, pd.putaway_date } into pdg
                                              select new
                                              {
                                                  sku_id = pdg.Key.sku_id,
                                                  goods_location_id = pdg.Key.goods_location_id,
                                                  goods_owner_id = pdg.Key.goods_owner_id,
                                                  series_number = pdg.Key.series_number,
+                                                 pdg.Key.expiry_date,
+                                                 pdg.Key.price,
+                                                 pdg.Key.putaway_date,
                                                  qty_locked = pdg.Sum(t => t.qty)
                                              };
 
             var move_locked_group_datas = from m in move_DBSet.AsNoTracking()
                                           where m.move_status == 0
-                                          group m by new { m.sku_id, m.orig_goods_location_id, m.goods_owner_id, m.series_number } into mg
+                                          group m by new { m.sku_id, m.orig_goods_location_id, m.goods_owner_id, m.series_number, m.expiry_date, m.price, m.putaway_date } into mg
                                           select new
                                           {
                                               sku_id = mg.Key.sku_id,
                                               goods_location_id = mg.Key.orig_goods_location_id,
                                               goods_owner_id = mg.Key.goods_owner_id,
                                               series_number = mg.Key.series_number,
+                                              mg.Key.expiry_date,
+                                              mg.Key.price,
+                                              mg.Key.putaway_date,
                                               qty_locked = mg.Sum(t => t.qty)
                                           };
             var query = from sg in stock_group_datas
-                        join dp in dispatch_group_datas on new { sg.sku_id, sg.goods_location_id, sg.goods_owner_id, sg.series_number } equals new { dp.sku_id, dp.goods_location_id, dp.goods_owner_id, dp.series_number } into dp_left
+                        join dp in dispatch_group_datas on new { sg.sku_id, sg.goods_location_id, sg.goods_owner_id, sg.series_number, sg.expiry_date, sg.price, sg.putaway_date } equals new { dp.sku_id, dp.goods_location_id, dp.goods_owner_id, dp.series_number, dp.expiry_date, dp.price, dp.putaway_date } into dp_left
                         from dp in dp_left.DefaultIfEmpty()
-                        join pl in process_locked_group_datas on new { sg.sku_id, sg.goods_location_id, sg.goods_owner_id, sg.series_number } equals new { pl.sku_id, pl.goods_location_id, pl.goods_owner_id, pl.series_number } into pl_left
+                        join pl in process_locked_group_datas on new { sg.sku_id, sg.goods_location_id, sg.goods_owner_id, sg.series_number, sg.expiry_date, sg.price, sg.putaway_date } equals new { pl.sku_id, pl.goods_location_id, pl.goods_owner_id, pl.series_number, pl.expiry_date, pl.price, pl.putaway_date } into pl_left
                         from pl in pl_left.DefaultIfEmpty()
-                        join m in move_locked_group_datas on new { sg.sku_id, sg.goods_location_id, sg.goods_owner_id, sg.series_number } equals new { m.sku_id, m.goods_location_id, m.goods_owner_id, m.series_number } into m_left
+                        join m in move_locked_group_datas on new { sg.sku_id, sg.goods_location_id, sg.goods_owner_id, sg.series_number, sg.expiry_date, sg.price, sg.putaway_date } equals new { m.sku_id, m.goods_location_id, m.goods_owner_id, m.series_number, m.expiry_date, m.price, m.putaway_date } into m_left
                         from m in m_left.DefaultIfEmpty()
                         join sku in sku_DBSet on sg.sku_id equals sku.id
                         join spu in spu_DBSet on sku.spu_id equals spu.id
@@ -667,6 +717,9 @@ namespace ModernWMS.WMS.Services
                             location_name = gl.location_name,
                             warehouse_name = gl.warehouse_name,
                             series_number = sg.series_number,
+                            expiry_date = sg.expiry_date,
+                            price = sg.price,
+                            putaway_date = sg.putaway_date,
                             goods_location_id = sg.goods_location_id
                         };
 
@@ -713,12 +766,15 @@ namespace ModernWMS.WMS.Services
                         {
                             dp.dispatch_no,
                             wh.warehouse_name,
-                            location.location_name,
+                            location_name = location.location_name,
                             spu.spu_name,
                             spu.spu_code,
                             sku.sku_name,
                             sku.sku_code,
                             dpp.series_number,
+                            dpp.price,
+                            dpp.expiry_date,
+                            dpp.putaway_date,
                             dp.customer_name,
                             dp.create_time,
                             dpp.goods_owner_id,
@@ -735,6 +791,9 @@ namespace ModernWMS.WMS.Services
                             sku_name = dg.Key.sku_name,
                             sku_code = dg.Key.sku_code,
                             series_number = dg.Key.series_number,
+                            expiry_date = dg.Key.expiry_date,
+                            price = dg.Key.price,
+                            putaway_date = dg.Key.putaway_date,
                             customer_name = dg.Key.customer_name,
                             delivery_date = dg.Key.create_time,
                             goods_owner_name = dg.Key.goods_owner_name,
@@ -745,6 +804,88 @@ namespace ModernWMS.WMS.Services
             var list = await query.OrderByDescending(t => t.delivery_date)
                                               .Skip((input.pageIndex - 1) * input.pageSize)
                                               .Take(input.pageSize).ToListAsync();
+            return (list, totals);
+        }
+
+        /// <summary>
+        /// stock age page search
+        /// </summary>
+        /// <param name="pageSearch">args</param>
+        /// <param name="currentUser">currentUser</param>
+        /// <returns></returns>
+        public async Task<(List<StockAgeViewModel> data, int totals)> StockAgePageAsync(StockAgeSearchViewModel input, CurrentUser currentUser)
+        {
+            var database_config = Configuration.GetSection("Database")["db"].ToUpper();
+            var DbSet = _dBContext.GetDbSet<StockEntity>().Where(t => t.tenant_id.Equals(currentUser.tenant_id));
+            var sku_DBSet = _dBContext.GetDbSet<SkuEntity>().AsNoTracking();
+            var spu_DBSet = _dBContext.GetDbSet<SpuEntity>().AsNoTracking();
+            var location_DBSet = _dBContext.GetDbSet<GoodslocationEntity>().AsNoTracking();
+            if (input.expiry_date_from > UtilConvert.MinDate)
+            {
+                DbSet = DbSet.Where(t => t.expiry_date >= input.expiry_date_from);
+            }
+            if (input.expiry_date_to > UtilConvert.MinDate)
+            {
+                DbSet = DbSet.Where(t => t.expiry_date <= input.expiry_date_to);
+            }
+            var stock_group_datas = from stock in DbSet.AsNoTracking()
+                                    join gw in _dBContext.GetDbSet<GoodsownerEntity>().AsNoTracking() on stock.goods_owner_id equals gw.id into gw_left
+                                    from gw in gw_left.DefaultIfEmpty()
+                                    where stock.tenant_id == currentUser.tenant_id
+                                    group new { stock, gw } by new { stock.sku_id, stock.goods_location_id, stock.goods_owner_id, stock.series_number, gw.goods_owner_name, stock.expiry_date, stock.price, stock.putaway_date } into sg
+                                    select new
+                                    {
+                                        sku_id = sg.Key.sku_id,
+                                        goods_location_id = sg.Key.goods_location_id,
+                                        goods_owner_id = sg.Key.goods_owner_id,
+                                        goods_owner_name = sg.Key.goods_owner_name,
+                                        series_number = sg.Key.series_number,
+                                        sg.Key.expiry_date,
+                                        sg.Key.price,
+                                        sg.Key.putaway_date,
+                                        qty_frozen = sg.Where(t => t.stock.is_freeze == true).Sum(e => e.stock.qty),
+                                        qty = sg.Sum(t => t.stock.qty)
+                                    };
+            var today = DateTime.Today;
+            var query = from sg in stock_group_datas
+                        join sku in sku_DBSet on sg.sku_id equals sku.id
+                        join spu in spu_DBSet on sku.spu_id equals spu.id
+                        join gl in location_DBSet on sg.goods_location_id equals gl.id
+                        where spu.spu_name.Contains(input.spu_name) && sku.sku_name.Contains(input.sku_name)
+                        && sku.sku_code.Contains(input.sku_code) && spu.spu_code.Contains(input.spu_code)
+                        && gl.warehouse_name.Contains(input.warehouse_name)
+                        select new StockAgeViewModel
+                        {
+                            sku_id = sg.sku_id,
+                            goods_owner_name = sg.goods_owner_name,
+                            spu_name = spu.spu_name,
+                            spu_code = spu.spu_code,
+                            sku_code = sku.sku_code,
+                            sku_name = sku.sku_name,
+                            qty = sg.qty,
+                            location_name = gl.location_name,
+                            warehouse_name = gl.warehouse_name,
+                            series_number = sg.series_number,
+                            expiry_date = sg.expiry_date,
+                            price = sg.price,
+                            putaway_date = sg.putaway_date,
+                            stock_age = sg.putaway_date == UtilConvert.MinDate ? 0 : database_config == "MYSQL" ? Microsoft.EntityFrameworkCore.MySqlDbFunctionsExtensions.DateDiffDay(EF.Functions, sg.putaway_date.Date, today) : Microsoft.EntityFrameworkCore.SqlServerDbFunctionsExtensions.DateDiffDay(EF.Functions, sg.putaway_date.Date, today),
+                        };
+
+            if (input.stock_age_from > 0)
+            {
+                query = query.Where(t => t.stock_age >= input.stock_age_from);
+            }
+            if (input.stock_age_to > 0)
+            {
+                query = query.Where(t => t.stock_age <= input.stock_age_to);
+            }
+            query = query.Where(t => t.qty > 0);
+            int totals = await query.CountAsync();
+            var list = await query.OrderBy(t => t.sku_code)
+                       .Skip((input.pageIndex - 1) * input.pageSize)
+                       .Take(input.pageSize)
+                       .ToListAsync();
             return (list, totals);
         }
 

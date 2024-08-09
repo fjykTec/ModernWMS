@@ -2,15 +2,18 @@
  * date：2022-12-22
  * developer：AMo
  */
+
 using Mapster;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
+using ModernWMS.Core;
 using ModernWMS.Core.DBContext;
 using ModernWMS.Core.DynamicSearch;
 using ModernWMS.Core.JWT;
 using ModernWMS.Core.Models;
 using ModernWMS.Core.Services;
+using ModernWMS.Core.Utility;
 using ModernWMS.WMS.Entities.Models;
 using ModernWMS.WMS.Entities.ViewModels;
 using ModernWMS.WMS.IServices;
@@ -25,6 +28,7 @@ namespace ModernWMS.WMS.Services
     public class AsnService : BaseService<AsnEntity>, IAsnService
     {
         #region Args
+
         /// <summary>
         /// The DBContext
         /// </summary>
@@ -34,9 +38,16 @@ namespace ModernWMS.WMS.Services
         /// Localizer Service
         /// </summary>
         private readonly IStringLocalizer<Core.MultiLanguage> _stringLocalizer;
-        #endregion
+
+        /// <summary>
+        /// functions
+        /// </summary>
+        private readonly FunctionHelper _functionHelper;
+
+        #endregion Args
 
         #region constructor
+
         /// <summary>
         ///Asn  constructor
         /// </summary>
@@ -44,15 +55,19 @@ namespace ModernWMS.WMS.Services
         /// <param name="stringLocalizer">Localizer</param>
         public AsnService(
             SqlDBContext dBContext
-          , IStringLocalizer<Core.MultiLanguage> stringLocalizer
+            , IStringLocalizer<Core.MultiLanguage> stringLocalizer
+            , FunctionHelper functionHelper
             )
         {
             this._dBContext = dBContext;
             this._stringLocalizer = stringLocalizer;
+            this._functionHelper = functionHelper;
         }
-        #endregion
+
+        #endregion constructor
 
         #region Api
+
         /// <summary>
         /// page search, sqlTitle input asn_status:0 ~ 4
         /// </summary>
@@ -69,7 +84,7 @@ namespace ModernWMS.WMS.Services
                     queries.Add(s);
                 });
             }
-            Byte asn_status = 255; 
+            Byte asn_status = 255;
             var Asns = _dBContext.GetDbSet<AsnEntity>().AsNoTracking();
             if (pageSearch.sqlTitle.ToLower().Contains("asn_status:alltodo"))
             {
@@ -77,12 +92,12 @@ namespace ModernWMS.WMS.Services
             }
             else if (pageSearch.sqlTitle.ToLower().Contains("asn_status"))
             {
-                asn_status = Convert.ToByte(pageSearch.sqlTitle.Trim().ToLower().Replace("asn_status","").Replace("：", "").Replace(":", "").Replace("=", ""));
+                asn_status = Convert.ToByte(pageSearch.sqlTitle.Trim().ToLower().Replace("asn_status", "").Replace("：", "").Replace(":", "").Replace("=", ""));
                 //asn_status = asn_status.Equals(4) ? (Byte)255 : asn_status;
                 Asns = Asns.Where(t => t.asn_status == asn_status);
             }
             var Spus = _dBContext.GetDbSet<SpuEntity>().AsNoTracking();
-            var Skus = _dBContext.GetDbSet<SkuEntity>().AsNoTracking();           
+            var Skus = _dBContext.GetDbSet<SkuEntity>().AsNoTracking();
             var Asnmasters = _dBContext.GetDbSet<AsnmasterEntity>().AsNoTracking();
 
             var query = from m in Asns
@@ -108,6 +123,7 @@ namespace ModernWMS.WMS.Services
                             length_unit = p.length_unit,
                             volume_unit = p.volume_unit,
                             weight_unit = p.weight_unit,
+                            price = m.price,
                             asn_qty = m.asn_qty,
                             actual_qty = m.actual_qty,
                             arrival_time = m.arrival_time,
@@ -127,7 +143,8 @@ namespace ModernWMS.WMS.Services
                             creator = m.creator,
                             create_time = m.create_time,
                             last_update_time = m.last_update_time,
-                            is_valid = m.is_valid
+                            is_valid = m.is_valid, 
+                            expiry_date = m.expiry_date
                         };
             query = query.Where(queries.AsExpression<AsnViewModel>());
             int totals = await query.CountAsync();
@@ -170,6 +187,7 @@ namespace ModernWMS.WMS.Services
                             length_unit = p.length_unit,
                             volume_unit = p.volume_unit,
                             weight_unit = p.weight_unit,
+                            price = m.price,
                             asn_qty = m.asn_qty,
                             actual_qty = m.actual_qty,
                             arrival_time = m.arrival_time,
@@ -189,11 +207,13 @@ namespace ModernWMS.WMS.Services
                             creator = m.creator,
                             create_time = m.create_time,
                             last_update_time = m.last_update_time,
-                            is_valid = m.is_valid
+                            is_valid = m.is_valid,
+                            expiry_date = m.expiry_date
                         };
             var data = await query.FirstOrDefaultAsync(t => t.id.Equals(id));
             return data ?? new AsnViewModel();
         }
+
         /// <summary>
         /// add a new record
         /// </summary>
@@ -205,7 +225,7 @@ namespace ModernWMS.WMS.Services
             var DbSet = _dBContext.GetDbSet<AsnEntity>();
             var entity = viewModel.Adapt<AsnEntity>();
             entity.id = 0;
-            entity.asn_no = await GetOrderCode(currentUser);
+            entity.asn_no = await _functionHelper.GetFormNoAsync("Asn");
             entity.creator = currentUser.user_name;
             entity.create_time = DateTime.Now;
             entity.last_update_time = DateTime.Now;
@@ -263,6 +283,7 @@ namespace ModernWMS.WMS.Services
 
             return code;
         }
+
         /// <summary>
         /// update a record
         /// </summary>
@@ -280,6 +301,7 @@ namespace ModernWMS.WMS.Services
             entity.asn_no = viewModel.asn_no;
             entity.spu_id = viewModel.spu_id;
             entity.sku_id = viewModel.sku_id;
+            entity.price = viewModel.price;
             entity.asn_qty = viewModel.asn_qty;
             entity.weight = viewModel.weight;
             entity.volume = viewModel.volume;
@@ -299,6 +321,7 @@ namespace ModernWMS.WMS.Services
                 return (false, _stringLocalizer["save_failed"]);
             }
         }
+
         /// <summary>
         /// delete a record
         /// </summary>
@@ -361,9 +384,11 @@ namespace ModernWMS.WMS.Services
                 return (false, _stringLocalizer["save_failed"]);
             }
         }
-        #endregion
+
+        #endregion Api
 
         #region Flow Api
+
         /// <summary>
         /// Confirm Delivery
         /// change the asn_status from 0 to 1
@@ -375,6 +400,7 @@ namespace ModernWMS.WMS.Services
             var idList = viewModels.Where(t => t.id > 0).Select(t => t.id).ToList();
             var Asns = _dBContext.GetDbSet<AsnEntity>();
             var entities = await Asns.Where(t => idList.Contains(t.id)).ToListAsync();
+            var last_update_time = DateTime.Now;
             if (!entities.Any())
             {
                 return (false, "[202]" + _stringLocalizer["not_exists_entity"]);
@@ -383,13 +409,25 @@ namespace ModernWMS.WMS.Services
             {
                 return (false, "[202]" + $"{_stringLocalizer["ASN_Status_Is_Not_Pre_Delivery"]}");
             }
+            // get asnmaster data
+            var asnmaster_id = entities.Select(t => t.asnmaster_id).FirstOrDefault();
+            var Asnmaster = _dBContext.GetDbSet<AsnmasterEntity>();
+            var asnmasterentity = await Asnmaster.FirstOrDefaultAsync(t => t.id.Equals(asnmaster_id));
+            if (asnmasterentity == null)
+            {
+                return (false, "[202]" + _stringLocalizer["not_exists_entity"]);
+            }
+            // update asnmaster last_update_time
+            asnmasterentity.last_update_time = last_update_time;
+
             entities.ForEach(t =>
             {
-                 var vm = viewModels.FirstOrDefault(t => t.id == t.id);
+                var vm = viewModels.FirstOrDefault(t => t.id == t.id);
                 if (vm != null)
                 {
                     t.asn_status = 1;
                     t.arrival_time = vm.arrival_time;
+                    t.last_update_time = last_update_time;
                 }
             });
             var qty = await _dBContext.SaveChangesAsync();
@@ -402,6 +440,7 @@ namespace ModernWMS.WMS.Services
                 return (false, _stringLocalizer["confirm_failed"]);
             }
         }
+
         /// <summary>
         /// Cancel confirm, change asn_status 1 to 0
         /// </summary>
@@ -411,6 +450,7 @@ namespace ModernWMS.WMS.Services
         {
             var Asns = _dBContext.GetDbSet<AsnEntity>();
             var entities = await Asns.Where(t => idList.Contains(t.id)).ToListAsync();
+            var last_update_time = DateTime.Now;
             if (!entities.Any())
             {
                 return (false, "[202]" + _stringLocalizer["not_exists_entity"]);
@@ -419,10 +459,22 @@ namespace ModernWMS.WMS.Services
             {
                 return (false, "[202]" + $"{_stringLocalizer["ASN_Status_Is_Not_Pre_Delivery"]}");
             }
+            // get asnmaster data
+            var asnmaster_id = entities.Select(t => t.asnmaster_id).FirstOrDefault();
+            var Asnmaster = _dBContext.GetDbSet<AsnmasterEntity>();
+            var asnmasterentity = await Asnmaster.FirstOrDefaultAsync(t => t.id.Equals(asnmaster_id));
+            if (asnmasterentity == null)
+            {
+                return (false, "[202]" + _stringLocalizer["not_exists_entity"]);
+            }
+            // update asnmaster last_update_time
+            asnmasterentity.last_update_time = last_update_time;
+
             entities.ForEach(e =>
             {
                 e.asn_status = 0;
                 e.arrival_time = Core.Utility.UtilConvert.MinDate;
+                e.last_update_time = last_update_time;
             });
             var qty = await _dBContext.SaveChangesAsync();
             if (qty > 0)
@@ -501,7 +553,7 @@ namespace ModernWMS.WMS.Services
             {
                 e.asn_status = 1;
                 e.unload_time = Core.Utility.UtilConvert.MinDate;
-                e.unload_person_id =0;
+                e.unload_person_id = 0;
                 e.unload_person = string.Empty;
                 e.last_update_time = DateTime.Now;
             });
@@ -515,6 +567,7 @@ namespace ModernWMS.WMS.Services
                 return (false, _stringLocalizer["save_failed"]);
             }
         }
+
         /// <summary>
         /// sorting， add a new asnsort record and update asn sorted_qty
         /// </summary>
@@ -536,26 +589,55 @@ namespace ModernWMS.WMS.Services
             {
                 return (false, "[202]" + $"{_stringLocalizer["ASN_Status_Is_Not_Pre_Sort"]}");
             }
-            var sortEntities = viewModels.Where(v => entities.Select(e => e.id).ToList().Contains(v.asn_id))
-                .Select(v => new AsnsortEntity
+            var models = viewModels.Where(v => entities.Select(e => e.id).ToList().Contains(v.asn_id)).ToList();
+            List<AsnsortEntity> sortEntities = new List<AsnsortEntity>();
+            foreach (var v in models)
+            {
+                if (v.sorted_qty > 1 && v.is_auto_num)
                 {
-                    id = 0,
-                    asn_id = v.asn_id,
-                    sorted_qty = v.sorted_qty,
-                    series_number = v.series_number,
-                    create_time = DateTime.Now,
-                    creator = currentUser.user_name,
-                    is_valid = true,
-                    last_update_time = DateTime.Now,
-                    tenant_id = currentUser.tenant_id
-                }).ToList();
+                    List<string> snlist = await _functionHelper.GetFormNoListAsync("Asnsort", v.sorted_qty, currentUser.tenant_id, "sn");
+                    for (int i = 0; i < v.sorted_qty; i++)
+                    {
+                        sortEntities.Add(new AsnsortEntity
+                        {
+                            id = 0,
+                            asn_id = v.asn_id,
+                            sorted_qty = 1,
+                            series_number = snlist[i],
+                            create_time = DateTime.Now,
+                            creator = currentUser.user_name,
+                            is_valid = true,
+                            last_update_time = DateTime.Now,
+                            tenant_id = currentUser.tenant_id
+                        });
+                    }
+                }
+                else
+                {
+                    string sn = await _functionHelper.GetFormNoAsync("Asnsort", "sn");
+                    sortEntities.Add(new AsnsortEntity
+                    {
+                        id = 0,
+                        asn_id = v.asn_id,
+                        sorted_qty = v.sorted_qty,
+                        series_number = sn,
+                        create_time = DateTime.Now,
+                        creator = currentUser.user_name,
+                        is_valid = true,
+                        last_update_time = DateTime.Now,
+                        tenant_id = currentUser.tenant_id
+                    });
+                }
+            }
             await Asnsorts.AddRangeAsync(sortEntities);
 
             entities.ForEach(e =>
             {
                 int sum_sorted_qty = viewModels.Where(t => t.asn_id.Equals(e.id)).Sum(v => v.sorted_qty);
+                var expiry_date = viewModels.Where(t => t.asn_id.Equals(e.id)).Select(v => v.expiry_date).FirstOrDefault();
                 e.sorted_qty += sum_sorted_qty;
                 e.last_update_time = DateTime.Now;
+                e.expiry_date = expiry_date;
             });
             var qty = await _dBContext.SaveChangesAsync();
             if (qty > 0)
@@ -567,24 +649,44 @@ namespace ModernWMS.WMS.Services
                 return (false, _stringLocalizer["save_failed"]);
             }
         }
+
         /// <summary>
         /// get asnsorts list by asn_id
         /// </summary>
         /// <param name="asn_id">asn id</param>
         /// <returns></returns>
-        public async Task<List<AsnsortEntity>> GetAsnsortsAsync(int asn_id)
+        public async Task<List<AsnsortViewModel>> GetAsnsortsAsync(int asn_id)
         {
             var Asnsorts = _dBContext.GetDbSet<AsnsortEntity>();
-            var sortsEntities = await Asnsorts.AsNoTracking().Where(t => t.asn_id == asn_id).ToListAsync();
-            if (sortsEntities.Any())
+            var asns = _dBContext.Set<AsnEntity>().AsNoTracking();
+
+            var data = await (from m in asns
+                              join d in Asnsorts on m.id equals d.asn_id
+                              where m.id == asn_id
+                              select new AsnsortViewModel
+                              {
+                                  id = d.id,
+                                  asn_id = asn_id,
+                                  sorted_qty = d.sorted_qty,
+                                  series_number = d.series_number,
+                                  putaway_qty = d.putaway_qty,
+                                  expiry_date = m.expiry_date,
+                                  creator = d.creator,
+                                  create_time = d.create_time,
+                                  last_update_time = d.last_update_time,
+                                  is_valid = d.is_valid,
+                                  tenant_id = d.tenant_id
+                              }).ToListAsync();
+            if (data != null && data.Count > 0)
             {
-                return sortsEntities;
+                return data;
             }
             else
             {
-                return new List<AsnsortEntity>();
+                return new List<AsnsortViewModel>();
             }
         }
+
         /// <summary>
         /// update or delete asnsorts data
         /// </summary>
@@ -606,14 +708,12 @@ namespace ModernWMS.WMS.Services
                 {
                     t.last_update_time = DateTime.Now;
                     t.is_valid = true;
-                    t.create_time = t.create_time.Year < 1985 ? DateTime.Now : t.create_time;
-                    t.creator = string.IsNullOrEmpty(t.creator) ? user.user_name : t.creator;
                 });
                 Asnsorts.UpdateRange(updateEntities);
             }
 
             var qty = await _dBContext.SaveChangesAsync();
-            if (qty > 0)
+            if (qty >= 0)
             {
                 var Asns = _dBContext.GetDbSet<AsnEntity>();
                 var asnids = entities.Select(t => t.asn_id).Distinct().ToList();
@@ -635,6 +735,10 @@ namespace ModernWMS.WMS.Services
                         if (s != null)
                         {
                             e.sorted_qty = s.sorted_qty;
+                        }
+                        else
+                        {
+                            e.sorted_qty = 0;
                         }
                     });
                     await _dBContext.SaveChangesAsync();
@@ -806,6 +910,8 @@ namespace ModernWMS.WMS.Services
                 entity.asn_status = 4;
             }
             entity.last_update_time = DateTime.Now;
+            // expiry_date
+            var expiry_date = entity.expiry_date;
 
             // 获取已上架数小于分拣数的分拣记录
             var sortEntities = await Asnsorts.Where(t => t.asn_id == viewModels[0].asn_id && t.sorted_qty > t.putaway_qty).ToListAsync();
@@ -841,10 +947,15 @@ namespace ModernWMS.WMS.Services
                 {
                     entity.damage_qty += viewModel.putaway_qty;
                 }
+                DateTime putaway_date = DateTime.Now.ToString("yyyy-MM-dd").ObjToDate();
+                // 2024年3月14日 09:40:25 增加单价
                 var stockEntity = await Stocks.FirstOrDefaultAsync(t => t.sku_id.Equals(entity.sku_id)
                                                                               && t.goods_location_id.Equals(viewModel.goods_location_id)
                                                                               && t.goods_owner_id.Equals(viewModel.goods_owner_id)
                                                                               && t.series_number.Equals(viewModel.series_number)
+                                                                              && t.expiry_date.Equals(expiry_date)
+                                                                              && t.price.Equals(entity.price)
+                                                                              && t.putaway_date.Equals(putaway_date)
                                                                               );
                 if (stockEntity == null)
                 {
@@ -858,6 +969,9 @@ namespace ModernWMS.WMS.Services
                         is_freeze = false,
                         last_update_time = DateTime.Now,
                         tenant_id = currentUser.tenant_id,
+                        expiry_date = expiry_date,
+                        price = entity.price,
+                        putaway_date = putaway_date,
                         id = 0
                     };
                     await Stocks.AddAsync(stockEntity);
@@ -942,9 +1056,11 @@ namespace ModernWMS.WMS.Services
             }
             */
         }
-        #endregion
 
-        #region Arrival list 
+        #endregion Flow Api
+
+        #region Arrival list
+
         /// <summary>
         /// Arrival list
         /// </summary>
@@ -1013,17 +1129,21 @@ namespace ModernWMS.WMS.Services
                                               volume = a.volume,
                                               supplier_id = a.supplier_id,
                                               supplier_name = a.supplier_name,
-                                              is_valid = a.is_valid
+                                              is_valid = a.is_valid,
+                                              expiry_date = a.expiry_date,
+                                              price = a.price,
+                                              sorted_qty = a.sorted_qty,
                                           }).ToList()
                         };
             query = query.Where(queries.AsExpression<AsnmasterBothViewModel>());
             int totals = await query.CountAsync();
-            var list = await query.OrderByDescending(t => t.create_time)
+            var list = await query.OrderByDescending(t => t.last_update_time)
                        .Skip((pageSearch.pageIndex - 1) * pageSearch.pageSize)
                        .Take(pageSearch.pageSize)
                        .ToListAsync();
             return (list, totals);
         }
+
         /// <summary>
         /// get Arrival list
         /// </summary>
@@ -1078,7 +1198,10 @@ namespace ModernWMS.WMS.Services
                                               volume = a.volume,
                                               supplier_id = a.supplier_id,
                                               supplier_name = a.supplier_name,
-                                              is_valid = a.is_valid
+                                              is_valid = a.is_valid,
+                                              sorted_qty = a.sorted_qty,
+                                              expiry_date = a.expiry_date,
+                                              price = a.price
                                           }).ToList()
                         };
             var data = await query.FirstOrDefaultAsync();
@@ -1095,7 +1218,7 @@ namespace ModernWMS.WMS.Services
         {
             var Asns = _dBContext.GetDbSet<AsnEntity>();
             var Asnmasters = _dBContext.GetDbSet<AsnmasterEntity>();
-            string asn_no = await GetOrderCode(currentUser);
+            string asn_no = await _functionHelper.GetFormNoAsync("Asnmaster");
             var entity = new AsnmasterEntity
             {
                 id = 0,
@@ -1131,7 +1254,8 @@ namespace ModernWMS.WMS.Services
                     create_time = DateTime.Now,
                     last_update_time = DateTime.Now,
                     is_valid = true,
-                    tenant_id = currentUser.tenant_id
+                    tenant_id = currentUser.tenant_id,
+                    price = d.price
                 }).ToList()
             };
             await Asnmasters.AddAsync(entity);
@@ -1145,6 +1269,7 @@ namespace ModernWMS.WMS.Services
                 return (0, _stringLocalizer["save_failed"]);
             }
         }
+
         /// <summary>
         /// add a new record
         /// </summary>
@@ -1188,6 +1313,7 @@ namespace ModernWMS.WMS.Services
                         d.goods_owner_id = viewModel.goods_owner_id;
                         d.goods_owner_name = viewModel.goods_owner_name;
                         d.last_update_time = DateTime.Now;
+                        d.price = vm.price;
                     }
                 });
             }
@@ -1214,7 +1340,8 @@ namespace ModernWMS.WMS.Services
                         create_time = DateTime.Now,
                         last_update_time = DateTime.Now,
                         is_valid = true,
-                        tenant_id = currentUser.tenant_id
+                        tenant_id = currentUser.tenant_id,
+                        price = d.price
                     }).ToList();
                 entity.detailList.AddRange(adds);
             }
@@ -1252,7 +1379,46 @@ namespace ModernWMS.WMS.Services
                 return (false, _stringLocalizer["delete_failed"]);
             }
         }
+
+        #endregion Arrival list
+
+        #region print series number
+        /// <summary>
+        /// print series number
+        /// </summary>
+        /// <param name="input">selected asn id</param>
+        /// <returns></returns>
+        public async Task<List<AsnPrintSeriesNumberViewModel>> GetAsnPrintSeriesNumberAsync(List<int> input)
+        {
+            var Spus = _dBContext.GetDbSet<SpuEntity>().AsNoTracking();
+            var Skus = _dBContext.GetDbSet<SkuEntity>().AsNoTracking();
+            var Asns = _dBContext.GetDbSet<AsnEntity>().AsNoTracking();
+            var Asnmasters = _dBContext.GetDbSet<AsnmasterEntity>().AsNoTracking();
+            var sorts = _dBContext.GetDbSet<AsnsortEntity>().AsNoTracking();
+
+            var query = from m in Asnmasters
+                        join a in Asns on m.id equals a.asnmaster_id
+                        join p in Spus.AsNoTracking() on a.spu_id equals p.id
+                        join k in Skus.AsNoTracking() on a.sku_id equals k.id
+                        join s in sorts on a.id equals s.asn_id
+                        where input.Contains(a.id)
+                        select new AsnPrintSeriesNumberViewModel
+                        {
+                            asn_id = a.id,
+                            asnmaster_id = m.id,
+                            asn_no = m.asn_no,
+                            sku_id = a.sku_id,
+                            sku_code = k.sku_code,
+                            sku_name = k.sku_name,
+                            spu_code = p.spu_code,
+                            spu_name = p.spu_name,
+                            series_number = s.series_number
+                        };
+            var data = await query.OrderBy(t => t.asn_id).ToListAsync();
+            data ??= new List<AsnPrintSeriesNumberViewModel>();
+            return data;
+        }
+
         #endregion
     }
 }
- 

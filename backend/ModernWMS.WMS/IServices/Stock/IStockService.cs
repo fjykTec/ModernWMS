@@ -75,6 +75,14 @@ namespace ModernWMS.WMS.IServices
         /// <returns></returns>
         Task<(List<DeliveryStatisticViewModel> datas, int totals)> DeliveryStatistic(DeliveryStatisticSearchViewModel input, CurrentUser currentUser);
 
+
+        /// <summary>
+        /// stock age page search
+        /// </summary>
+        /// <param name="pageSearch">args</param>
+        /// <param name="currentUser">currentUser</param>
+        /// <returns></returns>
+        Task<(List<StockAgeViewModel> data, int totals)> StockAgePageAsync(StockAgeSearchViewModel input, CurrentUser currentUser);
         #endregion Api
     }
 }

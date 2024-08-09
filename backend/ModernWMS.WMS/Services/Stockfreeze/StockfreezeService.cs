@@ -17,6 +17,7 @@ using ModernWMS.Core.DynamicSearch;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
+using ModernWMS.Core;
 
 namespace ModernWMS.WMS.Services
 {
@@ -37,6 +38,11 @@ namespace ModernWMS.WMS.Services
         /// </summary>
         private readonly IStringLocalizer<ModernWMS.Core.MultiLanguage> _stringLocalizer;
 
+        /// <summary>
+        /// Function Helper
+        /// </summary>
+        private readonly FunctionHelper _functionHelper;
+
         #endregion Args
 
         #region constructor
@@ -49,10 +55,11 @@ namespace ModernWMS.WMS.Services
         public StockfreezeService(
             SqlDBContext dBContext
           , IStringLocalizer<ModernWMS.Core.MultiLanguage> stringLocalizer
-            )
+             , FunctionHelper functionHelper)
         {
             this._dBContext = dBContext;
             this._stringLocalizer = stringLocalizer;
+            this._functionHelper = functionHelper;
         }
 
         #endregion constructor
@@ -104,7 +111,7 @@ namespace ModernWMS.WMS.Services
                 .Where(t => t.tenant_id.Equals(currentUser.tenant_id))
                 .Where(queries.AsExpression<StockfreezeViewModel>());
             int totals = await query.CountAsync();
-            var list = await query.OrderByDescending(t => t.handle_time)
+            var list = await query.OrderByDescending(t => t.last_update_time)
                        .Skip((pageSearch.pageIndex - 1) * pageSearch.pageSize)
                        .Take(pageSearch.pageSize)
                        .ToListAsync();
@@ -153,10 +160,7 @@ namespace ModernWMS.WMS.Services
                                   warehouse_name = location.warehouse_name,
                                   series_number = m.series_number,
                               }).FirstOrDefaultAsync();
-            if (data == null)
-            {
-                return null;
-            }
+
             return data;
         }
 
@@ -175,9 +179,9 @@ namespace ModernWMS.WMS.Services
             entity.handler = currentUser.user_name;
             entity.last_update_time = DateTime.Now;
             entity.tenant_id = currentUser.tenant_id;
-            entity.job_code = await GetOrderCode(currentUser);
+            entity.job_code = await _functionHelper.GetFormNoAsync("Stockfreeze");
             var stock_DBSet = _dBContext.GetDbSet<StockEntity>();
-            var stocks = await stock_DBSet.Where(t => t.goods_location_id == entity.goods_location_id && t.goods_owner_id == entity.goods_owner_id && t.sku_id == entity.sku_id).ToListAsync();
+            var stocks = await stock_DBSet.Where(t => t.goods_location_id == entity.goods_location_id && t.goods_owner_id == entity.goods_owner_id && t.sku_id == entity.sku_id && t.series_number == entity.series_number  ).ToListAsync();
             foreach (var stock in stocks)
             {
                 if (entity.job_type == true)

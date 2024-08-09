@@ -7,6 +7,7 @@ using Mapster;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
+using ModernWMS.Core;
 using ModernWMS.Core.DBContext;
 using ModernWMS.Core.DynamicSearch;
 using ModernWMS.Core.JWT;
@@ -37,6 +38,11 @@ namespace ModernWMS.WMS.Services
         /// </summary>
         private readonly IStringLocalizer<ModernWMS.Core.MultiLanguage> _stringLocalizer;
 
+        /// <summary>
+        /// functions
+        /// </summary>
+        private readonly FunctionHelper _functionHelper;
+
         #endregion Args
 
         #region constructor
@@ -49,10 +55,12 @@ namespace ModernWMS.WMS.Services
         public DispatchlistService(
             SqlDBContext dBContext
           , IStringLocalizer<ModernWMS.Core.MultiLanguage> stringLocalizer
+           , FunctionHelper functionHelper
             )
         {
             this._dBContext = dBContext;
             this._stringLocalizer = stringLocalizer;
+            this._functionHelper = functionHelper;
         }
 
         #endregion constructor
@@ -140,6 +148,8 @@ namespace ModernWMS.WMS.Services
                             length_unit = spu.length_unit,
                             volume_unit = spu.volume_unit,
                             weight_unit = spu.weight_unit,
+                            pick_checker = d.pick_checker,
+                            pick_checker_id = d.pick_checker_id,
                             is_todo = pageSearch.sqlTitle.Contains("dispatch_status") || (pageSearch.sqlTitle.Equals("package") && d.dispatch_status.Equals(4))
                                             || (pageSearch.sqlTitle.Equals("weight") && d.dispatch_status.Equals(5))
                                             || (pageSearch.sqlTitle.Equals("delivery") && d.dispatch_status.Equals(6)) ? false : true,
@@ -148,7 +158,7 @@ namespace ModernWMS.WMS.Services
                  .Where(queries.AsExpression<DispatchlistViewModel>());
 
             int totals = await query.CountAsync();
-            var list = await query.OrderBy(t => t.is_todo == true ? 0 : 1).ThenByDescending(t => t.create_time)
+            var list = await query.OrderBy(t => t.is_todo == true ? 0 : 1).ThenByDescending(t => t.last_update_time)
                        .Skip((pageSearch.pageIndex - 1) * pageSearch.pageSize)
                        .Take(pageSearch.pageSize)
                        .ToListAsync();
@@ -210,7 +220,9 @@ namespace ModernWMS.WMS.Services
                                    bar_code = sku.bar_code,
                                    unpicked_qty = d.qty - d.picked_qty,
                                    sku_name = sku.sku_name,
-                                   unit = sku.unit
+                                   unit = sku.unit,
+                                   pick_checker = d.pick_checker,
+                                   pick_checker_id = d.pick_checker_id,
                                }).ToListAsync();
             return datas;
         }
@@ -230,6 +242,7 @@ namespace ModernWMS.WMS.Services
             var delete_id_list = new List<int>();
             var sku_id_list = viewModels.Select(t => t.sku_id).ToList();
             var skus = await (_dBContext.GetDbSet<SkuEntity>().AsNoTracking().Where(t => sku_id_list.Contains(t.id))).ToListAsync();
+            var now_time = DateTime.Now;
             if (entities.Any(t => t.dispatch_status != 1 && t.dispatch_status != 0))
             {
                 return (false, "[202]" + _stringLocalizer["data_changed"]);
@@ -255,7 +268,7 @@ namespace ModernWMS.WMS.Services
                     }
                     entity.sku_id = vm.sku_id;
                     entity.qty = vm.qty;
-                    entity.last_update_time = DateTime.Now;
+                    entity.last_update_time = now_time;
                     var sku = skus.FirstOrDefault(t => t.id == entity.sku_id);
                     if (sku != null)
                     {
@@ -270,8 +283,8 @@ namespace ModernWMS.WMS.Services
                         id = 0,
                         dispatch_no = dispatch_no,
                         creator = currentUser.user_name,
-                        create_time = DateTime.Now,
-                        last_update_time = DateTime.Now,
+                        create_time = now_time,
+                        last_update_time = now_time,
                         dispatch_status = dispatch_status,
                         sku_id = vm.sku_id,
                         qty = vm.qty
@@ -341,7 +354,12 @@ namespace ModernWMS.WMS.Services
                                    warehouse_area_name = location.warehouse_area_name,
                                    warehouse_area_property = location.warehouse_area_property,
                                    warehouse_name = location.warehouse_name,
-                                   series_number = dpl.series_number
+                                   series_number = dpl.series_number,
+                                   expiry_date = dpl.expiry_date,
+                                   price = dpl.price,
+                                   picker = dpl.picker,
+                                   picker_id = dpl.picker_id,
+                                   putaway_date = dpl.putaway_date,
                                }).ToListAsync();
             return datas;
         }
@@ -473,6 +491,8 @@ namespace ModernWMS.WMS.Services
                                   waybill_no = dl.waybill_no,
                                   carrier = dl.carrier,
                                   freightfee = dl.freightfee,
+                                  pick_checker = dl.pick_checker,
+                                  pick_checker_id = dl.pick_checker_id,
                               }
                               ).ToListAsync();
             return data.Adapt<List<DispatchlistDetailViewModel>>();
@@ -490,14 +510,15 @@ namespace ModernWMS.WMS.Services
             var entities = viewModel.Adapt<List<DispatchlistEntity>>();
             var sku_id_list = entities.Select(t => t.sku_id).ToList();
             var skus = await _dBContext.GetDbSet<SkuEntity>().Where(t => sku_id_list.Contains(t.id)).ToListAsync();
-            var dispatch_no = await GetOrderCode(currentUser);
+            var dispatch_no = await _functionHelper.GetFormNoAsync("Dispatchlist");
+            var now_time = DateTime.Now;
             foreach (var entity in entities)
             {
                 var sku = skus.FirstOrDefault(t => t.id == entity.sku_id);
                 entity.id = 0;
-                entity.create_time = DateTime.Now;
+                entity.create_time = now_time;
                 entity.creator = currentUser.user_name;
-                entity.last_update_time = DateTime.Now;
+                entity.last_update_time = now_time;
                 entity.tenant_id = currentUser.tenant_id;
                 if (sku != null)
                 {
@@ -565,7 +586,7 @@ namespace ModernWMS.WMS.Services
             var stock_group_datas = from stock in stock_DbSet.AsNoTracking()
                                     join gl in _dBContext.GetDbSet<GoodslocationEntity>().AsNoTracking() on stock.goods_location_id equals gl.id
                                     where stock.tenant_id == currentUser.user_id
-                                    group stock by new { stock.id, stock.sku_id, stock.goods_location_id, stock.goods_owner_id, stock.series_number } into sg
+                                    group stock by new { stock.id, stock.sku_id, stock.goods_location_id, stock.goods_owner_id, stock.series_number, stock.expiry_date, stock.price,stock.putaway_date } into sg
                                     select new
                                     {
                                         stock_id = sg.Key.id,
@@ -573,51 +594,63 @@ namespace ModernWMS.WMS.Services
                                         sku_id = sg.Key.sku_id,
                                         goods_location_id = sg.Key.goods_location_id,
                                         series_number = sg.Key.series_number,
+                                        sg.Key.expiry_date,
+                                        sg.Key.price,
+                                        sg.Key.putaway_date,
                                         qty_frozen = sg.Where(t => t.is_freeze == true).Sum(e => e.qty),
                                         qty = sg.Sum(t => t.qty)
                                     };
             var dispatch_group_datas = from dp in DbSet.AsNoTracking()
                                        join dpp in dispatchpick_DBSet.AsNoTracking() on dp.id equals dpp.dispatchlist_id
                                        where dp.dispatch_status > 1 && dp.dispatch_status < 6
-                                       group dpp by new { dpp.sku_id, dpp.goods_location_id, dpp.goods_owner_id, dpp.series_number } into dg
+                                       group dpp by new { dpp.sku_id, dpp.goods_location_id, dpp.goods_owner_id, dpp.series_number, dpp.expiry_date, dpp.price,dpp.putaway_date } into dg
                                        select new
                                        {
                                            goods_owner_id = dg.Key.goods_owner_id,
                                            sku_id = dg.Key.sku_id,
                                            goods_location_id = dg.Key.goods_location_id,
                                            series_number = dg.Key.series_number,
+                                           dg.Key.expiry_date,
+                                           dg.Key.price,
+                                           dg.Key.putaway_date,
                                            qty_locked = dg.Sum(t => t.pick_qty)
                                        };
             var process_locked_group_datas = from pd in processdetail_DBSet
                                              where pd.is_update_stock == false
-                                             group pd by new { pd.sku_id, pd.goods_location_id, pd.goods_owner_id, pd.series_number } into pdg
+                                             group pd by new { pd.sku_id, pd.goods_location_id, pd.goods_owner_id, pd.series_number, pd.expiry_date, pd.price,pd.putaway_date } into pdg
                                              select new
                                              {
                                                  goods_owner_id = pdg.Key.goods_owner_id,
                                                  sku_id = pdg.Key.sku_id,
                                                  goods_location_id = pdg.Key.goods_location_id,
                                                  series_number = pdg.Key.series_number,
+                                                 pdg.Key.expiry_date,
+                                                 pdg.Key.price,
+                                                 pdg.Key.putaway_date,
                                                  qty_locked = pdg.Sum(t => t.qty)
                                              };
             var move_locked_group_datas = from m in move_DBSet.AsNoTracking()
                                           where m.move_status == 0
-                                          group m by new { m.sku_id, m.orig_goods_location_id, m.goods_owner_id, m.series_number } into mg
+                                          group m by new { m.sku_id, m.orig_goods_location_id, m.goods_owner_id, m.series_number, m.expiry_date, m.price,m.putaway_date } into mg
                                           select new
                                           {
                                               goods_owner_id = mg.Key.goods_owner_id,
                                               sku_id = mg.Key.sku_id,
                                               goods_location_id = mg.Key.orig_goods_location_id,
                                               series_number = mg.Key.series_number,
+                                              mg.Key.expiry_date,
+                                              mg.Key.price,
+                                              mg.Key.putaway_date,
                                               qty_locked = mg.Sum(t => t.qty)
                                           };
             var datas = await (from dl in DbSet
                                join sg in stock_group_datas on dl.sku_id equals sg.sku_id into sg_left
                                from sg in sg_left.DefaultIfEmpty()
-                               join dp in dispatch_group_datas on new { sg.sku_id, sg.goods_location_id, sg.goods_owner_id, sg.series_number } equals new { dp.sku_id, dp.goods_location_id, dp.goods_owner_id, dp.series_number } into dp_left
+                               join dp in dispatch_group_datas on new { sg.sku_id, sg.goods_location_id, sg.goods_owner_id, sg.series_number, sg.expiry_date, sg.price,sg.putaway_date } equals new { dp.sku_id, dp.goods_location_id, dp.goods_owner_id, dp.series_number, dp.expiry_date, dp.price,dp.putaway_date } into dp_left
                                from dp in dp_left.DefaultIfEmpty()
-                               join pl in process_locked_group_datas on new { sg.sku_id, sg.goods_location_id, sg.goods_owner_id, sg.series_number } equals new { pl.sku_id, pl.goods_location_id, pl.goods_owner_id, pl.series_number } into pl_left
+                               join pl in process_locked_group_datas on new { sg.sku_id, sg.goods_location_id, sg.goods_owner_id, sg.series_number, sg.expiry_date, sg.price,sg.putaway_date } equals new { pl.sku_id, pl.goods_location_id, pl.goods_owner_id, pl.series_number, pl.expiry_date, pl.price,pl.putaway_date } into pl_left
                                from pl in pl_left.DefaultIfEmpty()
-                               join m in move_locked_group_datas on new { sg.sku_id, sg.goods_location_id, sg.goods_owner_id, sg.series_number } equals new { m.sku_id, m.goods_location_id, m.goods_owner_id, m.series_number } into m_left
+                               join m in move_locked_group_datas on new { sg.sku_id, sg.goods_location_id, sg.goods_owner_id, sg.series_number, sg.expiry_date, sg.price,sg.putaway_date } equals new { m.sku_id, m.goods_location_id, m.goods_owner_id, m.series_number, m.expiry_date, m.price,m.putaway_date } into m_left
                                from m in m_left.DefaultIfEmpty()
                                join sku in sku_DBSet on dl.sku_id equals sku.id
                                join spu in spu_DBSet on sku.spu_id equals spu.id
@@ -648,7 +681,10 @@ namespace ModernWMS.WMS.Services
                                    location_name = gl.location_name == null ? "" : gl.location_name,
                                    warehouse_area_name = gl.warehouse_area_name == null ? "" : gl.warehouse_area_name,
                                    warehouse_name = gl.warehouse_name == null ? "" : gl.warehouse_name,
-                                   series_number = sg.series_number
+                                   series_number = sg.series_number==null ? "":sg.series_number,
+                                   expiry_date = sg.expiry_date==null ? UtilConvert.MinDate : sg.expiry_date,
+                                   price = sg.price == null ? 0:sg.price,
+                                    putaway_date = sg.putaway_date == null ? UtilConvert.MinDate:sg.putaway_date,
                                }).ToListAsync();
             var res = (from d in datas
                        group d by new
@@ -700,6 +736,9 @@ namespace ModernWMS.WMS.Services
                                     warehouse_name = d.warehouse_name,
                                     pick_qty = 0,
                                     series_number = d.series_number,
+                                    expiry_date = d.expiry_date,
+                                    price = d.price,
+                                    putaway_date=d.putaway_date,
                                 }
                               ).OrderByDescending(o => o.qty_available).ToList();
                 int pick_qty = 0;
@@ -738,6 +777,7 @@ namespace ModernWMS.WMS.Services
             var new_dispatchlists = new List<DispatchlistEntity>();
             var topick_viewmodels = new List<StockViewModel>();
             var sku_id_list = viewModels.Select(t => t.sku_id).ToList();
+            var now_time = DateTime.Now;
             foreach (var vm in viewModels.Where(t => t.confirm == true).ToList())
             {
                 stock_id_list.AddRange(vm.pick_list.Where(t => t.pick_qty > 0).Select(t => t.stock_id).ToList());
@@ -753,7 +793,7 @@ namespace ModernWMS.WMS.Services
                 if (vm.confirm == true)
                 {
                     d.dispatch_status = 2;
-                    d.last_update_time = DateTime.Now;
+                    d.last_update_time = now_time;
                     d.lock_qty = vm.pick_list.Sum(t => t.pick_qty);
                     foreach (var p in vm.pick_list.Where(t => t.pick_qty > 0).ToList())
                     {
@@ -764,9 +804,12 @@ namespace ModernWMS.WMS.Services
                             dispatchlist_id = p.dispatchlist_id,
                             goods_location_id = p.goods_location_id,
                             goods_owner_id = p.goods_owner_id,
-                            last_update_time = DateTime.Now,
+                            last_update_time = now_time,
                             series_number = p.series_number,
+                            expiry_date = p.expiry_date,
+                            price = p.price,
                             pick_qty = p.pick_qty,
+                            putaway_date = p.putaway_date,
                         });
                         topick_viewmodels.Add(new StockViewModel { id = p.stock_id, qty = p.pick_qty });
                     }
@@ -800,7 +843,7 @@ namespace ModernWMS.WMS.Services
             }
             var stock_group_datas = from stock in stock_DBSet.AsNoTracking()
                                     where stock_id_list.Contains(stock.id)
-                                    group stock by new { stock.id, stock.sku_id, stock.goods_location_id, stock.goods_owner_id, stock.series_number } into sg
+                                    group stock by new { stock.id, stock.sku_id, stock.goods_location_id, stock.goods_owner_id, stock.series_number, stock.expiry_date, stock.price,stock.putaway_date } into sg
                                     select new
                                     {
                                         stock_id = sg.Key.id,
@@ -808,49 +851,61 @@ namespace ModernWMS.WMS.Services
                                         sku_id = sg.Key.sku_id,
                                         goods_location_id = sg.Key.goods_location_id,
                                         series_number = sg.Key.series_number,
+                                        sg.Key.expiry_date,
+                                        sg.Key.price,
+                                        sg.Key.putaway_date,
                                         qty_frozen = sg.Where(t => t.is_freeze == true).Sum(e => e.qty),
                                         qty = sg.Sum(t => t.qty)
                                     };
             var dispatch_group_datas = from dp in DBSet.AsNoTracking()
                                        join dpp in pick_DBSet.AsNoTracking() on dp.id equals dpp.dispatchlist_id
                                        where dp.dispatch_status > 1 && dp.dispatch_status < 6
-                                       group dpp by new { dpp.sku_id, dpp.goods_location_id, dpp.goods_owner_id, dpp.series_number } into dg
+                                       group dpp by new { dpp.sku_id, dpp.goods_location_id, dpp.goods_owner_id, dpp.series_number, dpp.expiry_date, dpp.price,dpp.putaway_date } into dg
                                        select new
                                        {
                                            goods_owner_id = dg.Key.goods_owner_id,
                                            sku_id = dg.Key.sku_id,
                                            goods_location_id = dg.Key.goods_location_id,
                                            series_number = dg.Key.series_number,
+                                           dg.Key.expiry_date,
+                                           dg.Key.price,
+                                           dg.Key.putaway_date,
                                            qty_locked = dg.Sum(t => t.pick_qty)
                                        };
             var process_locked_group_datas = from pd in processdetail_DBSet
                                              where pd.is_update_stock == false
-                                             group pd by new { pd.sku_id, pd.goods_location_id, pd.goods_owner_id, pd.series_number } into pdg
+                                             group pd by new { pd.sku_id, pd.goods_location_id, pd.goods_owner_id, pd.series_number, pd.expiry_date, pd.price,pd.putaway_date } into pdg
                                              select new
                                              {
                                                  goods_owner_id = pdg.Key.goods_owner_id,
                                                  sku_id = pdg.Key.sku_id,
                                                  goods_location_id = pdg.Key.goods_location_id,
                                                  series_number = pdg.Key.series_number,
+                                                 pdg.Key.expiry_date,
+                                                 pdg.Key.price,
+                                                 pdg.Key.putaway_date,
                                                  qty_locked = pdg.Sum(t => t.qty)
                                              };
             var move_locked_group_datas = from m in move_DBSet.AsNoTracking()
                                           where m.move_status == 0
-                                          group m by new { m.sku_id, m.orig_goods_location_id, m.goods_owner_id, m.series_number } into mg
+                                          group m by new { m.sku_id, m.orig_goods_location_id, m.goods_owner_id, m.series_number, m.expiry_date, m.price,m.putaway_date } into mg
                                           select new
                                           {
                                               goods_owner_id = mg.Key.goods_owner_id,
                                               sku_id = mg.Key.sku_id,
                                               goods_location_id = mg.Key.orig_goods_location_id,
                                               series_number = mg.Key.series_number,
+                                              mg.Key.expiry_date,
+                                              mg.Key.price,
+                                              mg.Key.putaway_date,
                                               qty_locked = mg.Sum(t => t.qty)
                                           };
             var stock_datas = await (from sg in stock_group_datas
-                                     join dp in dispatch_group_datas on new { sg.sku_id, sg.goods_location_id, sg.goods_owner_id, sg.series_number } equals new { dp.sku_id, dp.goods_location_id, dp.goods_owner_id, dp.series_number } into dp_left
+                                     join dp in dispatch_group_datas on new { sg.sku_id, sg.goods_location_id, sg.goods_owner_id, sg.series_number, sg.expiry_date, sg.price,sg.putaway_date } equals new { dp.sku_id, dp.goods_location_id, dp.goods_owner_id, dp.series_number, dp.expiry_date, dp.price,dp.putaway_date } into dp_left
                                      from dp in dp_left.DefaultIfEmpty()
-                                     join pl in process_locked_group_datas on new { sg.sku_id, sg.goods_location_id, sg.goods_owner_id, sg.series_number } equals new { pl.sku_id, pl.goods_location_id, pl.goods_owner_id, pl.series_number } into pl_left
+                                     join pl in process_locked_group_datas on new { sg.sku_id, sg.goods_location_id, sg.goods_owner_id, sg.series_number, sg.expiry_date, sg.price,sg.putaway_date } equals new { pl.sku_id, pl.goods_location_id, pl.goods_owner_id, pl.series_number, pl.expiry_date, pl.price,pl.putaway_date } into pl_left
                                      from pl in pl_left.DefaultIfEmpty()
-                                     join m in move_locked_group_datas on new { sg.sku_id, sg.goods_location_id, sg.goods_owner_id, sg.series_number } equals new { m.sku_id, m.goods_location_id, m.goods_owner_id, m.series_number } into m_left
+                                     join m in move_locked_group_datas on new { sg.sku_id, sg.goods_location_id, sg.goods_owner_id, sg.series_number, sg.expiry_date, sg.price,sg.putaway_date } equals new { m.sku_id, m.goods_location_id, m.goods_owner_id, m.series_number, m.expiry_date, m.price,m.putaway_date } into m_left
                                      from m in m_left.DefaultIfEmpty()
                                      select new
                                      {
@@ -866,7 +921,7 @@ namespace ModernWMS.WMS.Services
                 return (false, "[202]" + _stringLocalizer["data_changed"]);
             }
             await pick_DBSet.AddRangeAsync(pick_datas);
-            var dispatch_no = await GetOrderCode(currentUser);
+            var dispatch_no = await _functionHelper.GetFormNoAsync("Dispatchlist");
             var sku_datas = await _dBContext.GetDbSet<SkuEntity>().Where(t => sku_id_list.Contains(t.id)).ToListAsync();
             foreach (var nd in new_dispatchlists)
             {
@@ -882,14 +937,10 @@ namespace ModernWMS.WMS.Services
             };
             await DBSet.AddRangeAsync(new_dispatchlists);
             var qty = await _dBContext.SaveChangesAsync();
-            if (qty > 0)
-            {
-                return (true, _stringLocalizer["operation_success"]);
-            }
-            else
-            {
-                return (false, _stringLocalizer["operation_failed"]);
-            }
+
+            return (true, _stringLocalizer["operation_success"]);
+ 
+
         }
 
         /// <summary>
@@ -907,7 +958,7 @@ namespace ModernWMS.WMS.Services
             {
                 return (false, _stringLocalizer["status_changed"]);
             }
-            var time = DateTime.Now;
+            var now_time = DateTime.Now;
             var dispatch_id_list = entities.Select(t => t.id).ToList();
             var pick_entities = await pick_DBSet.Where(t => dispatch_id_list.Contains(t.dispatchlist_id)).ToListAsync();
             if (viewModel.dispatch_status == 3)
@@ -915,12 +966,12 @@ namespace ModernWMS.WMS.Services
                 foreach (var pick in pick_entities)
                 {
                     pick.picked_qty = 0;
-                    pick.last_update_time = time;
+                    pick.last_update_time = now_time;
                 }
                 foreach (var entity in entities)
                 {
                     entity.picked_qty = 0;
-                    entity.last_update_time = time;
+                    entity.last_update_time = now_time;
                     entity.dispatch_status = 2;
                 }
             }
@@ -930,7 +981,7 @@ namespace ModernWMS.WMS.Services
                 foreach (var entity in entities)
                 {
                     entity.lock_qty = 0;
-                    entity.last_update_time = time;
+                    entity.last_update_time = now_time;
                     entity.dispatch_status = 1;
                 }
             }
@@ -983,7 +1034,7 @@ namespace ModernWMS.WMS.Services
         {
             var DBSet = _dBContext.GetDbSet<DispatchlistEntity>();
             var entity = await DBSet.Where(t => t.id == id).FirstOrDefaultAsync();
-            var time = DateTime.Now;
+            var now_time = DateTime.Now;
             if (entity == null)
             {
                 return (false, _stringLocalizer["not_exists_entity"]);
@@ -1022,7 +1073,7 @@ namespace ModernWMS.WMS.Services
             {
                 return (false, _stringLocalizer["status_changed"]);
             }
-            entity.last_update_time = time;
+            entity.last_update_time = now_time;
             var qty = await _dBContext.SaveChangesAsync();
             if (qty > 0)
             {
@@ -1047,16 +1098,81 @@ namespace ModernWMS.WMS.Services
             var entities = await DBSet.Where(t => t.dispatch_status == 2 && t.dispatch_no == dispatch_no && t.tenant_id == currentUser.tenant_id).ToListAsync();
             var dispatchlist_id_list = entities.Select(t => t.id).ToList();
             var pick_datas = await pick_DBSet.Where(t => dispatchlist_id_list.Contains(t.dispatchlist_id)).ToListAsync();
+            var now_time = DateTime.Now;
             entities.ForEach(t =>
             {
                 t.picked_qty = t.lock_qty;
                 t.dispatch_status = 3;
-                t.last_update_time = DateTime.Now;
+                t.last_update_time = now_time;
+                t.pick_checker = currentUser.user_name;
+                t.pick_checker_id = currentUser.user_id;
             });
             pick_datas.ForEach(t =>
             {
                 t.picked_qty = t.pick_qty;
-                t.last_update_time = DateTime.Now;
+                t.last_update_time = now_time;
+            });
+            var qty = await _dBContext.SaveChangesAsync();
+            if (qty > 0)
+            {
+                return (true, _stringLocalizer["operation_success"]);
+            }
+            else
+            {
+                return (false, _stringLocalizer["operation_failed"]);
+            }
+        }
+
+        /// <summary>
+        /// confirm pick detail
+        /// </summary>
+        /// <param name="picklist_id">dispatch list pick detail id</param>
+        /// <param name="currentUser">current user</param>
+        /// <returns></returns>
+        public async Task<(bool flag, string msg)> ConfirmPickDetail(List<int> picklist_id, CurrentUser currentUser)
+        {
+            var DBSet = _dBContext.GetDbSet<DispatchlistEntity>();
+            var pick_DBSet = _dBContext.GetDbSet<DispatchpicklistEntity>();
+            var pick_datas = await pick_DBSet.Where(t => picklist_id.Contains(t.id)).ToListAsync();
+            if (pick_datas.Any(t=>t.picker_id > 0) || pick_datas.Any(t=>t.picked_qty>0))
+            {
+                return (false, _stringLocalizer["data_changed"]);
+            }
+            pick_datas.ForEach(t=> 
+            { 
+                t.picker = currentUser.user_name;
+                t.picker_id = currentUser.user_id;
+            });
+            var qty = await _dBContext.SaveChangesAsync();
+            if (qty > 0)
+            {
+                return (true, _stringLocalizer["operation_success"]);
+            }
+            else
+            {
+                return (false, _stringLocalizer["operation_failed"]);
+            }
+        }
+
+        /// <summary>
+        /// cancel confirm pick detail
+        /// </summary>
+        /// <param name="picklist_id">dispatch list pick detail id</param>
+        /// <param name="currentUser">current user</param>
+        /// <returns></returns>
+        public async Task<(bool flag, string msg)> CancelConfirmPickDetail(List<int> picklist_id, CurrentUser currentUser)
+        {
+            var DBSet = _dBContext.GetDbSet<DispatchlistEntity>();
+            var pick_DBSet = _dBContext.GetDbSet<DispatchpicklistEntity>();
+            var pick_datas = await pick_DBSet.Where(t => picklist_id.Contains(t.id)  ).ToListAsync();
+            if (pick_datas.Any(t =>t.picker_id == 0) || pick_datas.Any(t => t.picked_qty > 0))
+            {
+                return (false, _stringLocalizer["data_changed"]);
+            }
+            pick_datas.ForEach(t => 
+            {
+                t.picker = "";
+                t.picker_id = 0;
             });
             var qty = await _dBContext.SaveChangesAsync();
             if (qty > 0)
@@ -1081,7 +1197,7 @@ namespace ModernWMS.WMS.Services
             var DBSet = _dBContext.GetDbSet<DispatchlistEntity>();
             var dispatchlist_id_list = viewModels.Select(t => t.id).ToList();
             var entities = await DBSet.Where(t => dispatchlist_id_list.Contains(t.id)).ToListAsync();
-            var time = DateTime.Now;
+            var now_time = DateTime.Now;
             var code = GetPackageOrWeightCode();
             foreach (var vm in viewModels)
             {
@@ -1094,10 +1210,10 @@ namespace ModernWMS.WMS.Services
                 {
                     return (false, "[202]" + _stringLocalizer["unpackgeqty_lessthen"]);
                 }
-                entity.last_update_time = time;
+                entity.last_update_time = now_time;
                 entity.package_person = currentUser.user_name;
                 entity.package_qty += vm.package_qty;
-                entity.package_time = time;
+                entity.package_time = now_time;
                 entity.package_no = code;
                 entity.dispatch_status = 4;
             }
@@ -1169,7 +1285,7 @@ namespace ModernWMS.WMS.Services
             var DBSet = _dBContext.GetDbSet<DispatchlistEntity>();
             var dispatchlist_id_list = viewModels.Select(t => t.id).ToList();
             var entities = await DBSet.Where(t => dispatchlist_id_list.Contains(t.id)).ToListAsync();
-            var time = DateTime.Now;
+            var now_time = DateTime.Now;
             var code = GetPackageOrWeightCode();
             foreach (var vm in viewModels)
             {
@@ -1182,7 +1298,7 @@ namespace ModernWMS.WMS.Services
                 {
                     return (false, "[202]" + _stringLocalizer["unweightqty_lessthen"]);
                 }
-                entity.last_update_time = time;
+                entity.last_update_time = now_time;
                 entity.weighing_person = currentUser.user_name;
                 entity.weighing_qty += vm.weighing_qty;
                 entity.weighing_weight += vm.weighing_weight;
@@ -1225,7 +1341,7 @@ namespace ModernWMS.WMS.Services
                                 {
                                     proposedValues["dispatch_status"] = 5;
                                 }
-                                proposedValues["last_update_time"] = DateTime.Now;
+                                proposedValues["last_update_time"] = now_time;
                             }
                             // Refresh original values to bypass next concurrency check
                             entry.OriginalValues.SetValues(databaseValues);
@@ -1261,14 +1377,14 @@ namespace ModernWMS.WMS.Services
             var pick_DBSet = _dBContext.GetDbSet<DispatchpicklistEntity>();
             var stock_DBSet = _dBContext.GetDbSet<StockEntity>();
             var entities = await DBSet.Where(t => dispatchlist_id_list.Contains(t.id)).ToListAsync();
-            var time = DateTime.Now;
+            var now_time = DateTime.Now;
             foreach (var entity in entities)
             {
                 if (entity.dispatch_status != 3 && entity.dispatch_status != 4 && entity.dispatch_status != 5)
                 {
                     return (false, "[202]" + _stringLocalizer["data_changed"]);
                 }
-                entity.last_update_time = time;
+                entity.last_update_time = now_time;
                 entity.dispatch_status = 6;
                 entity.lock_qty = 0;
                 entity.actual_qty = entity.picked_qty;
@@ -1276,26 +1392,26 @@ namespace ModernWMS.WMS.Services
             }
             var pick_sql = pick_DBSet.Where(t => dispatchlist_id_list.Contains(t.dispatchlist_id));
             var pick_datas = await pick_sql.ToListAsync();
-            var picks_g = pick_sql.AsNoTracking().GroupBy(e => new { e.goods_location_id, e.sku_id, e.goods_owner_id, e.series_number }).Select(c => new { c.Key.goods_location_id, c.Key.sku_id, c.Key.goods_owner_id, c.Key.series_number, picked_qty = c.Sum(t => t.picked_qty) });
+            var picks_g = pick_sql.AsNoTracking().GroupBy(e => new { e.goods_location_id, e.sku_id, e.goods_owner_id, e.series_number, e.expiry_date, e.price,e.putaway_date }).Select(c => new { c.Key.goods_location_id, c.Key.sku_id, c.Key.goods_owner_id, c.Key.series_number, c.Key.expiry_date, c.Key.price,c.Key.putaway_date, picked_qty = c.Sum(t => t.picked_qty) });
             var picks = await picks_g.ToListAsync();
             var stocks = await (from stock in stock_DBSet
-                                where pick_sql.Any(t => t.goods_location_id == stock.goods_location_id && t.sku_id == stock.sku_id && t.goods_owner_id == stock.goods_owner_id && t.series_number == stock.series_number)
+                                where pick_sql.Any(t => t.goods_location_id == stock.goods_location_id && t.sku_id == stock.sku_id && t.goods_owner_id == stock.goods_owner_id && t.series_number == stock.series_number && t.expiry_date == stock.expiry_date && t.price == stock.price && t.putaway_date == stock.putaway_date)
                                 select stock).ToListAsync();
             foreach (var pick in picks)
             {
-                var s = stocks.FirstOrDefault(t => t.goods_location_id == pick.goods_location_id && t.sku_id == pick.sku_id && t.goods_owner_id == pick.goods_owner_id && t.series_number == pick.series_number);
+                var s = stocks.FirstOrDefault(t => t.goods_location_id == pick.goods_location_id && t.sku_id == pick.sku_id && t.goods_owner_id == pick.goods_owner_id && t.series_number == pick.series_number && t.expiry_date == pick.expiry_date && t.price == pick.price && t.putaway_date == pick.putaway_date);
                 if (s == null)
                 {
                     return (false, "[202]" + _stringLocalizer["data_changed"]);
                 }
                 s.qty -= pick.picked_qty;
-                s.last_update_time = time;
+                s.last_update_time = now_time;
                 stock_DBSet.Update(s);
             }
             foreach (var pick in pick_datas)
             {
                 pick.is_update_stock = true;
-                pick.last_update_time = DateTime.Now;
+                pick.last_update_time = now_time;
             }
             var saved = false;
             int res = 0;
@@ -1319,7 +1435,7 @@ namespace ModernWMS.WMS.Services
                             {
                                 return (false, "[202]" + _stringLocalizer["data_changed"]);
                             }
-                            proposedValues["last_update_time"] = DateTime.Now;
+                            proposedValues["last_update_time"] = now_time;
                         }
                         else if (entry.Entity is StockEntity)
                         {
@@ -1331,7 +1447,7 @@ namespace ModernWMS.WMS.Services
                                 return (false, "[202]" + _stringLocalizer["data_changed"]);
                             }
                             proposedValues["qty"] = UtilConvert.ObjToInt(databaseValues["qty"]) - t_p.picked_qty;
-                            proposedValues["last_update_time"] = DateTime.Now;
+                            proposedValues["last_update_time"] = now_time;
                             // Refresh original values to bypass next concurrency check
                             entry.OriginalValues.SetValues(databaseValues);
                         }
@@ -1364,7 +1480,7 @@ namespace ModernWMS.WMS.Services
             var freightfee_id_list = viewModels.Select(t => t.freightfee_id).Distinct().ToList();
             var entities = await DBSet.Where(t => dispatchlist_id_list.Contains(t.id)).ToListAsync();
             var freightfees = await _dBContext.GetDbSet<FreightfeeEntity>().Where(t => freightfee_id_list.Contains(t.id)).ToListAsync();
-            var time = DateTime.Now;
+            var now_time = DateTime.Now;
             foreach (var entity in entities)
             {
                 var vm = viewModels.FirstOrDefault(t => t.id == entity.id);
@@ -1373,7 +1489,7 @@ namespace ModernWMS.WMS.Services
                     var freightfee = freightfees.FirstOrDefault(t => t.id == vm.freightfee_id);
                     if (freightfee != null)
                     {
-                        entity.last_update_time = time;
+                        entity.last_update_time = now_time;
                         entity.carrier = freightfee.carrier;
                         entity.waybill_no = vm.waybill_no;
                         if (entity.weighing_no != "")
@@ -1408,6 +1524,7 @@ namespace ModernWMS.WMS.Services
             var DBSet = _dBContext.GetDbSet<DispatchlistEntity>();
             var dispatchlist_id_list = viewModels.Select(t => t.id).ToList();
             var entities = await DBSet.Where(t => dispatchlist_id_list.Contains(t.id)).ToListAsync();
+            var now_time = DateTime.Now;
             foreach (var entity in entities)
             {
                 var vm = viewModels.FirstOrDefault(t => t.id == t.id && t.dispatch_status == entity.dispatch_status);
@@ -1417,7 +1534,7 @@ namespace ModernWMS.WMS.Services
                 }
                 entity.sign_qty = entity.actual_qty - vm.damage_qty;
                 entity.damage_qty = vm.damage_qty;
-                entity.last_update_time = DateTime.Now;
+                entity.last_update_time = now_time;
                 entity.dispatch_status = 7;
             }
             var res = await _dBContext.SaveChangesAsync();
@@ -1481,8 +1598,9 @@ namespace ModernWMS.WMS.Services
             var customer_list = await _dBContext.GetDbSet<CustomerEntity>().Where(t => t.tenant_id == currentUser.tenant_id && import_customer_name.Contains(t.customer_name)).ToListAsync();
             var entities = new List<DispatchlistEntity>();
             var groups = viewModels.Select(t => t.import_group).Distinct().ToList();
-            var groups_code = await GetOrderCodeList(currentUser, groups.Count());
+            var groups_code = await _functionHelper.GetFormNoListAsync("Dispatchlist", groups.Count);
             var group_code_dic = new Dictionary<int, string>();
+            var now_time = DateTime.Now;
             for (int i = 0; i < groups.Count(); i++)
             {
                 group_code_dic.Add(groups[i], groups_code[i]);
@@ -1506,8 +1624,8 @@ namespace ModernWMS.WMS.Services
                     sku_id = sku.id,
                     qty = vm.qty,
                     creator = currentUser.user_name,
-                    create_time = DateTime.Now,
-                    last_update_time = DateTime.Now,
+                    create_time = now_time,
+                    last_update_time = now_time,
                     tenant_id = currentUser.tenant_id,
                     dispatch_no = group_code_dic[vm.import_group],
                 });
@@ -1537,7 +1655,7 @@ namespace ModernWMS.WMS.Services
             {
                 for (int i = 1; i <= cnt; i++)
                 {
-                    code.Add(date +"-"+ cnt.ToString("0000"));
+                    code.Add(date + "-" + cnt.ToString("0000"));
                 }
             }
             else
@@ -1663,7 +1781,6 @@ namespace ModernWMS.WMS.Services
                 r.pick_list = picklist.Where(t => t.qty_available > 0).ToList();
             }
         }*/
-
 
         #endregion Api
     }

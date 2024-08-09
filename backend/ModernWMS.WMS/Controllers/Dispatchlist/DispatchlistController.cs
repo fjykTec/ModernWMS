@@ -206,6 +206,44 @@ namespace ModernWMS.WMS.Controllers
         }
 
         /// <summary>
+        ///  confirm pick detail
+        /// </summary>
+        /// <param name="picklist_id">dispatch list pick detail id</param>
+        /// <returns></returns>
+        [HttpPost("confirm-pick-detail")]
+        public async Task<ResultModel<string>> ConfirmPickDetail([FromBody]List<int> picklist_id)
+        {
+            var (flag, msg) = await _dispatchlistService.ConfirmPickDetail(picklist_id, CurrentUser);
+            if (flag)
+            {
+                return ResultModel<string>.Success(msg);
+            }
+            else
+            {
+                return ResultModel<string>.Error(msg);
+            }
+        }
+
+        /// <summary>
+        ///  confirm pick detail
+        /// </summary>
+        /// <param name="picklist_id">dispatch list pick detail id</param>
+        /// <returns></returns>
+        [HttpPost("cancel-confirm-pick-detail")]
+        public async Task<ResultModel<string>> CancelConfirmPickDetail([FromBody] List<int> picklist_id)
+        {
+            var (flag, msg) = await _dispatchlistService.CancelConfirmPickDetail(picklist_id, CurrentUser);
+            if (flag)
+            {
+                return ResultModel<string>.Success(msg);
+            }
+            else
+            {
+                return ResultModel<string>.Error(msg);
+            }
+        }
+
+        /// <summary>
         ///  package dispatchpicklist
         /// </summary>
         /// <param name="viewModels">viewModels</param>

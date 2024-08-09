@@ -3,6 +3,7 @@
  * developer：NoNo
  */
 
+using ModernWMS.Core.Utility;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -89,5 +90,22 @@ namespace ModernWMS.WMS.Entities.ViewModels
         /// goods_location_id
         /// </summary>
         public int goods_location_id { get; set; } = 0;
+
+        /// <summary>
+        /// expiry_date
+        /// </summary>
+        public DateTime expiry_date { get; set; } = UtilConvert.MinDate;
+
+        /// <summary>
+        /// price
+        /// </summary>
+        public decimal price { get; set; } = 0;
+
+        /// <summary>
+        /// putaway_date
+        /// </summary>
+        public DateTime putaway_date { get; set; } = UtilConvert.MinDate;
+
+
     }
 }

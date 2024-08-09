@@ -10,6 +10,7 @@ using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 using Microsoft.Data.SqlClient;
 using Mapster;
 using Microsoft.AspNetCore.JsonPatch.Internal;
+using ModernWMS.Core.Models;
 
 namespace ModernWMS.Core.DBContext
 {
@@ -71,6 +72,7 @@ namespace ModernWMS.Core.DBContext
         /// <param name="modelBuilder"></param>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<GlobalUniqueSerialEntity>();
             MappingEntityTypes(modelBuilder);
             /*foreach (var entityType in modelBuilder.Model.GetEntityTypes())
                {

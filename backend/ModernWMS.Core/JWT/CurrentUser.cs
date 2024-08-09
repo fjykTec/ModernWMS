@@ -12,10 +12,12 @@ namespace ModernWMS.Core.JWT
         /// user_id
         /// </summary>
         public int user_id { get; set; } = 1;
+
         /// <summary>
         /// user_num
         /// </summary>
         public string user_num { get; set; } = "admin";
+
         /// <summary>
         /// user_name
         /// </summary>

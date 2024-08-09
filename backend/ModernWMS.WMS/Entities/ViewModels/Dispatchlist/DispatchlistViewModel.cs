@@ -292,6 +292,16 @@ namespace ModernWMS.WMS.Entities.ViewModels
         /// </summary>
         public bool is_todo { get; set; } = false;
 
+        /// <summary>
+        /// pick_checker_id
+        /// </summary>
+        public int pick_checker_id { get; set; } = 0;
+
+        /// <summary>
+        /// pick_checker
+        /// </summary>
+        public string pick_checker { get; set; } = string.Empty;
+
         #endregion Property
     }
 }

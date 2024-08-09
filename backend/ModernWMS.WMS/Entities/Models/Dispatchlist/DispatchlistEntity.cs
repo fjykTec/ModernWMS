@@ -166,16 +166,26 @@ namespace ModernWMS.WMS.Entities.Models
         /// </summary>
         public long tenant_id { get; set; }  = 0;
 
+        /// <summary>
+        /// pick_checker_id
+        /// </summary>
+        public int pick_checker_id { get; set; } = 0;
+
+        /// <summary>
+        /// pick_checker
+        /// </summary>
+        public string pick_checker { get; set; } = string.Empty;
+
 
         #endregion
 
 
         #region detail table
 
-         /// <summary>
-         /// detail table
-         /// </summary>
-         public List<DispatchpicklistEntity> detailList { get; set; } = new List<DispatchpicklistEntity>(2);
+        /// <summary>
+        /// detail table
+        /// </summary>
+        public List<DispatchpicklistEntity> detailList { get; set; } = new List<DispatchpicklistEntity>(2);
 
         #endregion
 

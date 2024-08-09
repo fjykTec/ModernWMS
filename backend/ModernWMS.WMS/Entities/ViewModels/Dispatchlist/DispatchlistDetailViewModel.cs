@@ -225,6 +225,19 @@ namespace ModernWMS.WMS.Entities.ViewModels
         /// sku_code
         /// </summary>
         public string sku_code { get; set; } = string.Empty;
+
+
+        /// <summary>
+        /// pick_checker_id
+        /// </summary>
+        public decimal pick_checker_id { get; set; } = 0;
+
+        /// <summary>
+        /// pick_checker
+        /// </summary>
+        public string pick_checker { get; set; } = string.Empty;
+
+
         #endregion
     }
 }

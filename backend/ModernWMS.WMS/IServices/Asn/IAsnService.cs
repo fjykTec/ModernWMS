@@ -106,7 +106,7 @@ namespace ModernWMS.WMS.IServices
         /// </summary>
         /// <param name="asn_id">asn id</param>
         /// <returns></returns>
-        Task<List<AsnsortEntity>> GetAsnsortsAsync(int asn_id);
+        Task<List<AsnsortViewModel>> GetAsnsortsAsync(int asn_id);
 
         /// <summary>
         /// update or delete asnsorts data
@@ -186,6 +186,15 @@ namespace ModernWMS.WMS.IServices
         /// <param name="id">id</param>
         /// <returns></returns>
         Task<(bool flag, string msg)> DeleteAsnmasterAsync(int id);
+        #endregion
+
+        #region print series number
+        /// <summary>
+        /// print series number
+        /// </summary>
+        /// <param name="input">selected asn id</param>
+        /// <returns></returns>
+        Task<List<AsnPrintSeriesNumberViewModel>> GetAsnPrintSeriesNumberAsync(List<int> input);
         #endregion
     }
 }

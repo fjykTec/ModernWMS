@@ -2,6 +2,7 @@
  * date：2023-08-30
  * developer：AMo
  */
+using ModernWMS.Core.Utility;
 using System.ComponentModel.DataAnnotations;
 
 namespace ModernWMS.WMS.Entities.ViewModels
@@ -151,6 +152,29 @@ namespace ModernWMS.WMS.Entities.ViewModels
         /// </summary>
         [Display(Name = "is_valid")]
         public bool is_valid { get; set; } = true;
+
+        /// <summary>
+        /// expiry_date
+        /// </summary>
+        [Display(Name = "expiry_date")]
+        public DateTime expiry_date { get; set; } = Core.Utility.UtilConvert.MinDate;
+
+        /// <summary>
+        /// price
+        /// </summary>
+        [Display(Name = "price")]
+        public decimal price { get; set; } = 0;
+
+        /// <summary>
+        /// sorted_qty
+        /// </summary>
+        public int sorted_qty { get; set; } = 0;
+
+        /// <summary>
+        /// putaway_date
+        /// </summary>
+        public DateTime putaway_date { get; set; } = UtilConvert.MinDate;
+
 
         #endregion
 

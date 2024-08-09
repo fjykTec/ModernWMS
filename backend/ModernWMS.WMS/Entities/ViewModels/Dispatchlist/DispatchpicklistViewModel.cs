@@ -126,6 +126,32 @@ namespace ModernWMS.WMS.Entities.ViewModels
         [MaxLength(64, ErrorMessage = "MaxLength")]
         public string series_number { get; set; } = string.Empty;
 
+        /// <summary>
+        /// expiry_date
+        /// </summary>
+        public DateTime expiry_date { get; set; } = UtilConvert.MinDate;
+
+        /// <summary>
+        /// price
+        /// </summary>
+        public decimal price { get; set; } = 0;
+
+        /// <summary>
+        /// picker_id
+        /// </summary>
+        public int picker_id { get; set; } = 0;
+
+        /// <summary>
+        /// picker
+        /// </summary>
+        public string picker { get; set; } = string.Empty;
+
+        /// <summary>
+        /// putaway_date
+        /// </summary>
+        public DateTime putaway_date { get; set; } = UtilConvert.MinDate;
+
+
         #endregion Property
     }
 }
