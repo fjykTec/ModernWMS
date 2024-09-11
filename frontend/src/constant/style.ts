@@ -12,12 +12,26 @@ export const primaryLightColor = '#ECE7F6'
 export const lightGrey = '#999999'
 export const errorColor = '#BA2828'
 
+// The low resolution of the selection box ADAPTS to solve the problem that the scroll bar of the selection box button causes the button to disappear
+let select_table_height = 445
+if (window?.innerHeight) {
+  if (window.innerHeight > 740) {
+    select_table_height = 500
+  } else {
+    const computed_table_height = window.innerHeight - 48 - 64 - 52 - 24 - 74
+
+    if (computed_table_height > 200) {
+      select_table_height = computed_table_height
+    }
+  }
+}
+
 export const SYSTEM_HEIGHT = {
   HEADER: 60,
   TAB: 70,
   OPERATE_BAR: 52,
   VXE_PAGER: 48,
-  SELECT_TABLE: 500,
+  SELECT_TABLE: select_table_height,
   TOOLBAR: 40
 }
 
