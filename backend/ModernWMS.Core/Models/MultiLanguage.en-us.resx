@@ -645,4 +645,7 @@
   <data name="username_existed" xml:space="preserve">
     <value>User name already exists</value>
   </data>
+  <data name="self_parent_category" xml:space="preserve">
+    <value>The parent category cannot be itself</value>
+  </data>
 </root>

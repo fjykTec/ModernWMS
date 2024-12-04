@@ -116,6 +116,11 @@ namespace ModernWMS.WMS.Services
         /// <returns></returns>
         public async Task<(bool flag, string msg)> UpdateAsync(CategoryViewModel viewModel)
         {
+            if (viewModel.id > 0 && viewModel.id == viewModel.parent_id)
+            {
+                return (false, _stringLocalizer["self_parent_category"]);
+            }
+
             var DbSet = _dBContext.GetDbSet<CategoryEntity>();
             var entity = await DbSet.FirstOrDefaultAsync(t => t.id.Equals(viewModel.id));
             if (entity == null)
