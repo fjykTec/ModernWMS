@@ -6,7 +6,7 @@
   <p>开源的简易完整的仓库管理系统</p>
 
 <!-- Badges -->
-[![License: Apache2.0](https://img.shields.io/badge/license-Apache2.0-orange.svg)](https://opensource.org/license/apache-2-0/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-orange.svg)](https://opensource.org/licenses/MIT/)
 ![Release Version (latest Version)](https://img.shields.io/github/v/release/fjykTec/ModernWMS?color=orange&include_prereleases)
 ![QR Code Support](https://img.shields.io/badge/QR--Code-Support-orange.svg)
 ![Docker Support](https://img.shields.io/badge/Docker-Support-orange.svg)
@@ -36,7 +36,7 @@
 </div>
 <div align="center">
   <h3>
-  <a href="https://gitee.com/modernwms/ModernWMS/blob/master/README.md">English Document</a>
+  <a href="https://github.com/fjykTec/ModernWMS/blob/master/README.md">English Document</a>
   </h3>
   <h3>
   <a href="https://modernwms.ikeyly.com">官网首页</a>
@@ -52,8 +52,8 @@
     - [Linux OS](#linux-os)
     - [Windows OS](#windows-os)
   - [安装](#安装)
-    - [Linux](#linux)
-    - [Windows](#windows)
+    - [Linux shell](#linux-shell)
+    - [Windows PowerShell](#windows-powershell)
   - [使用方法](#使用方法)
   - [联系我们](#联系我们)
   - [版权信息](#版权信息)
@@ -65,7 +65,7 @@
   该库存管理系统是，我们从多年ERP系统研发中总结出来的一套针对小型物流仓储供应链流程。 在工作过程中我们很多的中小企业，由于IT预算有限，所以无法用上适合他们的系统，却又实实在在存在仓储管理方面的需求，以此我们开始了这个项目。 为了帮助一些有需要的用户。
 
 ## 必要条件
-
++ 打开80 和 20011 端口  :bangbang: :bangbang: :bangbang:
 ### Linux OS
 
 + Ubuntu 18.04(LTS),20.04(LTS),22.04(LTS)
@@ -81,13 +81,13 @@
 
 ## 安装
 
-### Linux
+### Linux shell
 
 + 下载源码后编译
   + 第一步，下载源码
 
   ```bash
-  cd /tmp/ && wget https://gitee.com/modernwms/ModernWMS/repository/archive/master.zip
+  cd /tmp/ && wget https://github.com/fjykTec/ModernWMS/archive/refs/heads/master.zip
   ```  
 
   + 第二步，安装.NET SDK 和 NodeJS
@@ -101,42 +101,49 @@
   sudo apt-get install gcc g++ make
   sudo npm install -g yarn
   ```  
-
+  常见问题：采用的其他版本的操作系统，安装dotnet-sdk-7.0时报错，请更换dpkg包的下载路径
+  
   + 第三步，编译前端和后端
 
   ```bash
   sudo apt install unzip
   cd /tmp/ && unzip master.zip && cd ./ModernWMS-master
-  mkdir -p /ModernWMS/frontend/ /ModernWMS/backend/
+  sudo mkdir -p /ModernWMS/frontend/ /ModernWMS/backend/
   cd /tmp/ModernWMS-master/frontend/ 
-  sed -i 's#http://127.0.0.1#http://前部署服务器的IP地址#g' ./.env.production
-  yarn && yarn build && cp -rf /tmp/ModernWMS-master/frontend/dist/* /ModernWMS/frontend/
+  sed -i 's#http://127.0.0.1#http://当前部署服务器的IP地址#g' ./.env.production
+  sudo yarn && sudo yarn build && cp -rf /tmp/ModernWMS-master/frontend/dist/* /ModernWMS/frontend/
   cd /tmp/ModernWMS-master/backend/ && sudo dotnet publish && cp -rf /tmp/ModernWMS-master/backend/ModernWMS/bin/Debug/net7.0/publish/* /ModernWMS/backend/
-  cp -rf /tmp/ModernWMS-master/backend/ModernWMS/wms.db /ModernWMS/backend/
   ```  
+  常见问题：sudo yarn && sudo yarn build 时报错，注意更改源，建议采用淘宝源
 
-  + 第四步，安装nginx
+  + 第四步，初始化数据库
+  
+   1) 修改后端目录C:\ModernWMS\frontend\中的 appsettings.json 文件, 参考 <a href="https://modernwms.ikeyly.com/problem-contents.html?fileurl=/assets/markdown/problem-usingPgsql_zh.md">修改配置文件操作流程</a> ，连接池配置时注意修改数据库IP地址、端口、账号、密码，确保可以正确连接数据库
+   2) 下载数据库脚本，初始化数据库，提供 <a href="https://modernwms.ikeyly.com/assets/staticFile/database_mysql.sql">MySql</a>，  <a href="https://modernwms.ikeyly.com/assets/staticFile/database_mssql.sql">SQLServer</a>，   <a href="https://modernwms.ikeyly.com/assets/staticFile/database_postgresql.sql">Postgresql</a>
+
+  + 第五步，安装nginx
 
   ```bash
   cd /tmp/ && wget http://nginx.org/download/nginx-1.18.0.tar.gz 
   tar -zxvf nginx-1.18.0.tar.gz && cd nginx-1.18.0
-  ./configure --prefix=/etc/nginx --with-http_secure_link_module --with-http_stub_status_module --with-http_realip_module --without-http_rewrite_module --without-http_gzip_module
-  make && make install
-  cp -rf /ModernWMS/frontend/* /etc/nginx/html/
-  nohup /etc/nginx/sbin/nginx -g 'daemon off;' &
-  cd /ModernWMS/backend/ && dotnet ModernWMS.dll --urls http://0.0.0.0:20011
+  sudo ./configure --prefix=/etc/nginx --with-http_secure_link_module --with-http_stub_status_module --with-http_realip_module --without-http_rewrite_module --without-http_gzip_module
+  sudo make && sudo make install
+  sudo cp -rf /ModernWMS/frontend/* /etc/nginx/html/
+  nohup sudo /etc/nginx/sbin/nginx -g 'daemon off;' &
+  cd /ModernWMS/backend/ && nohup sudo dotnet ModernWMS.dll --urls http://0.0.0.0:20011 &
   ```  
-### Windows
+
+### Windows PowerShell
 
 + 下载源码后编译部署
   + 第一步，下载源码
   ```PowerShell
   cd C:\
-  wget -Uri https://gitee.com/modernwms/ModernWMS/repository/archive/master.zip  -OutFile master.zip
+  wget -Uri https://github.com/fjykTec/ModernWMS/archive/refs/heads/master.zip  -OutFile master.zip
   Expand-Archive -Path C:\master.zip -DestinationPath C:\
   ```
   + 第二步，安装.NET SDK 和 NodeJS
-  ```CMD
+  ```PowerShell
   wget -Uri https://download.visualstudio.microsoft.com/download/pr/35660869-0942-4c5d-8692-6e0d4040137a/4921a36b578d8358dac4c27598519832/dotnet-sdk-7.0.101-win-x64.exe  -OutFile dotnet-sdk-7.0.101-win-x64.exe
   .\dotnet-sdk-7.0.101-win-x64.exe /install /quiet /norestart
   wget -Uri https://nodejs.org/dist/v16.13.1/node-v16.13.1-x64.msi  -OutFile node-v16.13.1-x64.msi
@@ -144,7 +151,7 @@
   npm install -g yarn
   ```
   + 第三步，编译前端和后端
-  ```
+  ```PowerShell
   md C:\ModernWMS\frontend\
   md C:\ModernWMS\backend\
   cd C:\ModernWMS-master\backend
@@ -156,8 +163,13 @@
   yarn build 
   copy-item -path "C:\ModernWMS-master\frontend\dist\*" -destination "C:\ModernWMS\frontend\" -recurse
   ```
-  + 第四步，安装nginx并启动
-  ```
++ 第四步，初始化数据库
+  
+   1) 修改后端目录C:\ModernWMS\frontend\中的 appsettings.json 文件, 参考 <a href="https://modernwms.ikeyly.com/problem-contents.html?fileurl=/assets/markdown/problem-usingPgsql_zh.md">修改配置文件操作流程</a> ，连接池配置时注意修改数据库IP地址、端口、账号、密码，确保可以正确连接数据库
+   2) 下载数据库脚本，初始化数据库，提供 <a href="https://modernwms.ikeyly.com/assets/staticFile/database_mysql.sql">MySql</a>，  <a href="https://modernwms.ikeyly.com/assets/staticFile/database_mssql.sql">SQLServer</a>，   <a href="https://modernwms.ikeyly.com/assets/staticFile/database_postgresql.sql">Postgresql</a>
+
+  + 第五步，安装nginx  
+  ```PowerShell
   cd C:\
   wget -Uri http://nginx.org/download/nginx-1.16.1.zip -OutFile nginx-1.16.1.zip
   Expand-Archive -Path C:\nginx-1.16.1.zip -DestinationPath C:\
@@ -165,13 +177,13 @@
   cd C:\nginx-1.16.1\
   start nginx.exe
   cd C:\ModernWMS\backend\
-  dotnet ModernWMS.dll --urls http://0.0.0.0:20011
+  Start-Process -WindowStyle hidden -FilePath "dotnet ModernWMS.dll --urls http://0.0.0.0:20011"
   ```
 
 ## 使用方法
 
   ```shell
-  打开浏览器，进入：http://127.0.0.1 或者http://部署电脑的IP地址  
+  打开浏览器，进入：http://127.0.0.1 或者http://当前部署服务器的IP地址  
   
   初始账号: admin 密码: 1
   ```
@@ -188,14 +200,14 @@
 ## 联系我们
 
 <h4>
-  <a href="https://gitee.com/leucoon/vue-element-plus-admin/issues/new?issue%5Bassignee_id%5D=0&issue%5Bmilestone_id%5D=0">提交一个Bug</a>
+  <a href="https://github.com/fjykTec/ModernWMS/issues/new?template=bug_report.md&title=[BUG]">提交一个Bug</a>
 </h4>
 <h4>
-  <a href="https://gitee.com/leucoon/vue-element-plus-admin/issues/new?issue%5Bassignee_id%5D=0&issue%5Bmilestone_id%5D=0">提交一个建议</a>
+  <a href="https://github.com/fjykTec/ModernWMS/issues/new?template=feature_request.md&title=[FR]">提交一个建议</a>
 </h4>
 
 ## 版权信息
-该项目使用的是 [Apache2.0](https://opensource.org/license/apache-2-0/) 协议. 详情查阅[LICENSE.txt](https://gitee.com/modernwms/ModernWMS/blob/master/LICENSE).必须遵守此协议。
+该项目使用的是 [MIT](https://opensource.org/licenses/MIT/) 协议. 详情查阅[LICENSE.txt](https://github.com/fjykTec/ModernWMS/master/LICENSE).必须遵守此协议。
 
 ## 特别声明
 

@@ -6,7 +6,7 @@
   <p>A simple, complete and open source warehouse management system</p>
 
 <!-- Badges -->
-[![License: Apache2.0](https://img.shields.io/badge/license-Apache2.0-orange.svg)](https://opensource.org/license/apache-2-0/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-orange.svg)](https://opensource.org/licenses/MIT/)
 ![Release Version (latest Version)](https://img.shields.io/github/v/release/fjykTec/ModernWMS?color=orange&include_prereleases)
 ![QR Code Support](https://img.shields.io/badge/QR--Code-Support-orange.svg)
 ![Docker Support](https://img.shields.io/badge/Docker-Support-orange.svg)
@@ -36,7 +36,7 @@
 </div>
 <div align="center">
   <h3>
-  <a href="https://gitee.com/modernwms/ModernWMS/blob/master/README.zh_CN.md">中文文档</a>
+  <a href="https://github.com/fjykTec/ModernWMS/blob/master/README.zh_CN.md">中文文档</a>
   </h3>
   <h3>
   <a href="https://modernwms.ikeyly.com">Home Page</a>
@@ -52,8 +52,8 @@
     - [Linux OS](#linux-os)
     - [Windows OS](#windows-os)
   - [Installation](#installation)
-    - [Linux](#linux)
-    - [Windows](#windows)
+    - [Linux shell](#linux-shell)
+    - [Windows PowerShell](#windows-powershell)
     - [Docker(Optional)](#dockeroptional)
   - [Usage](#usage)
   - [Contact](#contact)
@@ -65,7 +65,7 @@
   The inventory management system is a set of small logistics warehousing supply chain processes that we have summarized from years of ERP system research and development. In the process of work, many of our small and medium-sized enterprises, due to limited IT budget, cannot use the right system for them, but there are real needs in warehouse management, that's how we started the project. To help some people who need it.
 
 ## Requirements
-
++ Ensure ports 80 and 20011 are open on your server.  :bangbang: :bangbang: :bangbang:
 ### Linux OS
 
 + Ubuntu 18.04(LTS),20.04(LTS),22.04(LTS)
@@ -81,13 +81,13 @@
 
 ## Installation
 
-### Linux
+### Linux shell
 
 + download the source code and compile
   + Step 1, download the source code
 
   ```bash
-  cd /tmp/ && wget https://gitee.com/modernwms/ModernWMS/repository/archive/master.zip
+  cd /tmp/ && wget https://github.com/fjykTec/ModernWMS/archive/refs/heads/master.zip
   ```  
 
   + Step 2, Install .NET SDK and NodeJS
@@ -107,33 +107,36 @@
   ```bash
   sudo apt install unzip
   cd /tmp/ && unzip master.zip && cd ./ModernWMS-master
-  mkdir -p /ModernWMS/frontend/ /ModernWMS/backend/
+  sudo mkdir -p /ModernWMS/frontend/ /ModernWMS/backend/
   cd /tmp/ModernWMS-master/frontend/ 
-  sed -i 's#http://127.0.0.1#http://IP address#g' ./.env.production
-  yarn && yarn build && cp -rf /tmp/ModernWMS-master/frontend/dist/* /ModernWMS/frontend/
+  sudo sed -i 's#http://127.0.0.1#http://IP address#g' ./.env.production
+  sudo yarn && sudo yarn build && cp -rf /tmp/ModernWMS-master/frontend/dist/* /ModernWMS/frontend/
   cd /tmp/ModernWMS-master/backend/ && sudo dotnet publish && cp -rf /tmp/ModernWMS-master/backend/ModernWMS/bin/Debug/net7.0/publish/* /ModernWMS/backend/
-  cp -rf /tmp/ModernWMS-master/backend/ModernWMS/wms.db /ModernWMS/backend/
   ```  
 
-  + Step 4, Install Nginx
+  + Step 4, database initialization 
+  1) Modify `/ModernWMS/backend/appsettings.json`，you can reference <a href="https://modernwms.ikeyly.com/problem-contents.html?fileurl=/assets/markdown/problem-usingPgsql_en.md">operation process</a> ，When configuring the connection pool, ensure to update the database IP address, port, username, and password to establish a successful connection.
+   2) Download the database script and initialize the database <a href="https://modernwms.ikeyly.com/assets/staticFile/database_mysql.sql">MySql</a>，  <a href="https://modernwms.ikeyly.com/assets/staticFile/database_mssql.sql">SQLServer</a>，   <a href="https://modernwms.ikeyly.com/assets/staticFile/database_postgresql.sql">Postgresql</a>
+  
+  + Step 5, Install Nginx
 
   ```bash
   cd /tmp/ && wget http://nginx.org/download/nginx-1.18.0.tar.gz 
   tar -zxvf nginx-1.18.0.tar.gz && cd nginx-1.18.0
-  ./configure --prefix=/etc/nginx --with-http_secure_link_module --with-http_stub_status_module --with-http_realip_module --without-http_rewrite_module --without-http_gzip_module
-  make && make install
-  cp -rf /ModernWMS/frontend/* /etc/nginx/html/
-  nohup /etc/nginx/sbin/nginx -g 'daemon off;' &
-  cd /ModernWMS/backend/ && dotnet ModernWMS.dll --urls http://0.0.0.0:20011
+  sudo ./configure --prefix=/etc/nginx --with-http_secure_link_module --with-http_stub_status_module --with-http_realip_module --without-http_rewrite_module --without-http_gzip_module
+  sudo make && sudo make install
+  sudo cp -rf /ModernWMS/frontend/* /etc/nginx/html/
+  nohup sudo /etc/nginx/sbin/nginx -g 'daemon off;' &
+  cd /ModernWMS/backend/ && nohup sudo dotnet ModernWMS.dll --urls http://0.0.0.0:20011 &
   ```  
   
-### Windows
+### Windows PowerShell
 
 + download the source code and compile
   + Step 1, download the source code
   ```PowerShell
   cd C:\
-  wget -Uri https://gitee.com/modernwms/ModernWMS/repository/archive/master.zip  -OutFile master.zip
+  wget -Uri https://github.com/fjykTec/ModernWMS/archive/refs/heads/master.zip  -OutFile master.zip
   Expand-Archive -Path C:\master.zip -DestinationPath C:\
   ```
   + Step 2, Install .NET SDK and NodeJS
@@ -157,7 +160,11 @@
   yarn build 
   copy-item -path "C:\ModernWMS-master\frontend\dist\*" -destination "C:\ModernWMS\frontend\" -recurse
   ```
-  + Step 4, Install Nginx
+  + Step 4, database initialization 
+  1) Modify `C:\ModernWMS\frontend\appsettings.json`，you can reference <a href="https://modernwms.ikeyly.com/problem-contents.html?fileurl=/assets/markdown/problem-usingPgsql_en.md">operation process</a> ，When configuring the connection pool, ensure to update the database IP address, port, username, and password to establish a successful connection.
+   2) Download the database script and initialize the database <a href="https://modernwms.ikeyly.com/assets/staticFile/database_mysql.sql">MySql</a>，  <a href="https://modernwms.ikeyly.com/assets/staticFile/database_mssql.sql">SQLServer</a>，   <a href="https://modernwms.ikeyly.com/assets/staticFile/database_postgresql.sql">Postgresql</a>
+
+  + Step 5, Install Nginx 
   ```
   cd C:\
   wget -Uri http://nginx.org/download/nginx-1.16.1.zip -OutFile nginx-1.16.1.zip
@@ -166,7 +173,7 @@
   cd C:\nginx-1.16.1\
   start nginx.exe
   cd C:\ModernWMS\backend\
-  dotnet ModernWMS.dll --urls http://0.0.0.0:20011
+  Start-Process -WindowStyle hidden -FilePath "dotnet ModernWMS.dll --urls http://0.0.0.0:20011" 
   ```
 
 ### Docker(Optional)
@@ -205,9 +212,9 @@
   + Step 1, download the source code
 
   ```bash
-  cd /tmp/ && wget https://gitee.com/modernwms/ModernWMS/repository/archive/master.zip
+  cd /tmp/ && wget https://github.com/fjykTec/ModernWMS/archive/refs/heads/master.zip
   ```  
-
+  
   + Step 2，Install .NET SDK and NodeJS
 
   ```bash
@@ -229,7 +236,7 @@
   yarn && yarn build && cp -rf /tmp/ModernWMS-master/frontend/dist/* /tmp/ModernWMS-master/docker/frontend/
   cd /tmp/ModernWMS-master/backend/ && sudo dotnet publish && cp -rf /tmp/ModernWMS-master/backend/ModernWMS/bin/Debug/net7.0/publish/* /tmp/ModernWMS-master/docker/backend/
   cp -rf /tmp/ModernWMS-master/backend/ModernWMS/wms.db /tmp/ModernWMS-master/docker/backend/
-  ``` 
+  ```  
 
   + Step 4, deploy
 
@@ -262,15 +269,15 @@
 ## Contact
 
 <h4>
-  <a href="https://gitee.com/modernwms/ModernWMS/issues/new?issue%5Bassignee_id%5D=0&issue%5Bmilestone_id%5D=0">Report a BUG</a>
+  <a href="https://github.com/fjykTec/ModernWMS/issues/new?template=bug_report.md&title=[BUG]">Report a BUG</a>
 </h4>
 <h4>
-  <a href="https://gitee.com/leucoon/vue-element-plus-admin/issues/new?issue%5Bassignee_id%5D=0&issue%5Bmilestone_id%5D=0">Submit a suggestion</a>
+  <a href="https://github.com/fjykTec/ModernWMS/issues/new?template=feature_request.md&title=[FR]">Submit a suggestion</a>
 </h4>
 
 ## License
 
-Distributed under the [MIT](https://opensource.org/licenses/MIT/) License. See [LICENSE.txt](https://gitee.com/modernwms/ModernWMS/blob/master/LICENSE) for more information.This must be observed.
+Distributed under the [MIT](https://opensource.org/licenses/MIT/) License. See [LICENSE.txt](https://github.com/fjykTec/ModernWMS/master/LICENSE) for more information.This must be observed.
 
 ## Donate
 
