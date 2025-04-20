@@ -110,8 +110,8 @@
   sudo mkdir -p /ModernWMS/frontend/ /ModernWMS/backend/
   cd /tmp/ModernWMS-master/frontend/ 
   sudo sed -i 's#http://127.0.0.1#http://IP address#g' ./.env.production
-  sudo yarn && sudo yarn build && cp -rf /tmp/ModernWMS-master/frontend/dist/* /ModernWMS/frontend/
-  cd /tmp/ModernWMS-master/backend/ && sudo dotnet publish && cp -rf /tmp/ModernWMS-master/backend/ModernWMS/bin/Debug/net7.0/publish/* /ModernWMS/backend/
+  sudo yarn && sudo yarn build && sudo cp -rf /tmp/ModernWMS-master/frontend/dist/* /ModernWMS/frontend/
+  cd /tmp/ModernWMS-master/backend/ && sudo dotnet publish && sudo cp -rf /tmp/ModernWMS-master/backend/ModernWMS/bin/Debug/net7.0/publish/* /ModernWMS/backend/
   ```  
 
   + Step 4, database initialization 

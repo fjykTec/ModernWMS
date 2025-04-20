@@ -111,14 +111,14 @@
   sudo mkdir -p /ModernWMS/frontend/ /ModernWMS/backend/
   cd /tmp/ModernWMS-master/frontend/ 
   sed -i 's#http://127.0.0.1#http://当前部署服务器的IP地址#g' ./.env.production
-  sudo yarn && sudo yarn build && cp -rf /tmp/ModernWMS-master/frontend/dist/* /ModernWMS/frontend/
-  cd /tmp/ModernWMS-master/backend/ && sudo dotnet publish && cp -rf /tmp/ModernWMS-master/backend/ModernWMS/bin/Debug/net7.0/publish/* /ModernWMS/backend/
+  sudo yarn && sudo yarn build && sudo cp -rf /tmp/ModernWMS-master/frontend/dist/* /ModernWMS/frontend/
+  cd /tmp/ModernWMS-master/backend/ && sudo dotnet publish && sudo cp -rf /tmp/ModernWMS-master/backend/ModernWMS/bin/Debug/net7.0/publish/* /ModernWMS/backend/
   ```  
   常见问题：sudo yarn && sudo yarn build 时报错，注意更改源，建议采用淘宝源
 
   + 第四步，初始化数据库
   
-   1) 修改后端目录C:\ModernWMS\frontend\中的 appsettings.json 文件, 参考 <a href="https://modernwms.ikeyly.com/problem-contents.html?fileurl=/assets/markdown/problem-usingPgsql_zh.md">修改配置文件操作流程</a> ，连接池配置时注意修改数据库IP地址、端口、账号、密码，确保可以正确连接数据库
+   1) 修改后端目录`C:\ModernWMS\frontend\appsettings.json`文件, 参考 <a href="https://modernwms.ikeyly.com/problem-contents.html?fileurl=/assets/markdown/problem-usingPgsql_zh.md">修改配置文件操作流程</a> ，连接池配置时注意修改数据库IP地址、端口、账号、密码，确保可以正确连接数据库
    2) 下载数据库脚本，初始化数据库，提供 <a href="https://modernwms.ikeyly.com/assets/staticFile/database_mysql.sql">MySql</a>，  <a href="https://modernwms.ikeyly.com/assets/staticFile/database_mssql.sql">SQLServer</a>，   <a href="https://modernwms.ikeyly.com/assets/staticFile/database_postgresql.sql">Postgresql</a>
 
   + 第五步，安装nginx
@@ -165,7 +165,7 @@
   ```
 + 第四步，初始化数据库
   
-   1) 修改后端目录C:\ModernWMS\frontend\中的 appsettings.json 文件, 参考 <a href="https://modernwms.ikeyly.com/problem-contents.html?fileurl=/assets/markdown/problem-usingPgsql_zh.md">修改配置文件操作流程</a> ，连接池配置时注意修改数据库IP地址、端口、账号、密码，确保可以正确连接数据库
+   1) 修改后端目录`C:\ModernWMS\frontend\appsettings.json`文件, 参考 <a href="https://modernwms.ikeyly.com/problem-contents.html?fileurl=/assets/markdown/problem-usingPgsql_zh.md">修改配置文件操作流程</a> ，连接池配置时注意修改数据库IP地址、端口、账号、密码，确保可以正确连接数据库
    2) 下载数据库脚本，初始化数据库，提供 <a href="https://modernwms.ikeyly.com/assets/staticFile/database_mysql.sql">MySql</a>，  <a href="https://modernwms.ikeyly.com/assets/staticFile/database_mssql.sql">SQLServer</a>，   <a href="https://modernwms.ikeyly.com/assets/staticFile/database_postgresql.sql">Postgresql</a>
 
   + 第五步，安装nginx  
