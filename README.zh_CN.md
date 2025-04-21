@@ -54,6 +54,7 @@
   - [安装](#安装)
     - [Linux shell](#linux-shell)
     - [Windows PowerShell](#windows-powershell)
+  - [常见问题](#常见问题)
   - [使用方法](#使用方法)
   - [联系我们](#联系我们)
   - [版权信息](#版权信息)
@@ -65,7 +66,7 @@
   该库存管理系统是，我们从多年ERP系统研发中总结出来的一套针对小型物流仓储供应链流程。 在工作过程中我们很多的中小企业，由于IT预算有限，所以无法用上适合他们的系统，却又实实在在存在仓储管理方面的需求，以此我们开始了这个项目。 为了帮助一些有需要的用户。
 
 ## 必要条件
-+ 打开80 和 20011 端口  :bangbang: :bangbang: :bangbang:
+
 ### Linux OS
 
 + Ubuntu 18.04(LTS),20.04(LTS),22.04(LTS)
@@ -101,7 +102,6 @@
   sudo apt-get install gcc g++ make
   sudo npm install -g yarn
   ```  
-  常见问题：采用的其他版本的操作系统，安装dotnet-sdk-7.0时报错，请更换dpkg包的下载路径
   
   + 第三步，编译前端和后端
 
@@ -114,11 +114,10 @@
   sudo yarn && sudo yarn build && sudo cp -rf /tmp/ModernWMS-master/frontend/dist/* /ModernWMS/frontend/
   cd /tmp/ModernWMS-master/backend/ && sudo dotnet publish && sudo cp -rf /tmp/ModernWMS-master/backend/ModernWMS/bin/Debug/net7.0/publish/* /ModernWMS/backend/
   ```  
-  常见问题：sudo yarn && sudo yarn build 时报错，注意更改源，建议采用淘宝源
 
   + 第四步，初始化数据库
   
-   1) 修改后端目录`C:\ModernWMS\frontend\appsettings.json`文件, 参考 <a href="https://modernwms.ikeyly.com/problem-contents.html?fileurl=/assets/markdown/problem-usingPgsql_zh.md">修改配置文件操作流程</a> ，连接池配置时注意修改数据库IP地址、端口、账号、密码，确保可以正确连接数据库
+   1) 修改后端目录<font color=red>`/ModernWMS/backend/appsettings.json`</font>文件, 参考 <a href="https://modernwms.ikeyly.com/problem-contents.html?fileurl=/assets/markdown/problem-usingPgsql_zh.md">修改配置文件操作流程</a> ，连接池配置时注意修改数据库IP地址、端口、账号、密码，确保可以正确连接数据库
    2) 下载数据库脚本，初始化数据库，提供 <a href="https://modernwms.ikeyly.com/assets/staticFile/database_mysql.sql">MySql</a>，  <a href="https://modernwms.ikeyly.com/assets/staticFile/database_mssql.sql">SQLServer</a>，   <a href="https://modernwms.ikeyly.com/assets/staticFile/database_postgresql.sql">Postgresql</a>
 
   + 第五步，安装nginx
@@ -165,7 +164,7 @@
   ```
 + 第四步，初始化数据库
   
-   1) 修改后端目录`C:\ModernWMS\frontend\appsettings.json`文件, 参考 <a href="https://modernwms.ikeyly.com/problem-contents.html?fileurl=/assets/markdown/problem-usingPgsql_zh.md">修改配置文件操作流程</a> ，连接池配置时注意修改数据库IP地址、端口、账号、密码，确保可以正确连接数据库
+   1) 修改后端目录<font color=red>`C:\ModernWMS\frontend\appsettings.json`</font>文件, 参考 <a href="https://modernwms.ikeyly.com/problem-contents.html?fileurl=/assets/markdown/problem-usingPgsql_zh.md">修改配置文件操作流程</a> ，连接池配置时注意修改数据库IP地址、端口、账号、密码，确保可以正确连接数据库
    2) 下载数据库脚本，初始化数据库，提供 <a href="https://modernwms.ikeyly.com/assets/staticFile/database_mysql.sql">MySql</a>，  <a href="https://modernwms.ikeyly.com/assets/staticFile/database_mssql.sql">SQLServer</a>，   <a href="https://modernwms.ikeyly.com/assets/staticFile/database_postgresql.sql">Postgresql</a>
 
   + 第五步，安装nginx  
@@ -179,6 +178,10 @@
   cd C:\ModernWMS\backend\
   Start-Process -WindowStyle hidden -FilePath "dotnet ModernWMS.dll --urls http://0.0.0.0:20011"
   ```
+## 常见问题
+  1) 打开部署服务器的80 和 20011 端口，如果采用的是云服务器，需开放防火墙对这两个端口的访问限制  :bangbang: :bangbang: :bangbang:
+  2) 采用必要条件中之外其他版本的操作系统，安装dotnet-sdk-7.0时报错，请更换dpkg包的下载路径
+  3) sudo yarn && sudo yarn build 时报错，注意更改源，建议采用淘宝源
 
 ## 使用方法
 
@@ -207,7 +210,7 @@
 </h4>
 
 ## 版权信息
-该项目使用的是 [MIT](https://opensource.org/licenses/MIT/) 协议. 详情查阅[LICENSE.txt](https://github.com/fjykTec/ModernWMS/master/LICENSE).必须遵守此协议。
+该项目使用的是 [Apache2.0](https://opensource.org/license/apache-2-0/) 协议. 详情查阅[LICENSE.txt](https://gitee.com/modernwms/ModernWMS/blob/master/LICENSE).必须遵守此协议。
 
 ## 特别声明
 

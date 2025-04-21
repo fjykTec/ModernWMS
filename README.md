@@ -55,6 +55,7 @@
     - [Linux shell](#linux-shell)
     - [Windows PowerShell](#windows-powershell)
     - [Docker(Optional)](#dockeroptional)
+  - [Frequently Asked Questions (FAQ)](#frequently-asked-questions-faq)
   - [Usage](#usage)
   - [Contact](#contact)
   - [License](#license)
@@ -65,7 +66,7 @@
   The inventory management system is a set of small logistics warehousing supply chain processes that we have summarized from years of ERP system research and development. In the process of work, many of our small and medium-sized enterprises, due to limited IT budget, cannot use the right system for them, but there are real needs in warehouse management, that's how we started the project. To help some people who need it.
 
 ## Requirements
-+ Ensure ports 80 and 20011 are open on your server.  :bangbang: :bangbang: :bangbang:
+
 ### Linux OS
 
 + Ubuntu 18.04(LTS),20.04(LTS),22.04(LTS)
@@ -115,7 +116,7 @@
   ```  
 
   + Step 4, database initialization 
-  1) Modify `/ModernWMS/backend/appsettings.json`，you can reference <a href="https://modernwms.ikeyly.com/problem-contents.html?fileurl=/assets/markdown/problem-usingPgsql_en.md">operation process</a> ，When configuring the connection pool, ensure to update the database IP address, port, username, and password to establish a successful connection.
+  1) Modify <font color=red>`/ModernWMS/backend/appsettings.json`</font>，you can reference <a href="https://modernwms.ikeyly.com/problem-contents.html?fileurl=/assets/markdown/problem-usingPgsql_en.md">operation process</a> ，When configuring the connection pool, ensure to update the database IP address, port, username, and password to establish a successful connection.
    2) Download the database script and initialize the database <a href="https://modernwms.ikeyly.com/assets/staticFile/database_mysql.sql">MySql</a>，  <a href="https://modernwms.ikeyly.com/assets/staticFile/database_mssql.sql">SQLServer</a>，   <a href="https://modernwms.ikeyly.com/assets/staticFile/database_postgresql.sql">Postgresql</a>
   
   + Step 5, Install Nginx
@@ -161,7 +162,7 @@
   copy-item -path "C:\ModernWMS-master\frontend\dist\*" -destination "C:\ModernWMS\frontend\" -recurse
   ```
   + Step 4, database initialization 
-  1) Modify `C:\ModernWMS\frontend\appsettings.json`，you can reference <a href="https://modernwms.ikeyly.com/problem-contents.html?fileurl=/assets/markdown/problem-usingPgsql_en.md">operation process</a> ，When configuring the connection pool, ensure to update the database IP address, port, username, and password to establish a successful connection.
+  1) Modify <font color=red>`C:\ModernWMS\frontend\appsettings.json`</font>，you can reference <a href="https://modernwms.ikeyly.com/problem-contents.html?fileurl=/assets/markdown/problem-usingPgsql_en.md">operation process</a> ，When configuring the connection pool, ensure to update the database IP address, port, username, and password to establish a successful connection.
    2) Download the database script and initialize the database <a href="https://modernwms.ikeyly.com/assets/staticFile/database_mysql.sql">MySql</a>，  <a href="https://modernwms.ikeyly.com/assets/staticFile/database_mssql.sql">SQLServer</a>，   <a href="https://modernwms.ikeyly.com/assets/staticFile/database_postgresql.sql">Postgresql</a>
 
   + Step 5, Install Nginx 
@@ -246,6 +247,10 @@
   docker build -t modernwms:1.0 .
   docker run -d -p 20011:20011 -p 80:80  modernwms:1.0 ./run.sh
   ```
+## Frequently Asked Questions (FAQ)
+  1) Open ports 80 and 20011 on the deployment server.For cloud servers (e.g., Aliyun, Huawei Cloud), ensure both security group rules and firewall settings allow access to these ports  :bangbang: :bangbang: :bangbang:
+  2) Errors during installation of dotnet-sdk-7.0 on unsupported OS versions，If encountering dependency issues, modify the download path of dpkg packages (e.g., use official Microsoft repositories or compatible OS-specific sources)
+  3) Errors in sudo yarn && sudo yarn build. Switch to Taobao Registry to resolve dependency installation failures.
 
 ## Usage
 
@@ -277,7 +282,7 @@
 
 ## License
 
-Distributed under the [MIT](https://opensource.org/licenses/MIT/) License. See [LICENSE.txt](https://github.com/fjykTec/ModernWMS/master/LICENSE) for more information.This must be observed.
+Distributed under the [Apache2.0](https://opensource.org/license/apache-2-0/) License. See [LICENSE.txt](https://github.com/fjykTec/ModernWMS/master/LICENSE) for more information.This must be observed.
 
 ## Donate
 
