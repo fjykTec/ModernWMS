@@ -116,7 +116,7 @@
   ```  
 
   + Step 4, database initialization 
-  1) Modify <font color="red">/ModernWMS/backend/appsettings.json</font>，you can reference <a href="https://modernwms.ikeyly.com/problem-contents.html?fileurl=/assets/markdown/problem-usingPgsql_en.md">operation process</a> ，When configuring the connection pool, ensure to update the database IP address, port, username, and password to establish a successful connection.
+  1) Modify <span style="red">`/ModernWMS/backend/appsettings.json`</span>，you can reference <a href="https://modernwms.ikeyly.com/problem-contents.html?fileurl=/assets/markdown/problem-usingPgsql_en.md">operation process</a> ，When configuring the connection pool, ensure to update the database IP address, port, username, and password to establish a successful connection.
    2) Download the database script and initialize the database <a href="https://modernwms.ikeyly.com/assets/staticFile/database_mysql.sql">MySql</a>，  <a href="https://modernwms.ikeyly.com/assets/staticFile/database_mssql.sql">SQLServer</a>，   <a href="https://modernwms.ikeyly.com/assets/staticFile/database_postgresql.sql">Postgresql</a>
   
   + Step 5, Install Nginx
@@ -162,7 +162,7 @@
   copy-item -path "C:\ModernWMS-master\frontend\dist\*" -destination "C:\ModernWMS\frontend\" -recurse
   ```
   + Step 4, database initialization 
-  1) Modify <font color="red">C:\ModernWMS\frontend\appsettings.json</font>，you can reference <a href="https://modernwms.ikeyly.com/problem-contents.html?fileurl=/assets/markdown/problem-usingPgsql_en.md">operation process</a> ，When configuring the connection pool, ensure to update the database IP address, port, username, and password to establish a successful connection.
+  1) Modify <span style="red">`C:\ModernWMS\frontend\appsettings.json`</span>，you can reference <a href="https://modernwms.ikeyly.com/problem-contents.html?fileurl=/assets/markdown/problem-usingPgsql_en.md">operation process</a> ，When configuring the connection pool, ensure to update the database IP address, port, username, and password to establish a successful connection.
    2) Download the database script and initialize the database <a href="https://modernwms.ikeyly.com/assets/staticFile/database_mysql.sql">MySql</a>，  <a href="https://modernwms.ikeyly.com/assets/staticFile/database_mssql.sql">SQLServer</a>，   <a href="https://modernwms.ikeyly.com/assets/staticFile/database_postgresql.sql">Postgresql</a>
 
   + Step 5, Install Nginx 
