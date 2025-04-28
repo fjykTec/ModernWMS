@@ -90,6 +90,9 @@ const method = reactive({
       return
     }
     for (const item of res.data) {
+      if(item.id === props.form.id) {
+        continue
+      }
       data.combobox.parent.push({
         label: item.category_name,
         value: item.id
